@@ -1,0 +1,3461 @@
+{
+ "generated": "2026-11-06",
+ "total_bytes": 19095273,
+ "conventions": {
+  "units": "KayKit unit (hero ≈2.25 tall incl. hood ≈ treat as 1.8 m). suggested_scale brings each asset to that scale.",
+  "forward": "+Z for every GLB (verified: right-hand bones at -X, drone eyes at +Z)",
+  "up": "+Y",
+  "loader": "GLTFLoader + setMeshoptDecoder(MeshoptDecoder) from three/examples/jsm/libs/meshopt_decoder.module.js (r160)",
+  "shared_rig": "All KayKit chars (hero, npc_*, sk_*) share one rig: bone names identical, clips are cross-playable (e.g. play hero clips on skeletons via AnimationMixer on same bone names).",
+  "hand_slots": "KayKit: handslot.r / handslot.l (attach weapons here, identity transform); hand.r / hand.l are the deform bones.",
+  "anim_note": "Constant rest-pose tracks were stripped from clips (identical result in three.js; smaller files). Clips resampled (tolerance 1e-4)."
+ },
+ "files": [
+  {
+   "path": "chars/boss_mech.glb",
+   "bytes": 508868,
+   "license": "CC0-1.0",
+   "source": "Quaternius Animated Mech Pack (Mar 2021) — \"Leela\" (black/white/orange \"56\" walker)",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/mech_pack/Leela.glb",
+   "clips": [
+    "Death",
+    "HitRecieve_1",
+    "HitRecieve_2",
+    "Idle",
+    "Jump",
+    "Kick",
+    "Punch",
+    "Run",
+    "Run_Tall",
+    "Shoot",
+    "SwordSlash",
+    "Walk",
+    "Walk_Tall"
+   ],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Leela"
+   ],
+   "bbox": {
+    "min": [
+     -1.479,
+     -0.019,
+     -1.105
+    ],
+    "max": [
+     1.479,
+     5.197,
+     1.667
+    ],
+    "height": 5.216
+   },
+   "height": 5.216,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Act-1 boss. Original OGA zip ships FBX/OBJ/Blend only; glTF taken from the trebeljahr/quaternius-showcase conversion of the same CC0 pack. No hand bones (legged walker, no arms): spawn projectiles from \"Head\"/\"Chest\".",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "Leela_Texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/drone_scout.glb",
+   "bytes": 80596,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Enemy_Flying",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Enemy_Flying.glb",
+   "clips": [
+    "Attack",
+    "Dead",
+    "Idle",
+    "Run",
+    "Shoot",
+    "Walk"
+   ],
+   "hand_slot_nodes": [
+    "Hand.L",
+    "Hand.R"
+   ],
+   "mesh_nodes": [
+    "Sphere.001",
+    "Cube.000"
+   ],
+   "bbox": {
+    "min": [
+     -0.644,
+     0.105,
+     -0.234
+    ],
+    "max": [
+     0.643,
+     0.878,
+     0.439
+    ],
+    "height": 0.774
+   },
+   "height": 0.774,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "Unarmed drone variant (melee/kamikaze).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "chars/drone_tazi.glb",
+   "bytes": 87464,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Enemy_Flying_Gun",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Enemy_Flying_Gun.glb",
+   "clips": [
+    "Attack",
+    "Dead",
+    "Idle",
+    "Run",
+    "Shoot",
+    "Walk"
+   ],
+   "hand_slot_nodes": [
+    "Hand.L",
+    "Hand.R",
+    "Gun",
+    "Gun_end"
+   ],
+   "mesh_nodes": [
+    "Sphere.001",
+    "Cube.000"
+   ],
+   "bbox": {
+    "min": [
+     -0.644,
+     0.065,
+     -0.389
+    ],
+    "max": [
+     0.643,
+     0.937,
+     0.839
+    ],
+    "height": 0.872
+   },
+   "height": 0.872,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "Tazı drone (CC0 GLB found, no procedural fallback needed). Hover offset ~1.2 above ground. Gun bone \"Gun\"/\"Gun_end\" = muzzle. KHR_lights_punctual extension still declared but the two baked \"Sun\" lights were removed.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "chars/enemy_walker.glb",
+   "bytes": 102500,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Enemy_2Legs_Gun",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Enemy_2Legs_Gun.glb",
+   "clips": [
+    "Attack",
+    "Death",
+    "Idle",
+    "Jump",
+    "Run",
+    "Shoot",
+    "Walk"
+   ],
+   "hand_slot_nodes": [
+    "Gun",
+    "Gun_end"
+   ],
+   "mesh_nodes": [
+    "Enemy_Robot_2Legs",
+    "Cylinder"
+   ],
+   "bbox": {
+    "min": [
+     -0.644,
+     -0.004,
+     -0.234
+    ],
+    "max": [
+     0.644,
+     0.906,
+     0.659
+    ],
+    "height": 0.91
+   },
+   "height": 0.91,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 2.0,
+   "notes": "Bonus: small bipedal turret-walker (Sur patrol bot). Muzzle \"Gun_end\".",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "chars/hero.glb",
+   "bytes": 547484,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — Rogue_Hooded",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Characters/gltf/Rogue_Hooded.glb",
+   "clips": [
+    "1H_Melee_Attack_Chop",
+    "1H_Melee_Attack_Slice_Diagonal",
+    "1H_Melee_Attack_Slice_Horizontal",
+    "1H_Melee_Attack_Stab",
+    "1H_Ranged_Shoot",
+    "Cheer",
+    "Death_A",
+    "Death_A_Pose",
+    "Dodge_Backward",
+    "Dodge_Forward",
+    "Dodge_Left",
+    "Dodge_Right",
+    "Dualwield_Melee_Attack_Slice",
+    "Hit_A",
+    "Hit_B",
+    "Idle",
+    "Interact",
+    "PickUp",
+    "Running_A",
+    "Running_B",
+    "Spellcast_Raise",
+    "Spellcast_Shoot",
+    "Spellcasting",
+    "Throw",
+    "Use_Item",
+    "Walking_A",
+    "Walking_B"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "Knife",
+    "Rogue_Cape",
+    "Rogue_ArmLeft",
+    "Rogue_ArmRight",
+    "Rogue_Body",
+    "Rogue_Head_Hooded",
+    "Rogue_LegLeft",
+    "Rogue_LegRight"
+   ],
+   "bbox": {
+    "min": [
+     -1.003,
+     0,
+     -0.567
+    ],
+    "max": [
+     0.971,
+     2.251,
+     0.981
+    ],
+    "height": 2.251
+   },
+   "height": 2.251,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Hero (Deniz). Visible weapon mesh kept: \"Knife\" (on handslot.r); offhand knife/crossbows/throwable removed.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "rogue_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/mech_elite.glb",
+   "bytes": 499744,
+   "license": "CC0-1.0",
+   "source": "Quaternius Animated Mech Pack — \"Mike\" (blue, big arms)",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/mech_pack/Mike.glb",
+   "clips": [
+    "Death",
+    "HitRecieve_1",
+    "HitRecieve_2",
+    "Idle",
+    "Jump",
+    "Kick",
+    "Punch",
+    "Run",
+    "Shoot",
+    "SwordSlash",
+    "Walk",
+    "Walk_Holding"
+   ],
+   "hand_slot_nodes": [
+    "LowerArm.L",
+    "LowerArm.R",
+    "PalmI.L",
+    "PalmI.R"
+   ],
+   "mesh_nodes": [
+    "Mike"
+   ],
+   "bbox": {
+    "min": [
+     -2.745,
+     0.007,
+     -1.135
+    ],
+    "max": [
+     2.765,
+     5.296,
+     0.895
+    ],
+    "height": 5.289
+   },
+   "height": 5.289,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.8,
+   "notes": "Bonus: elite / second boss. Hands: Palm*/Index*/Thumb* bones, LowerArm.R/L for attachments.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "Mike_Texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/npc_bora.glb",
+   "bytes": 408412,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — Knight",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Characters/gltf/Knight.glb",
+   "clips": [
+    "1H_Melee_Attack_Chop",
+    "1H_Melee_Attack_Slice_Horizontal",
+    "Block",
+    "Block_Hit",
+    "Blocking",
+    "Cheer",
+    "Death_A",
+    "Death_A_Pose",
+    "Hit_A",
+    "Idle",
+    "Interact",
+    "PickUp",
+    "Running_A",
+    "Sit_Chair_Idle",
+    "Unarmed_Idle",
+    "Use_Item",
+    "Walking_A",
+    "Walking_B"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "Round_Shield",
+    "1H_Sword",
+    "Knight_Helmet",
+    "Knight_Cape",
+    "Knight_ArmLeft",
+    "Knight_ArmRight",
+    "Knight_Body",
+    "Knight_Head",
+    "Knight_LegLeft",
+    "Knight_LegRight"
+   ],
+   "bbox": {
+    "min": [
+     -1.135,
+     0,
+     -0.542
+    ],
+    "max": [
+     1.324,
+     2.467,
+     1.443
+    ],
+    "height": 2.467
+   },
+   "height": 2.467,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.05,
+   "notes": "Bora (heavy armor). Keeps 1H_Sword, Round_Shield, Knight_Helmet, Knight_Cape.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "knight_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/npc_mavi.glb",
+   "bytes": 388384,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — Rogue",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Characters/gltf/Rogue.glb",
+   "clips": [
+    "2H_Ranged_Aiming",
+    "2H_Ranged_Reload",
+    "2H_Ranged_Shoot",
+    "Cheer",
+    "Death_A",
+    "Death_A_Pose",
+    "Dodge_Backward",
+    "Hit_A",
+    "Idle",
+    "Interact",
+    "PickUp",
+    "Running_A",
+    "Sit_Chair_Idle",
+    "Unarmed_Idle",
+    "Use_Item",
+    "Walking_A",
+    "Walking_B"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "2H_Crossbow",
+    "Rogue_Cape",
+    "Rogue_ArmLeft",
+    "Rogue_ArmRight",
+    "Rogue_Body",
+    "Rogue_Head",
+    "Rogue_LegLeft",
+    "Rogue_LegRight"
+   ],
+   "bbox": {
+    "min": [
+     -1.942,
+     0,
+     -0.496
+    ],
+    "max": [
+     0.971,
+     2.187,
+     0.519
+    ],
+    "height": 2.187
+   },
+   "height": 2.187,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Mavi (sniper). Keeps 2H_Crossbow mesh as rifle stand-in.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "rogue_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/npc_nur.glb",
+   "bytes": 359348,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — Mage",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Characters/gltf/Mage.glb",
+   "clips": [
+    "Cheer",
+    "Death_A",
+    "Death_A_Pose",
+    "Hit_A",
+    "Idle",
+    "Interact",
+    "PickUp",
+    "Running_A",
+    "Sit_Chair_Idle",
+    "Spellcast_Raise",
+    "Spellcasting",
+    "Unarmed_Idle",
+    "Use_Item",
+    "Walking_A",
+    "Walking_B"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "Spellbook_open",
+    "Mage_Hat",
+    "Mage_Cape",
+    "Mage_ArmLeft",
+    "Mage_ArmRight",
+    "Mage_Body",
+    "Mage_Head",
+    "Mage_LegLeft",
+    "Mage_LegRight"
+   ],
+   "bbox": {
+    "min": [
+     -1.046,
+     0,
+     -1.017
+    ],
+    "max": [
+     1.297,
+     2.716,
+     1.022
+    ],
+    "height": 2.716
+   },
+   "height": 2.716,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.9,
+   "notes": "Nur Teyze. Keeps Mage_Hat, Mage_Cape, Spellbook_open (hide in engine if unwanted).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "mage_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/sk_mage.glb",
+   "bytes": 577628,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Mage",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Mage.glb",
+   "clips": [
+    "Death_A",
+    "Death_A_Pose",
+    "Death_C_Pose",
+    "Death_C_Skeletons",
+    "Hit_A",
+    "Hit_B",
+    "Idle",
+    "Idle_B",
+    "Idle_Combat",
+    "Running_A",
+    "Running_C",
+    "Skeletons_Awaken_Floor",
+    "Skeletons_Inactive_Floor_Pose",
+    "Spawn_Ground_Skeletons",
+    "Spellcast_Raise",
+    "Spellcast_Shoot",
+    "Spellcast_Summon",
+    "Spellcasting",
+    "Taunt",
+    "Walking_A",
+    "Walking_D_Skeletons"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "Skeleton_Mage_Hat",
+    "Skeleton_Mage_ArmLeft",
+    "Skeleton_Mage_ArmRight",
+    "Skeleton_Mage_Body",
+    "Skeleton_Mage_Eyes",
+    "Skeleton_Mage_Jaw",
+    "Skeleton_Mage_LegLeft",
+    "Skeleton_Mage_LegRight",
+    "Skeleton_Mage_Skull"
+   ],
+   "bbox": {
+    "min": [
+     -0.969,
+     0,
+     -0.848
+    ],
+    "max": [
+     0.969,
+     2.63,
+     0.887
+    ],
+    "height": 2.63
+   },
+   "height": 2.63,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Ranged caster husk; attach weapons/weapon_sk_staff to handslot.r.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/sk_minion.glb",
+   "bytes": 551232,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Minion",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Minion.glb",
+   "clips": [
+    "1H_Melee_Attack_Chop",
+    "Death_A",
+    "Death_A_Pose",
+    "Death_C_Pose",
+    "Death_C_Skeletons",
+    "Hit_A",
+    "Hit_B",
+    "Idle",
+    "Idle_B",
+    "Idle_Combat",
+    "Running_A",
+    "Running_C",
+    "Skeletons_Awaken_Floor",
+    "Skeletons_Inactive_Floor_Pose",
+    "Spawn_Ground_Skeletons",
+    "Taunt",
+    "Unarmed_Melee_Attack_Kick",
+    "Unarmed_Melee_Attack_Punch_A",
+    "Walking_A",
+    "Walking_D_Skeletons"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "Skeleton_Minion_ArmLeft",
+    "Skeleton_Minion_ArmRight",
+    "Skeleton_Minion_Body",
+    "Skeleton_Minion_Cloak",
+    "Skeleton_Minion_Eyes",
+    "Skeleton_Minion_Head",
+    "Skeleton_Minion_Jaw",
+    "Skeleton_Minion_LegLeft",
+    "Skeleton_Minion_LegRight"
+   ],
+   "bbox": {
+    "min": [
+     -0.969,
+     0,
+     -0.458
+    ],
+    "max": [
+     0.969,
+     2.166,
+     0.454
+    ],
+    "height": 2.166
+   },
+   "height": 2.166,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Scavenger fodder; unarmed punch/kick + optional weapon.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/sk_rogue.glb",
+   "bytes": 602860,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Rogue",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Rogue.glb",
+   "clips": [
+    "1H_Ranged_Aiming",
+    "1H_Ranged_Shoot",
+    "Death_A",
+    "Death_A_Pose",
+    "Death_C_Pose",
+    "Death_C_Skeletons",
+    "Dodge_Left",
+    "Dodge_Right",
+    "Dualwield_Melee_Attack_Slice",
+    "Dualwield_Melee_Attack_Stab",
+    "Hit_A",
+    "Hit_B",
+    "Idle",
+    "Idle_B",
+    "Idle_Combat",
+    "Running_A",
+    "Running_C",
+    "Skeletons_Awaken_Floor",
+    "Skeletons_Inactive_Floor_Pose",
+    "Spawn_Ground_Skeletons",
+    "Taunt",
+    "Walking_A",
+    "Walking_D_Skeletons"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "Skeleton_Rogue_Hood",
+    "Skeleton_Rogue_Cape",
+    "Skeleton_Rogue_ArmLeft",
+    "Skeleton_Rogue_ArmRight",
+    "Skeleton_Rogue_Body",
+    "Skeleton_Rogue_Eyes",
+    "Skeleton_Rogue_Head",
+    "Skeleton_Rogue_Jaw",
+    "Skeleton_Rogue_LegLeft",
+    "Skeleton_Rogue_LegRight"
+   ],
+   "bbox": {
+    "min": [
+     -0.971,
+     0,
+     -0.582
+    ],
+    "max": [
+     0.971,
+     2.308,
+     0.571
+    ],
+    "height": 2.308
+   },
+   "height": 2.308,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Fast scavenger; attach weapon_dagger x2 or weapon_sk_crossbow.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "chars/sk_warrior.glb",
+   "bytes": 605620,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Warrior",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Characters/gltf/Skeleton_Warrior.glb",
+   "clips": [
+    "1H_Melee_Attack_Chop",
+    "1H_Melee_Attack_Jump_Chop",
+    "1H_Melee_Attack_Slice_Diagonal",
+    "Block",
+    "Block_Attack",
+    "Death_A",
+    "Death_A_Pose",
+    "Death_C_Pose",
+    "Death_C_Skeletons",
+    "Hit_A",
+    "Hit_B",
+    "Idle",
+    "Idle_B",
+    "Idle_Combat",
+    "Running_A",
+    "Running_C",
+    "Skeletons_Awaken_Floor",
+    "Skeletons_Inactive_Floor_Pose",
+    "Spawn_Ground_Skeletons",
+    "Taunt",
+    "Walking_A",
+    "Walking_D_Skeletons"
+   ],
+   "hand_slot_nodes": [
+    "handslot.l",
+    "hand.l",
+    "handslot.r",
+    "hand.r"
+   ],
+   "mesh_nodes": [
+    "Skeleton_Warrior_Helmet",
+    "Skeleton_Warrior_ArmLeft",
+    "Skeleton_Warrior_ArmRight",
+    "Skeleton_Warrior_Body",
+    "Skeleton_Warrior_Cloak",
+    "Skeleton_Warrior_Eyes",
+    "Skeleton_Warrior_Head",
+    "Skeleton_Warrior_Jaw",
+    "Skeleton_Warrior_LegLeft",
+    "Skeleton_Warrior_LegRight"
+   ],
+   "bbox": {
+    "min": [
+     -0.971,
+     0,
+     -0.758
+    ],
+    "max": [
+     0.971,
+     2.59,
+     0.701
+    ],
+    "height": 2.591
+   },
+   "height": 2.591,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Sur husk (bruiser). No weapon in mesh: attach weapons/weapon_sk_blade or weapon_sk_axe + weapon_sk_shield to handslot.r / handslot.l.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/ac.glb",
+   "bytes": 13140,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — AC",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/AC.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "AC"
+   ],
+   "bbox": {
+    "min": [
+     -0.395,
+     -0.281,
+     -0.506
+    ],
+    "max": [
+     0.644,
+     0.405,
+     0.265
+    ],
+    "height": 0.686
+   },
+   "height": 0.686,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/antenna_2.glb",
+   "bytes": 9116,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Antenna_2",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Antenna_2.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Antenna_2"
+   ],
+   "bbox": {
+    "min": [
+     -0.484,
+     -0.358,
+     -0.3
+    ],
+    "max": [
+     0.133,
+     0.373,
+     0.356
+    ],
+    "height": 0.731
+   },
+   "height": 0.731,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 2,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/barrel_large.glb",
+   "bytes": 19252,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — barrel_large",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/barrel_large.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "barrel_large"
+   ],
+   "bbox": {
+    "min": [
+     -0.9,
+     0,
+     -0.9
+    ],
+    "max": [
+     0.9,
+     2,
+     0.9
+    ],
+    "height": 2
+   },
+   "height": 2,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.55,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/barrier.glb",
+   "bytes": 11204,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — barrier",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/barrier.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "barrier"
+   ],
+   "bbox": {
+    "min": [
+     -2,
+     0,
+     -0.25
+    ],
+    "max": [
+     2,
+     1.1,
+     0.25
+    ],
+    "height": 1.1
+   },
+   "height": 1.1,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/bonfire_fire.glb",
+   "bytes": 18880,
+   "license": "CC0-1.0",
+   "source": "Quaternius Survival Pack — Bonfire_Fire",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/survival_pack/Bonfire_Fire.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Bonfire_Fire"
+   ],
+   "bbox": {
+    "min": [
+     -1.007,
+     -0.059,
+     -1.005
+    ],
+    "max": [
+     1.168,
+     2.252,
+     0.979
+    ],
+    "height": 2.311
+   },
+   "height": 2.311,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.5,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/box_large.glb",
+   "bytes": 13676,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — box_large",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/box_large.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "box_large"
+   ],
+   "bbox": {
+    "min": [
+     -0.75,
+     0,
+     -0.75
+    ],
+    "max": [
+     0.75,
+     1.5,
+     0.75
+    ],
+    "height": 1.5
+   },
+   "height": 1.5,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.7,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/building_b.glb",
+   "bytes": 30532,
+   "license": "CC0-1.0",
+   "source": "KayKit City Builder Bits 1.0 — building_B",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0@main/addons/kaykit_city_builder_bits/Assets/gltf/building_B.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "building_B"
+   ],
+   "bbox": {
+    "min": [
+     -1,
+     0,
+     -1
+    ],
+    "max": [
+     1,
+     1.65,
+     1
+    ],
+    "height": 1.65
+   },
+   "height": 1.65,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 4,
+   "notes": "Slum block shell",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "citybits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/cable_long.glb",
+   "bytes": 7120,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Cable_Long",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Cable_Long.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Cable_Long"
+   ],
+   "bbox": {
+    "min": [
+     -0.142,
+     -2.505,
+     -0.045
+    ],
+    "max": [
+     0.146,
+     0.001,
+     0.087
+    ],
+    "height": 2.506
+   },
+   "height": 2.506,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/car_sedan.glb",
+   "bytes": 31096,
+   "license": "CC0-1.0",
+   "source": "KayKit City Builder Bits 1.0 — car_sedan",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0@main/addons/kaykit_city_builder_bits/Assets/gltf/car_sedan.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "car_sedan_wheel_front_left",
+    "car_sedan_wheel_front_right",
+    "car_sedan_wheel_rear_left",
+    "car_sedan_wheel_rear_right",
+    ""
+   ],
+   "bbox": {
+    "min": [
+     -0.209,
+     -0.061,
+     -0.472
+    ],
+    "max": [
+     0.209,
+     0.308,
+     0.466
+    ],
+    "height": 0.369
+   },
+   "height": 0.369,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 5,
+   "notes": "Wreck: retint dark/rust",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "citybits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/cargo_a_stacked.glb",
+   "bytes": 24144,
+   "license": "CC0-1.0",
+   "source": "KayKit Space Base Bits 1.0 — cargo_A_stacked",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Space-Base-Bits-1.0@main/addons/kaykit_space_base_bits/Assets/gltf/cargo_A_stacked.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "cargo_A_stacked"
+   ],
+   "bbox": {
+    "min": [
+     -0.51,
+     -0.01,
+     -0.51
+    ],
+    "max": [
+     0.51,
+     1.01,
+     0.51
+    ],
+    "height": 1.021
+   },
+   "height": 1.021,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 2,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "spacebits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/chest.glb",
+   "bytes": 27224,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — chest",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/chest.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "chest_lid",
+    ""
+   ],
+   "bbox": {
+    "min": [
+     -0.85,
+     0,
+     -0.7
+    ],
+    "max": [
+     0.85,
+     1.3,
+     0.746
+    ],
+    "height": 1.3
+   },
+   "height": 1.3,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.7,
+   "notes": "Dungeon kit, 4-unit grid. chest has separate \"chest_lid\" node (rotate X to open).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/coin_stack_small.glb",
+   "bytes": 18372,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — coin_stack_small",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/coin_stack_small.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "coin_stack_small"
+   ],
+   "bbox": {
+    "min": [
+     -0.445,
+     0,
+     -0.461
+    ],
+    "max": [
+     0.514,
+     0.478,
+     0.436
+    ],
+    "height": 0.478
+   },
+   "height": 0.478,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.6,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/computer.glb",
+   "bytes": 15148,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Computer",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Computer.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Computer"
+   ],
+   "bbox": {
+    "min": [
+     -0.235,
+     -0.002,
+     -0.224
+    ],
+    "max": [
+     0.235,
+     1.005,
+     0.405
+    ],
+    "height": 1.008
+   },
+   "height": 1.008,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.3,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/containers_a.glb",
+   "bytes": 19072,
+   "license": "CC0-1.0",
+   "source": "KayKit Space Base Bits 1.0 — containers_A",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Space-Base-Bits-1.0@main/addons/kaykit_space_base_bits/Assets/gltf/containers_A.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "containers_A"
+   ],
+   "bbox": {
+    "min": [
+     -0.25,
+     -0.002,
+     -0.25
+    ],
+    "max": [
+     0.25,
+     0.198,
+     0.25
+    ],
+    "height": 0.2
+   },
+   "height": 0.2,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 6,
+   "notes": "Cargo crate cluster — scale ×6 for shipping-container feel",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "spacebits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/containers_b.glb",
+   "bytes": 19080,
+   "license": "CC0-1.0",
+   "source": "KayKit Space Base Bits 1.0 — containers_B",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Space-Base-Bits-1.0@main/addons/kaykit_space_base_bits/Assets/gltf/containers_B.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "containers_B"
+   ],
+   "bbox": {
+    "min": [
+     -0.25,
+     -0.002,
+     -0.25
+    ],
+    "max": [
+     0.25,
+     0.198,
+     0.25
+    ],
+    "height": 0.2
+   },
+   "height": 0.2,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 6,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "spacebits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/crates_stacked.glb",
+   "bytes": 42472,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — crates_stacked",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/crates_stacked.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "crates_stacked"
+   ],
+   "bbox": {
+    "min": [
+     -1.09,
+     0,
+     -1.157
+    ],
+    "max": [
+     0.999,
+     2.142,
+     1.092
+    ],
+    "height": 2.142
+   },
+   "height": 2.142,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.8,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/dumpster.glb",
+   "bytes": 14588,
+   "license": "CC0-1.0",
+   "source": "KayKit City Builder Bits 1.0 — dumpster",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0@main/addons/kaykit_city_builder_bits/Assets/gltf/dumpster.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "dumpster"
+   ],
+   "bbox": {
+    "min": [
+     -0.283,
+     0,
+     -0.176
+    ],
+    "max": [
+     0.283,
+     0.317,
+     0.176
+    ],
+    "height": 0.317
+   },
+   "height": 0.317,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 5,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "citybits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/fence.glb",
+   "bytes": 5344,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Fence",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Fence.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Fence"
+   ],
+   "bbox": {
+    "min": [
+     -0.346,
+     0,
+     -0.026
+    ],
+    "max": [
+     0.346,
+     1.256,
+     0.026
+    ],
+    "height": 1.256
+   },
+   "height": 1.256,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 2,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/floor_dirt_large_rocky.glb",
+   "bytes": 15116,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — floor_dirt_large_rocky",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/floor_dirt_large_rocky.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "floor_dirt_large_rocky"
+   ],
+   "bbox": {
+    "min": [
+     -2,
+     -0.1,
+     -2
+    ],
+    "max": [
+     2,
+     0.293,
+     2
+    ],
+    "height": 0.393
+   },
+   "height": 0.393,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/floor_tile_large.glb",
+   "bytes": 13268,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — floor_tile_large",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/floor_tile_large.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "floor_tile_large"
+   ],
+   "bbox": {
+    "min": [
+     -2,
+     -0.1,
+     -2
+    ],
+    "max": [
+     2,
+     0.05,
+     2
+    ],
+    "height": 0.15
+   },
+   "height": 0.15,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/floor_tile_small_broken_a.glb",
+   "bytes": 10992,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — floor_tile_small_broken_a",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/floor_tile_small_broken_A.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "floor_tile_small_broken_A"
+   ],
+   "bbox": {
+    "min": [
+     -1,
+     -0.1,
+     -1
+    ],
+    "max": [
+     1,
+     0.05,
+     1
+    ],
+    "height": 0.15
+   },
+   "height": 0.15,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/gascan.glb",
+   "bytes": 17508,
+   "license": "CC0-1.0",
+   "source": "Quaternius Survival Pack — GasCan",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/survival_pack/GasCan.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "GasCan"
+   ],
+   "bbox": {
+    "min": [
+     -0.901,
+     -0.003,
+     -0.308
+    ],
+    "max": [
+     0.977,
+     2.469,
+     0.308
+    ],
+    "height": 2.473
+   },
+   "height": 2.473,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.25,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/light_street_1.glb",
+   "bytes": 9244,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Light_Street_1",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Light_Street_1.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Light_Street_1"
+   ],
+   "bbox": {
+    "min": [
+     -0.088,
+     -0.01,
+     -0.088
+    ],
+    "max": [
+     0.088,
+     2.857,
+     0.584
+    ],
+    "height": 2.866
+   },
+   "height": 2.866,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/lootbox.glb",
+   "bytes": 17568,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Lootbox",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Lootbox.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Lootbox_Base",
+    "Lootbox_Top"
+   ],
+   "bbox": {
+    "min": [
+     -0.296,
+     0,
+     -0.313
+    ],
+    "max": [
+     0.296,
+     0.512,
+     0.295
+    ],
+    "height": 0.512
+   },
+   "height": 0.512,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/pickup_health.glb",
+   "bytes": 13000,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Pickup_Health",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Pickup_Health.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Pickup_Health"
+   ],
+   "bbox": {
+    "min": [
+     -0.121,
+     -0.121,
+     -0.121
+    ],
+    "max": [
+     0.121,
+     0.121,
+     0.121
+    ],
+    "height": 0.241
+   },
+   "height": 0.241,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 2,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/pillar.glb",
+   "bytes": 12000,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — pillar",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/pillar.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "pillar"
+   ],
+   "bbox": {
+    "min": [
+     -0.75,
+     0,
+     -0.75
+    ],
+    "max": [
+     0.75,
+     4,
+     0.75
+    ],
+    "height": 4
+   },
+   "height": 4,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/pipe_1.glb",
+   "bytes": 3764,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Pipe_1",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Pipe_1.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Pipe_1"
+   ],
+   "bbox": {
+    "min": [
+     -1.221,
+     -0.106,
+     -0.324
+    ],
+    "max": [
+     1.221,
+     0.106,
+     0.232
+    ],
+    "height": 0.212
+   },
+   "height": 0.212,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/pipe_corner.glb",
+   "bytes": 4324,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Pipe_Corner",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Pipe_Corner.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Pipe_Corner"
+   ],
+   "bbox": {
+    "min": [
+     -1.29,
+     -0.106,
+     -1.418
+    ],
+    "max": [
+     0.71,
+     0.106,
+     0.908
+    ],
+    "height": 0.212
+   },
+   "height": 0.212,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/propanetank.glb",
+   "bytes": 14080,
+   "license": "CC0-1.0",
+   "source": "Quaternius Survival Pack — PropaneTank",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/survival_pack/PropaneTank.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "PropaneTank"
+   ],
+   "bbox": {
+    "min": [
+     -1.081,
+     -1.365,
+     -1.073
+    ],
+    "max": [
+     1.074,
+     1.526,
+     0.977
+    ],
+    "height": 2.891
+   },
+   "height": 2.891,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.4,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/rock_b.glb",
+   "bytes": 14192,
+   "license": "CC0-1.0",
+   "source": "KayKit Space Base Bits 1.0 — rock_B",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Space-Base-Bits-1.0@main/addons/kaykit_space_base_bits/Assets/gltf/rock_B.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "rock_B"
+   ],
+   "bbox": {
+    "min": [
+     -0.348,
+     0,
+     -0.401
+    ],
+    "max": [
+     0.348,
+     0.401,
+     0.401
+    ],
+    "height": 0.401
+   },
+   "height": 0.401,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 3,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "spacebits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/rocks_a.glb",
+   "bytes": 15568,
+   "license": "CC0-1.0",
+   "source": "KayKit Space Base Bits 1.0 — rocks_A",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Space-Base-Bits-1.0@main/addons/kaykit_space_base_bits/Assets/gltf/rocks_A.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "rocks_A"
+   ],
+   "bbox": {
+    "min": [
+     -0.79,
+     0,
+     -0.822
+    ],
+    "max": [
+     0.524,
+     0.354,
+     0.821
+    ],
+    "height": 0.354
+   },
+   "height": 0.354,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 3,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "spacebits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/rubble_half.glb",
+   "bytes": 18068,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — rubble_half",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/rubble_half.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "rubble_half"
+   ],
+   "bbox": {
+    "min": [
+     0,
+     0,
+     -1.516
+    ],
+    "max": [
+     4,
+     3.5,
+     1.484
+    ],
+    "height": 3.5
+   },
+   "height": 3.5,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/rubble_large.glb",
+   "bytes": 26324,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — rubble_large",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/rubble_large.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "rubble_large"
+   ],
+   "bbox": {
+    "min": [
+     -4.069,
+     0,
+     -1.585
+    ],
+    "max": [
+     4.06,
+     3.496,
+     1.597
+    ],
+    "height": 3.496
+   },
+   "height": 3.496,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/sign_corner_hazard.glb",
+   "bytes": 4804,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Sign_Corner_Hazard",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Sign_Corner_Hazard.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Sign_Corner_Hazard"
+   ],
+   "bbox": {
+    "min": [
+     -0.97,
+     -0.098,
+     -1.086
+    ],
+    "max": [
+     0.123,
+     0.103,
+     0.123
+    ],
+    "height": 0.201
+   },
+   "height": 0.201,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.5,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/streetlight.glb",
+   "bytes": 14444,
+   "license": "CC0-1.0",
+   "source": "KayKit City Builder Bits 1.0 — streetlight",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0@main/addons/kaykit_city_builder_bits/Assets/gltf/streetlight.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "streetlight"
+   ],
+   "bbox": {
+    "min": [
+     -0.239,
+     0,
+     -0.035
+    ],
+    "max": [
+     0.03,
+     0.96,
+     0.035
+    ],
+    "height": 0.96
+   },
+   "height": 0.96,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 4,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "citybits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/structure_low.glb",
+   "bytes": 22892,
+   "license": "CC0-1.0",
+   "source": "KayKit Space Base Bits 1.0 — structure_low",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Space-Base-Bits-1.0@main/addons/kaykit_space_base_bits/Assets/gltf/structure_low.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "structure_low"
+   ],
+   "bbox": {
+    "min": [
+     -0.875,
+     0,
+     -0.875
+    ],
+    "max": [
+     0.875,
+     1,
+     0.875
+    ],
+    "height": 1
+   },
+   "height": 1,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 2,
+   "notes": "Metal scaffold/platform",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "spacebits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/tank.glb",
+   "bytes": 19532,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — Tank",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/Tank.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Tank"
+   ],
+   "bbox": {
+    "min": [
+     -0.285,
+     -0.415,
+     0
+    ],
+    "max": [
+     0.285,
+     0.415,
+     0.619
+    ],
+    "height": 0.831
+   },
+   "height": 0.831,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 2.5,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/tent.glb",
+   "bytes": 17440,
+   "license": "CC0-1.0",
+   "source": "Quaternius Survival Pack — Tent",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/survival_pack/Tent.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Tent"
+   ],
+   "bbox": {
+    "min": [
+     -7.29,
+     -0.176,
+     -12.434
+    ],
+    "max": [
+     7.29,
+     10.149,
+     12.434
+    ],
+    "height": 10.325
+   },
+   "height": 10.325,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.25,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/torch_lit.glb",
+   "bytes": 15292,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — torch_lit",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/torch_lit.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "torch_lit"
+   ],
+   "bbox": {
+    "min": [
+     -0.275,
+     -0.395,
+     -0.275
+    ],
+    "max": [
+     0.275,
+     0.731,
+     0.275
+    ],
+    "height": 1.126
+   },
+   "height": 1.126,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/torch_mounted.glb",
+   "bytes": 16200,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — torch_mounted",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/torch_mounted.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "torch_mounted"
+   ],
+   "bbox": {
+    "min": [
+     -0.275,
+     -0.381,
+     0
+    ],
+    "max": [
+     0.275,
+     0.682,
+     0.616
+    ],
+    "height": 1.062
+   },
+   "height": 1.062,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/trash_a.glb",
+   "bytes": 11952,
+   "license": "CC0-1.0",
+   "source": "KayKit City Builder Bits 1.0 — trash_A",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0@main/addons/kaykit_city_builder_bits/Assets/gltf/trash_A.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "trash_A"
+   ],
+   "bbox": {
+    "min": [
+     -0.06,
+     0,
+     -0.067
+    ],
+    "max": [
+     0.067,
+     0.052,
+     0.067
+    ],
+    "height": 0.052
+   },
+   "height": 0.052,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 6,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "citybits_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/trashcan.glb",
+   "bytes": 15860,
+   "license": "CC0-1.0",
+   "source": "Quaternius Survival Pack — Trashcan",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/survival_pack/Trashcan.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Trashcan"
+   ],
+   "bbox": {
+    "min": [
+     -1.853,
+     0,
+     -2.659
+    ],
+    "max": [
+     1.864,
+     6.751,
+     2.2
+    ],
+    "height": 6.751
+   },
+   "height": 6.751,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 0.2,
+   "notes": "",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/tv_2.glb",
+   "bytes": 10420,
+   "license": "CC0-1.0",
+   "source": "Quaternius Cyberpunk Game Kit — TV_2",
+   "source_url": "https://raw.githubusercontent.com/trebeljahr/quaternius-showcase/main/public/glb/cyberpunk_pack/TV_2.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "TV_2"
+   ],
+   "bbox": {
+    "min": [
+     -0.172,
+     -0.227,
+     -0.237
+    ],
+    "max": [
+     0.634,
+     0.985,
+     0.108
+    ],
+    "height": 1.212
+   },
+   "height": 1.212,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.2,
+   "notes": "Origin is not at the base (min.y < 0); offset by -min.y.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": []
+  },
+  {
+   "path": "props/wall.glb",
+   "bytes": 23556,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — wall",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/wall.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "wall"
+   ],
+   "bbox": {
+    "min": [
+     -2,
+     0,
+     -0.5
+    ],
+    "max": [
+     2,
+     4,
+     0.5
+    ],
+    "height": 4
+   },
+   "height": 4,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/wall_broken.glb",
+   "bytes": 28984,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — wall_broken",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/wall_broken.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "wall_broken"
+   ],
+   "bbox": {
+    "min": [
+     -2,
+     0,
+     -0.5
+    ],
+    "max": [
+     2,
+     4,
+     0.5
+    ],
+    "height": 4
+   },
+   "height": 4,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/wall_doorway.glb",
+   "bytes": 32376,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — wall_doorway",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/wall_doorway.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "wall_doorway_door",
+    ""
+   ],
+   "bbox": {
+    "min": [
+     -2,
+     0,
+     -0.5
+    ],
+    "max": [
+     2,
+     4,
+     0.5
+    ],
+    "height": 4
+   },
+   "height": 4,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "props/wall_half.glb",
+   "bytes": 17096,
+   "license": "CC0-1.0",
+   "source": "KayKit Dungeon Remastered 1.0 — wall_half",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0@main/addons/kaykit_dungeon_remastered/Assets/gltf/wall_half.gltf.glb",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "wall_half"
+   ],
+   "bbox": {
+    "min": [
+     0,
+     0,
+     -0.5
+    ],
+    "max": [
+     2,
+     4,
+     0.5
+    ],
+    "height": 4
+   },
+   "height": 4,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1,
+   "notes": "Dungeon kit, 4-unit grid (walls 4×4, floor tiles 4×4 / small 2×2).",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "dungeon_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_axe.glb",
+   "bytes": 14348,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — axe_1handed",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Assets/gltf/axe_1handed.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "axe_1handed"
+   ],
+   "bbox": {
+    "min": [
+     -0.589,
+     -0.273,
+     -0.092
+    ],
+    "max": [
+     0.125,
+     0.971,
+     0.092
+    ],
+    "height": 1.244
+   },
+   "height": 1.244,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (or handslot.l) with identity transform; modelled in handslot space.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "barbarian_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_crossbow.glb",
+   "bytes": 19840,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — crossbow_1handed",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Assets/gltf/crossbow_1handed.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "crossbow_1handed"
+   ],
+   "bbox": {
+    "min": [
+     -0.454,
+     -0.171,
+     -0.278
+    ],
+    "max": [
+     0.457,
+     0.235,
+     0.944
+    ],
+    "height": 0.406
+   },
+   "height": 0.406,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (or handslot.l) with identity transform; modelled in handslot space.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "rogue_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_dagger.glb",
+   "bytes": 12900,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — dagger",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Assets/gltf/dagger.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "dagger"
+   ],
+   "bbox": {
+    "min": [
+     -0.12,
+     -0.225,
+     -0.076
+    ],
+    "max": [
+     0.139,
+     0.981,
+     0.076
+    ],
+    "height": 1.206
+   },
+   "height": 1.206,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (or handslot.l) with identity transform; modelled in handslot space.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "rogue_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_sk_axe.glb",
+   "bytes": 19568,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Axe",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Axe.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Skeleton_Axe"
+   ],
+   "bbox": {
+    "min": [
+     -0.494,
+     -0.251,
+     -0.141
+    ],
+    "max": [
+     0.494,
+     1.001,
+     0.141
+    ],
+    "height": 1.252
+   },
+   "height": 1.252,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (shield: handslot.l) with identity transform.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_sk_blade.glb",
+   "bytes": 17932,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Blade",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Blade.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Skeleton_Blade"
+   ],
+   "bbox": {
+    "min": [
+     -0.286,
+     -0.329,
+     -0.111
+    ],
+    "max": [
+     0.286,
+     1.168,
+     0.111
+    ],
+    "height": 1.497
+   },
+   "height": 1.497,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (shield: handslot.l) with identity transform.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_sk_crossbow.glb",
+   "bytes": 21656,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Crossbow",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Crossbow.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Skeleton_Crossbow"
+   ],
+   "bbox": {
+    "min": [
+     -0.556,
+     -0.171,
+     -0.278
+    ],
+    "max": [
+     0.556,
+     0.337,
+     1.141
+    ],
+    "height": 0.508
+   },
+   "height": 0.508,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (shield: handslot.l) with identity transform.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_sk_shield.glb",
+   "bytes": 18544,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Shield_Small_A",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Shield_Small_A.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Skeleton_Shield_Small_A"
+   ],
+   "bbox": {
+    "min": [
+     -0.416,
+     -0.416,
+     -0.045
+    ],
+    "max": [
+     0.416,
+     0.416,
+     0.111
+    ],
+    "height": 0.832
+   },
+   "height": 0.832,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (shield: handslot.l) with identity transform.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_sk_staff.glb",
+   "bytes": 38052,
+   "license": "CC0-1.0",
+   "source": "KayKit Skeletons 1.0 — Skeleton_Staff",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0@main/addons/kaykit_character_pack_skeletons/Assets/gltf/Skeleton_Staff.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "Skeleton_Staff"
+   ],
+   "bbox": {
+    "min": [
+     -0.458,
+     -0.846,
+     -0.368
+    ],
+    "max": [
+     0.14,
+     1.255,
+     0.385
+    ],
+    "height": 2.102
+   },
+   "height": 2.102,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (shield: handslot.l) with identity transform.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "skeleton_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_smokebomb.glb",
+   "bytes": 14452,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — smokebomb",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Assets/gltf/smokebomb.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "smokebomb"
+   ],
+   "bbox": {
+    "min": [
+     -0.191,
+     -0.171,
+     -0.182
+    ],
+    "max": [
+     0.191,
+     0.252,
+     0.182
+    ],
+    "height": 0.423
+   },
+   "height": 0.423,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (or handslot.l) with identity transform; modelled in handslot space.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "rogue_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "weapons/weapon_sword.glb",
+   "bytes": 13912,
+   "license": "CC0-1.0",
+   "source": "KayKit Adventurers 1.0 — sword_1handed",
+   "source_url": "https://cdn.jsdelivr.net/gh/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0@main/addons/kaykit_character_pack_adventures/Assets/gltf/sword_1handed.gltf",
+   "clips": [],
+   "hand_slot_nodes": null,
+   "mesh_nodes": [
+    "sword_1handed"
+   ],
+   "bbox": {
+    "min": [
+     -0.252,
+     -0.366,
+     -0.065
+    ],
+    "max": [
+     0.252,
+     1.409,
+     0.065
+    ],
+    "height": 1.775
+   },
+   "height": 1.775,
+   "forward_axis": "+Z",
+   "up_axis": "+Y",
+   "suggested_scale": 1.0,
+   "notes": "Attach to handslot.r (or handslot.l) with identity transform; modelled in handslot space.",
+   "compression": "EXT_meshopt_compression + KHR_mesh_quantization (needs MeshoptDecoder)",
+   "textures": [
+    {
+     "name": "knight_texture",
+     "size": [
+      512,
+      512
+     ],
+     "mime": "image/png"
+    }
+   ]
+  },
+  {
+   "path": "audio/amb_ambient_01_loop.m4a",
+   "bytes": 126252,
+   "license": "CC0-1.0",
+   "source": "\"100 CC0 SFX #2\" by rubberduck (CC0) https://opengameart.org/content/100-cc0-sfx-2",
+   "source_url": "https://opengameart.org/content/100-cc0-sfx-2",
+   "derived_from": "sfx100v2_loop_ambient_01.ogg (already a loop)",
+   "format": "AAC-LC .m4a, 44.1kHz, stereo 96k",
+   "loop": true
+  },
+  {
+   "path": "audio/amb_wind_ash_loop.m4a",
+   "bytes": 381069,
+   "license": "CC0-1.0",
+   "source": "Synthesized for this project (filtered brown/pink noise with gust LFO) — own work, CC0",
+   "source_url": null,
+   "derived_from": "",
+   "format": "AAC-LC .m4a, 44.1kHz, stereo 96k",
+   "loop": true
+  },
+  {
+   "path": "audio/music_combat.m4a",
+   "bytes": 2241332,
+   "license": "CC0-1.0",
+   "source": "\"Space Collisions\" from \"T&T Free Cyberpunk Pack\" (CC0) https://opengameart.org/content/t-t-free-cyberpunk-pack",
+   "source_url": "https://opengameart.org/content/t-t-free-cyberpunk-pack",
+   "derived_from": "Space%20Collisions_0.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, stereo 128k",
+   "loop": true
+  },
+  {
+   "path": "audio/music_dungeon.m4a",
+   "bytes": 1762151,
+   "license": "CC0-1.0",
+   "source": "\"Outpost (loop)\" from \"The World Fell Silent\" by Tsorthan Grove (CC0) https://opengameart.org/content/the-world-fell-silent",
+   "source_url": "https://opengameart.org/content/the-world-fell-silent",
+   "derived_from": "outpost_loop.flac",
+   "format": "AAC-LC .m4a, 44.1kHz, stereo 112k",
+   "loop": true
+  },
+  {
+   "path": "audio/music_explore.m4a",
+   "bytes": 5269819,
+   "license": "CC0-1.0",
+   "source": "\"Post Apocalyptic Wastelands [Loop Ready]\" by Juhani Junkala (CC0) https://opengameart.org/content/post-apocalyptic-wastelands-loop-ready",
+   "source_url": "https://opengameart.org/content/post-apocalyptic-wastelands-loop-ready",
+   "derived_from": "Juhani%20Junkala%20-%20Post%20Apocalyptic%20Wastelands%20%5BLoop%20Ready%5D.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, stereo 128k",
+   "loop": true
+  },
+  {
+   "path": "audio/sfx_chest_open.m4a",
+   "bytes": 4616,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "metalLatch.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_coin.m4a",
+   "bytes": 12278,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "handleCoins.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_crit.m4a",
+   "bytes": 14462,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip + Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "derived_from": "knifeSlice2.ogg + impactMetal_001.ogg + lowFrequency_explosion_000.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_door.m4a",
+   "bytes": 12486,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "doorOpen_1.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_drone_buzz_loop.m4a",
+   "bytes": 47238,
+   "license": "CC0-1.0",
+   "source": "Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "derived_from": "spaceEngineSmall_002.ogg (trimmed, crossfade-looped)",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": true
+  },
+  {
+   "path": "audio/sfx_emp.m4a",
+   "bytes": 13523,
+   "license": "CC0-1.0",
+   "source": "Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip + Kenney Interface Sounds (CC0) https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "derived_from": "lowFrequency_explosion_001.ogg + glitch_004.ogg + forceField_002.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_enemy_death_1.m4a",
+   "bytes": 16781,
+   "license": "CC0-1.0",
+   "source": "Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "derived_from": "explosionCrunch_002.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_enemy_death_2.m4a",
+   "bytes": 5946,
+   "license": "CC0-1.0",
+   "source": "\"The Essential Retro Video Game Sound Effects Collection\" by Juhani Junkala (CC0) https://opengameart.org/content/512-sound-effects-8-bit-style",
+   "source_url": "https://opengameart.org/content/512-sound-effects-8-bit-style",
+   "derived_from": "sfx_deathscream_android2.wav",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_footstep_1.m4a",
+   "bytes": 4066,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "footstep02.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_footstep_2.m4a",
+   "bytes": 4400,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "footstep06.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_hit_1.m4a",
+   "bytes": 4350,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "chop.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_hit_2.m4a",
+   "bytes": 8600,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "knifeSlice.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_hit_3.m4a",
+   "bytes": 3545,
+   "license": "CC0-1.0",
+   "source": "\"100 CC0 SFX #2\" by rubberduck (CC0) https://opengameart.org/content/100-cc0-sfx-2",
+   "source_url": "https://opengameart.org/content/100-cc0-sfx-2",
+   "derived_from": "sfx100v2_hit_02.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_hit_metal.m4a",
+   "bytes": 6909,
+   "license": "CC0-1.0",
+   "source": "Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "derived_from": "impactMetal_002.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_legendary_drop.m4a",
+   "bytes": 12929,
+   "license": "CC0-1.0",
+   "source": "Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip + Kenney Interface Sounds (CC0) https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "derived_from": "forceField_001.ogg + maximize_006.ogg + glass_003.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_level_up.m4a",
+   "bytes": 12954,
+   "license": "CC0-1.0",
+   "source": "Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip + Kenney Interface Sounds (CC0) https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "derived_from": "forceField_004.ogg + confirmation_004.ogg + maximize_008.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_loot_drop.m4a",
+   "bytes": 6334,
+   "license": "CC0-1.0",
+   "source": "Kenney RPG Audio (CC0) https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "source_url": "https://opengameart.org/sites/default/files/RPGsounds_Kenney.zip",
+   "derived_from": "dropLeather.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_potion.m4a",
+   "bytes": 21832,
+   "license": "CC0-1.0",
+   "source": "\"100 CC0 SFX #2\" by rubberduck (CC0) https://opengameart.org/content/100-cc0-sfx-2 + Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "derived_from": "sfx100v2_glass_02.ogg + slime_001.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_swing_1.m4a",
+   "bytes": 3774,
+   "license": "CC0-1.0",
+   "source": "\"Swishes Sound Pack\" by artisticdude (CC0) https://opengameart.org/content/swishes-sound-pack",
+   "source_url": "https://opengameart.org/content/swishes-sound-pack",
+   "derived_from": "swish-3.wav",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_swing_2.m4a",
+   "bytes": 4120,
+   "license": "CC0-1.0",
+   "source": "\"Swishes Sound Pack\" by artisticdude (CC0) https://opengameart.org/content/swishes-sound-pack",
+   "source_url": "https://opengameart.org/content/swishes-sound-pack",
+   "derived_from": "swish-7.wav",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_swing_3.m4a",
+   "bytes": 4212,
+   "license": "CC0-1.0",
+   "source": "\"Swishes Sound Pack\" by artisticdude (CC0) https://opengameart.org/content/swishes-sound-pack",
+   "source_url": "https://opengameart.org/content/swishes-sound-pack",
+   "derived_from": "swish-9.wav",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_ui_click.m4a",
+   "bytes": 1414,
+   "license": "CC0-1.0",
+   "source": "Kenney Interface Sounds (CC0) https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "derived_from": "click_002.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_ui_error.m4a",
+   "bytes": 2596,
+   "license": "CC0-1.0",
+   "source": "Kenney Interface Sounds (CC0) https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "derived_from": "error_004.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_ui_hover.m4a",
+   "bytes": 1823,
+   "license": "CC0-1.0",
+   "source": "Kenney Interface Sounds (CC0) https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "derived_from": "tick_001.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_ui_open.m4a",
+   "bytes": 5154,
+   "license": "CC0-1.0",
+   "source": "Kenney Interface Sounds (CC0) https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip",
+   "derived_from": "open_002.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "audio/sfx_zap.m4a",
+   "bytes": 4293,
+   "license": "CC0-1.0",
+   "source": "Kenney Sci-fi Sounds (CC0) https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "source_url": "https://opengameart.org/sites/default/files/sci-fi_sounds.zip",
+   "derived_from": "laserSmall_001.ogg",
+   "format": "AAC-LC .m4a, 44.1kHz, mono 96k",
+   "loop": false
+  },
+  {
+   "path": "tex/sky_overcast_1k.hdr",
+   "bytes": 1174053,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — kloofendal_overcast_puresky",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloofendal_overcast_puresky_1k.hdr",
+   "notes": "PRIMARY env map (PMREM) — ash-grey overcast"
+  },
+  {
+   "path": "tex/sky_sunset_1k.hdr",
+   "bytes": 1158432,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — industrial_sunset_puresky",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/industrial_sunset_puresky_1k.hdr",
+   "notes": "alt env map — dusk"
+  },
+  {
+   "path": "tex/sky_overcast_ldr.jpg",
+   "bytes": 14989,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — kloofendal_overcast_puresky (tonemapped Reinhard, 1024x512 equirect)",
+   "source_url": "https://polyhaven.com/a/kloofendal_overcast_puresky",
+   "notes": "LDR skybox/background fallback"
+  },
+  {
+   "path": "tex/sky_sunset_ldr.jpg",
+   "bytes": 20022,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — industrial_sunset_puresky (tonemapped)",
+   "source_url": "https://polyhaven.com/a/industrial_sunset_puresky",
+   "notes": "LDR fallback"
+  },
+  {
+   "path": "tex/mud_diff_512.jpg",
+   "bytes": 57109,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — brown_mud_02",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_02/brown_mud_02_diff_1k.jpg",
+   "notes": "tileable, albedo sRGB, downscaled 1k→512"
+  },
+  {
+   "path": "tex/mud_nor_gl_512.jpg",
+   "bytes": 118208,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — brown_mud_02",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_02/brown_mud_02_nor_gl_1k.jpg",
+   "notes": "tileable, normal (OpenGL +Y) linear, downscaled 1k→512"
+  },
+  {
+   "path": "tex/mud_arm_512.jpg",
+   "bytes": 57452,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — brown_mud_02",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud_02/brown_mud_02_arm_1k.jpg",
+   "notes": "tileable, packed AO=R Rough=G Metal=B linear (glTF/three ORM order), downscaled 1k→512"
+  },
+  {
+   "path": "tex/concrete_diff_512.jpg",
+   "bytes": 20232,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — concrete_floor_worn_001",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_diff_1k.jpg",
+   "notes": "tileable, albedo sRGB, downscaled 1k→512"
+  },
+  {
+   "path": "tex/concrete_nor_gl_512.jpg",
+   "bytes": 11040,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — concrete_floor_worn_001",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_nor_gl_1k.jpg",
+   "notes": "tileable, normal (OpenGL +Y) linear, downscaled 1k→512"
+  },
+  {
+   "path": "tex/concrete_arm_512.jpg",
+   "bytes": 25711,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — concrete_floor_worn_001",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_arm_1k.jpg",
+   "notes": "tileable, packed AO=R Rough=G Metal=B linear (glTF/three ORM order), downscaled 1k→512"
+  },
+  {
+   "path": "tex/rust_metal_diff_512.jpg",
+   "bytes": 56054,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — rusty_metal_02",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_diff_1k.jpg",
+   "notes": "tileable, albedo sRGB, downscaled 1k→512"
+  },
+  {
+   "path": "tex/rust_metal_nor_gl_512.jpg",
+   "bytes": 22695,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — rusty_metal_02",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg",
+   "notes": "tileable, normal (OpenGL +Y) linear, downscaled 1k→512"
+  },
+  {
+   "path": "tex/rust_metal_arm_512.jpg",
+   "bytes": 31350,
+   "license": "CC0-1.0",
+   "source": "Poly Haven — rusty_metal_02",
+   "source_url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_arm_1k.jpg",
+   "notes": "tileable, packed AO=R Rough=G Metal=B linear (glTF/three ORM order), downscaled 1k→512"
+  }
+ ]
+}
