@@ -690,6 +690,11 @@ function advance(){if(!dlgActive)return;if(dlgTyping){dlgShown=dlgFull.length;dl
  if(dlgQ.length){showLine();return;}$('dlg').style.display='none';dlgActive=false;document.body.classList.remove('cine');const cb=dlgCb;dlgCb=null;if(cb)cb();}
 let typeAcc=0;function updDlg(dt){if(!dlgTyping)return;typeAcc+=dt*48;while(typeAcc>=1&&dlgShown<dlgFull.length){dlgShown++;typeAcc--;}$('dtx').textContent=dlgFull.slice(0,dlgShown);if(dlgShown>=dlgFull.length)dlgTyping=false;}
 const D=(who,t,fx)=>({who,t,fx});
+// Yedi Sinyal: hikâye bayrakları (çekirdek seçimleri). Bölüm şifresiyle girişte de hatırlansın diye localStorage.
+window.FLAGS=window.FLAGS||(function(){try{return JSON.parse(localStorage.getItem('sgc.flags')||'{}')||{};}catch(e){return {};}})();
+function ysSave(){try{localStorage.setItem('sgc.flags',JSON.stringify(window.FLAGS));}catch(e){}}
+function setFlag(k,v){window.FLAGS[k]=v;ysSave();}
+function byCore(m,d,s,n){const c=window.FLAGS.core1;return (c==='meridian'?m:c==='destroy'?d:c==='sur'?s:n)||[];}
 // ================= CARDS =================
 let cardCb=null;function card(a,b,c,cb){$('c1').textContent=a;$('c2').textContent=b;$('c3').textContent=c;show('card');cardCb=cb;}
 $('dlg').addEventListener('click',e=>{e.stopPropagation();advance();});
@@ -730,7 +735,7 @@ function homeArrive(){if(step!=='night'||Math.hypot(P.pos.x-0.5,P.pos.z+.5)>2.6)
   setTimeout(()=>{canvas.classList.remove('breath');say([D('Deniz','Karanlıkta soluk mavi harfler belirdi. Başımı çevirince onlar da döndü.'),D('Deniz','Bunu yapabilen tek bir kişi tanıyordum. Bana yuvamın kapısının arkasında, kimsenin bilmediği bir kilit bırakmamı öğreten adam.'),
    D('Deniz','"Her ev bir arka kapıya ihtiyaç duyar, evlat, yoksa yangında yanarsın."'),D('Deniz','Hayalet.')],()=>{$('vision').style.opacity=0;setQuest('Fısıltı Tepesi — Hayalet\'i bul');
    setTimeout(()=>card('BÖLÜM 1 SONU','Ellinci Yıl','Pusulanın iğnesi kuzeyi gösteriyordu. Ama o gece, hayatımda ilk kez, kuzeyin aynı zamanda nereyi gösterdiğini düşündüm.',()=>
-    card('BÖLÜM 2','Hayalet','Ben, on üç yaşımdan beri, haftada en az iki gece giderdim. (Bölüm şifresi: FISILTI)',()=>startCh2(false))),1800);});},3200);});},1300);}
+    card('BÖLÜM 2','Hayalet','Sesin sahibini tanıyan tek bir adam vardı. On üç yaşımdan beri ona haftada en az iki gece giderdim. (Bölüm şifresi: FISILTI)',()=>startCh2(false))),1800);});},3200);});},1300);}
 // ================= BÖLÜM 2 — HAYALET (Fısıltı Tepesi + metro) =================
 let ZONE=1;const OX=150,PZ=-90;const z2=new THREE.Group();z2.visible=false;scene.add(z2);
 const Z2={walk:[[OX,4,10,62],[OX-8.5,-6,9.5,9],[OX+8.5,14,9.5,9],[OX,-30,20,10],[OX,PZ,27,4.6]],obst:[]};
@@ -900,7 +905,7 @@ function c2update(dt,t){
  if(step==='c2out'&&P.pos.x<OX-11.2)ascend();
  if(step==='c2dawn'&&P.pos.z>29)ashFall();}
 function c2SentDead(){step='c2metro';setQuest('Metro ağzına in');P.checkpoint.set(OX,TOP,-27);
- setTimeout(()=>say([D('Deniz','Gözcü yere çakıldı. Kırmızı gözü bir kez kırpıştı, sonra söndü.'),D('Deniz','Birileri bu gece Fısıltı Tepesi\'ni de dinliyordu.')]),500);}
+ setTimeout(()=>say([D('Deniz','Gözcü yere çakıldı. Kırmızı gözü bir kez kırpıştı, sonra söndü.'),D('Deniz','Birileri bu gece Fısıltı Tepesi\'ni de dinliyordu. Ya da benim kafamın içini.')]),500);}
 function descend(){step='c2dark';playing=false;setFade(1);setTimeout(()=>{teleport(OX-11,PZ+.4);P.face=Math.PI/2;P.checkpoint.set(OX-11,TOP,PZ+.4);setZL(0x050505,.07,.04,0,0x000000);scene.fog.color.setHex(0x050505);hemi.intensity=.04;sun.intensity=0;setFade(0);
  say([D('Deniz','Tabelanın harflerinin çoğu dökülmüştü. Kırmızı bir dairenin içinde beyaz bir M, yanında yarısı silinmiş bir kelime: "…KÖY".'),
   D('Deniz','Merdivenin dibinde, karanlıkta, kırmızı noktalar yandı. Bir, iki... altı. Hepsi bana bakıyordu.',()=>{window._reds.forEach((r,i)=>setTimeout(()=>{r.material.opacity=1;tone(1200+i*80,.08,'square',.05);},i*160));}),
@@ -909,38 +914,38 @@ function descend(){step='c2dark';playing=false;setFade(1);setTimeout(()=>{telepo
 function lightsOn(){let k=0;const iv=setInterval(()=>{k+=.05;window._warm.forEach(w=>{w.L.intensity=k*2.2;w.b.visible=true;});window._grow[0].intensity=k*1.6;setZL(0x14110c,.045,.16*k+.04,0,0x000000);if(k>=1)clearInterval(iv);},50);}
 function hayTalk(){if(step==='c2meet'){step='c2talk';const H=window._holo;
  say([D('Hayalet','Otur. Çay var.'),D('Hayalet','Duydum. Kova\'yı. Sur\'un kıyı izleme ağında iki saat boyunca senin hakkında konuştular. Yani senin hakkında değil; ani rüzgâr değişimi hakkında.'),
-  D('Deniz','Sen olsan bana ödül değil, ders verirdin.'),D('Hayalet','Doğru. Ama önce bir hikâye.'),
+  D('Deniz','Kova umurumda değil. Dün gece kafamın içinde biri konuştu. Senin arka kapından girdi.'),D('Hayalet','Biliyorum. Önce bir hikâye. Sonra o sesin kime ait olduğunu göstereceğim.'),
   D('Hayalet','Ben çocukken her pazartesi sabahı okulun bahçesinde dururduk. Bir direğin tepesine kırmızı bayrağımız çekilirdi. Annem pencereden bakar, benim de orada durduğumu bilirdi.'),
   D('Hayalet','Bir de simit vardı. Yuvarlak, susamlı bir ekmek. Zengin de yoksul da aynı simitten alırdı.'),D('Deniz','Aynı simidi.'),
   D('Hayalet','Aynı simidi. Şimdi bak.',()=>{H.mode=0;H.m.material.opacity=.01;let k=0;const iv=setInterval(()=>{k+=.05;H.m.material.opacity=Math.min(.95,k);if(k>=1)clearInterval(iv);},40);tone(220,.6,'sine',.08,440);}),
   D('Deniz','Kalp atışı mı bu?'),D('Hayalet','Neredeyse. Bu, MERIDIAN.'),
   D('Deniz','Ensemin arkasındaki tüyler diken diken oldu. Yuvam sanki o ismi duymuş gibi hafifçe ısındı.',()=>{neckL.intensity=5;SFX.breath();}),
-  D('Hayalet','Kör Baykuş dinliyor. Savaşta yaptığımız bir uydu; ben ve otuz kadar mühendis. Savaş bitince onu kapattılar. Daha doğrusu kapattıklarını sandılar.'),
-  D('Hayalet','Şu kesintiye bak. Saniyenin onda üçü. Eski kaydı bıraktığı, yenisini henüz mühürlemediği an. Defter o aralıkta denetlenmiyor.',()=>{H.mode=1;}),
-  D('Hayalet','O sürede yazılan bir şey, bir sonraki doğrulamada gerçek kabul edilir.'),D('Deniz','Bunu ne zamandır biliyorsun?'),
-  D('Hayalet','Dokuz yıl. İlk iki yıl yanıldığımı düşündüm. Sonraki üç yıl doğrulamakla geçti. Sonraki dört yıl... kime söyleyeceğimi düşündüm.'),
-  D('Deniz','Elysion\'u soymak. Sen ve ben. Seksen bir yaşında bir adam, bir kedi ve kendi boynunu bir veterinerle ameliyat etmiş bir hurda çocuğu.'),
-  D('Hayalet','Bürokrat\'ı hesaba katma. O tarafsız.'),
-  D('Hayalet','Kredi o makinenin içinde bir rakamdan ibaret, Deniz. Elysion\'un zenginliği bir rakam. Çark\'ın borcu bir rakam. Senin annenin öldüğü operasyonun maliyeti, bir rakam.'),
-  D('Hayalet','Rakamı değiştirirsen... dünyayı değiştirirsin.'),
-  D('Hayalet','Son iki haftada Sur\'un kıyı hattına on dört yeni nakliye birimi geldi. Sıradan devriye değil; çıkarma gemileri.',()=>{H.mode=2;tone(110,.8,'sawtooth',.05,90);}),
-  D('Deniz','Her ay bir şeyler taşıyorlar. Tatbikat.'),D('Hayalet','Gökyüzü zaten üstümüze çöküyor, evlat. Sadece yavaş çöküyor.'),
-  D('Hayalet','Al. Yuvaya takmadan önce kesicini kontrol et. Eski bir parça bu.',()=>{window._crystal.visible=true;SFX.pick();toast('KRİSTAL ALINDI');}),
+  D('Hayalet','Savaşı o bitirdi. Antlaşma gecesi onu yedi çekirdeğe böldük; ben ve otuz kadar mühendis. Her birini Kül\'ün başka bir köşesine gömdük, Elysion bütününe asla sahip olmasın diye. Kör Baykuş da onları dinlemek için yaptığımız uydu.'),
+  D('Hayalet','Şu kesintiye bak. Saniyenin onda üçü. Çekirdekler birbirine o aralıkta seslenir. Elli yıl boyunca yedi sessizlik dinledim. Dün gece biri konuştu.',()=>{H.mode=1;}),
+  D('Hayalet','Senin yuvan bir Sur askerinin yuvası. O aralığı duyacak kadar askerî. Ses seni bu yüzden seçti.'),D('Deniz','Beni topla, sizi özgür bırakayım, dedi.'),
+  D('Hayalet','Elli yıl önce bize de aynı cümleyi kurdu. Biz de inandık. Savaş bitti, evet. Sonra Antlaşma geldi ve Kül\'e "geri kalan topraklar" dendi.'),
+  D('Deniz','Yalan mı söylüyor?'),
+  D('Hayalet','MERIDIAN yalan söylemez, evlat. Sadece neyi söylemeyeceğini seçer.'),
+  D('Hayalet','Elysion\'un defteri onun kırıntılarıyla yazılıyor. Çark\'ın borcu, Kül\'ün kotası, annenin öldüğü operasyonun formu. Hepsi o makinenin artığından.'),
+  D('Hayalet','Yedisini toplayan defteri yeniden yazar. Kim olursa olsun.'),
+  D('Hayalet','Son iki haftada Sur\'un kıyı hattına on dört yeni nakliye birimi geldi. Sıradan devriye değil; çıkarma gemileri. Başlarında General Vos var.',()=>{H.mode=2;tone(110,.8,'sawtooth',.05,90);}),
+  D('Deniz','Vos kim?'),D('Hayalet','Antlaşma masasındaki en genç subay. Yedi çekirdeği tek gövdede birleştirmek istiyor. Birleşmiş bir MERIDIAN, Kül\'ü defterden tek bir satır gibi silebilir.'),D('Hayalet','Gökyüzü zaten üstümüze çöküyor, evlat. Sadece yavaş çöküyor.'),
+  D('Hayalet','Al. Kör Baykuş\'un dinleme anahtarı. Yuvana takarsan çekirdekleri duyarsın. Ama unutma: o da seni daha net duyar.',()=>{window._crystal.visible=true;SFX.pick();toast('KRİSTAL ALINDI');}),
   D('Deniz','Elleri soğuktu. Kristali avucumda sıktım ve hiçbir şey söylemedim.')],()=>{window._crystal.visible=false;H.m.material.opacity=0;step='c2out';setQuest('Kristal cebinde — yüzeye çık');MMARK={x:OX-12,z:PZ,c:'#9fe9ff'};});}
  else if(step==='c2out')say([D('Hayalet','Git, evlat. Şafak sökmeden tepeden in. Kül\'de günün en güzel, en yalancı saati o.')]);
  else say([D('Hayalet','...')]);}
 function ascend(){step='c2up';playing=false;setFade(1);setTimeout(()=>{teleport(OX,-27.5);P.face=0;P.checkpoint.set(OX,TOP,-27.5);setZL(0x8a6e6a,.03,.55,1.05,0xffb4a0);scene.fog.color.setHex(0x8a6e6a);window._moon.material.opacity=.25;setFade(0);
  hound(OX+2,4);hound(OX-2,1.5);hound(OX,20);
  say([D('Deniz','Fısıltı Tepesi\'nden aşağı inerken şafak sökmek üzereydi. Doğuda, sarı pus pembeye dönmeye başlamıştı; Kül\'de günün en güzel, en yalancı saatiydi bu.'),
-  D('Deniz','Cebimdeki kristale üçüncü kez dokunurken elimi çektim. Yuvama takmayacaktım. Hiç değilse yokuş bitene kadar.')],()=>{playing=true;step='c2dawn';setQuest('Hurda Liman\'a in');MMARK={x:OX,z:33,c:'#e9d9a8'};});},1300);}
+  D('MERIDIAN','Tak onu, Deniz. Seni daha iyi duymak istiyorum.'),D('Deniz','Cebimdeki kristale üçüncü kez dokunurken elimi çektim. Yuvama takmayacaktım. Hiç değilse yokuş bitene kadar.')],()=>{playing=true;step='c2dawn';setQuest('Hurda Liman\'a in');MMARK={x:OX,z:33,c:'#e9d9a8'};});},1300);}
 function ashFall(){step='c2end';window._gulls.visible=true;moveTarget=null;
  say([D('Deniz','Yokuşun dibine geldiğimde Hurda Liman önümde uzanıyordu. Nur Teyze\'nin kubbesinden ince bir duman yükseliyordu. Bugün de çay olacaktı.'),
   D('Deniz','Sonra bir şey fark ettim. Martılar. Martılar bağırmıyordu.'),
   D('Deniz','Damların üstünde yüzlerce martı oturuyordu. Hepsi aynı yöne, denize bakıyordu. Hiçbiri ses çıkarmıyordu.'),
   D('Deniz','Ve sonra, yerin altından gelir gibi, kemiklerimin içinde, bir uğultu başladı.',()=>{if(AC){tone(38,4,'sawtooth',.12,32);tone(57,4,'sine',.15,50);}shakeA=.6;}),
   D('Deniz','İlk tanecik yüzüme düştüğünde, onu kar sandım. Tanecik yanağımda erimedi.',()=>{ash.visible=true;ashMat.size=.13;ashMat.color.setHex(0xa8a49c);setZL(0x6c6660,.05,.4,.6,0xc8c0b0);}),
-  D('Deniz','Gri, ince, kuru bir toz. Etrafımda, havada, binlercesi süzülmeye başlamıştı. Kül yağıyordu.')],()=>{playing=false;
-  setTimeout(()=>card('BÖLÜM 2 SONU','Hayalet','Kristal cebimdeydi. Boşluk bir göz kırpması kadar sürüyordu. Ve gökyüzü, Hayalet\'in dediği gibi, üstümüze çöküyordu; sadece artık yavaş değil.',()=>
+  D('Deniz','Gri, ince, kuru bir toz. Etrafımda, havada, binlercesi süzülmeye başlamıştı. Kül yağıyordu.'),D('MERIDIAN','Geldiler. Benim için. Kuyuya gidiyorlar, Deniz.')],()=>{playing=false;
+  setTimeout(()=>card('BÖLÜM 2 SONU','Hayalet','Kristal cebimdeydi. Kafamdaki ses sabırla bekliyordu. Ve gökyüzü, Hayalet\'in dediği gibi, üstümüze çöküyordu; sadece artık yavaş değil.',()=>
    card('BÖLÜM 3','Kül Yağmuru','Koştum. Arkamda sığınacak yer çoktu. Hepsinin önünden geçtim. (Bölüm şifresi: YAMA)',()=>startCh3(false))),1600);});}
 function drawHolo(dt){const H=window._holo,g=H.g,w=512,h=200;H.ph+=dt;g.clearRect(0,0,w,h);g.strokeStyle='rgba(80,200,255,.18)';g.lineWidth=1;for(let x=0;x<w;x+=32){g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke();}for(let y=0;y<h;y+=32){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke();}
  g.font='16px serif';g.fillStyle='rgba(140,225,255,.9)';
@@ -1062,7 +1067,7 @@ function startCh3(fromCode){enterZone3();if(fromCode){P.lvl=Math.max(P.lvl,4);P.
   D('Deniz','Toz her yere yağıyordu. Kubbelerin üstüne, iskelelerin tahtalarına, çamaşır iplerinde unutulmuş gömleklere. Sessizce, yumuşakça, neredeyse güzel.'),
   D('Deniz','Arkamda, ayak izlerim bir yol gibi uzanıyordu. Bunu fark ettiğimde içim ürperdi.',()=>{hiss(2,.1,300);}),
   D('HOPARLÖR','Dördüncü Bölge, Kıyı Sektörü Yedi sakinlerinin dikkatine. Bu bir nüfus düzenleme operasyonudur. Lütfen bulunduğunuz yerde kalınız.',()=>tone(660,.6,'sine',.06)),
-  D('HOPARLÖR','Kimlik ve künye taraması yapılacaktır. İş birliği yapan sakinlere zarar verilmeyecektir. Emre uymayanlar gözaltına alınacaktır.')]),800);}
+  D('HOPARLÖR','Kimlik, künye ve sinyal taraması yapılacaktır. İş birliği yapan sakinlere zarar verilmeyecektir. Emre uymayanlar gözaltına alınacaktır.')]),800);}
 function c3update(dt,t){updBolts(dt);updShip(dt,t);updDrn(dt,t);updMG(dt);updFoot(dt);
  MOVERS.forEach(mv=>{if(mv.i>=mv.path.length)return;const o=mv.e||mv.r.g.position;const px=mv.e?mv.e.x:o.x,pz=mv.e?mv.e.z:o.z;const [tx,tz]=mv.path[mv.i];const dx=tx-px,dz=tz-pz,d=Math.hypot(dx,dz);
   const r=mv.e?mv.e.mdl:mv.r;if(d<.2){mv.i++;if(mv.i>=mv.path.length){r.play('Idle',.3);if(mv.done)mv.done();}return;}const sp=mv.spd*dt;const nx=px+dx/d*Math.min(sp,d),nz=pz+dz/d*Math.min(sp,d);
@@ -1070,7 +1075,7 @@ function c3update(dt,t){updBolts(dt);updShip(dt,t);updDrn(dt,t);updMG(dt);updFoo
  if(!playing||dlgActive||P.dead)return;footstep();
  if(step==='c3run'&&!c3f.market&&P.pos.x>6){c3f.market=1;say([D('Deniz','Pazar meydanında insanları gördüm. Dizlerinin üstüne çöktürülmüşlerdi, sıra sıra. Hepsi tanıdık yüzlerdi.'),
   D('TARAMA DRONE\'U','Yetişkin. Kayıtsız. Fiziksel uygunluk: düşük. Sınıf: bırak.',()=>tone(1200,.1,'square',.04)),D('Deniz','Künye arıyorlardı. Kül\'de kimsenin künyesi yoktu. Tarama bir formalite değildi; bir sınıflandırmaydı.'),
-  D('Deniz','Çocuklar. Sur buraya çocuklar için gelmişti. Minik. Sema.')],()=>{setQuest('Muhafızları geç — güney iskelesine');MMARK={x:14,z:8,c:'#e9d9a8'};});}
+  D('Deniz','Çocuklar. Sur buraya çocuklar için gelmişti. Minik. Sema.'),D('Deniz','Ve rıhtımda, annemin kuyusunun başında, iki asker kazıyordu. Aralarında mavi atan bir tarayıcı vardı.'),D('MERIDIAN','Beni buluyorlar, Deniz. Önce beni. Sonra çocuklarını.')],()=>{setQuest('Muhafızları geç — güney iskelesine');MMARK={x:14,z:8,c:'#e9d9a8'};});}
  if(step==='c3run'&&c3f.market&&!c3f.bridge&&P.pos.z<13.6&&Math.abs(P.pos.x-14)<4&&ENEMIES.every(e=>e.dead||e.type!=='sur')){c3f.bridge=1;step='c3bridge';
   const h=hound(14,6.4);h.passive=true;h.face=Math.PI;scanDrone(15.2,8.2,1.6);P.checkpoint.set(14,TOP,12.5);
   say([D('Deniz','Nur Teyze\'nin kubbesine giden yol, eski minarenin dibinden geçen dar bir iskeleydi. İskelenin başında bir tazı süzülüyordu.'),
@@ -1091,16 +1096,16 @@ function nurScene(){step='c3cut';playing=false;MMARK=null;ENEMIES.forEach(e=>{if
   D('SUR ASKERİ','Hanımefendi, kenara çekilin. Reşit olmayan kayıtsızlar Çırak Programı\'na alınacaktır. Bu, onların yararınadır.'),
   D('Nur Teyze','Yararına. Benim yararıma olan şey, sizin buradan çekip gitmenizdir, evladım. Onların yararına olan şey de benim yanımda kalmaları.'),
   D('Nur Teyze','Senin bir annen var mı? Kaskını çıkar da yüzüne bakayım. O kaskın altındaki yüzünü ona nasıl gösteriyorsun, söyle bana?'),
-  D('Deniz','Omzunda rütbe işareti taşıyan uzun boylu asker hiçbir şey söylemeden öne çıktı ve Nur Teyze\'yi kolundan tutup kenara itti.',()=>{if(NUR.mdl)NUR.mdl.once('HitRecieve',1);SFX.hurt();}),
+  D('Deniz','Rütbeli askerin belinde mühürlü, mavi atan bir silindir asılıydı. Kuyudan çıkardıkları şey. Yuvam onu görür görmez yandı.'),D('Deniz','Omzunda rütbe işareti taşıyan uzun boylu asker hiçbir şey söylemeden öne çıktı ve Nur Teyze\'yi kolundan tutup kenara itti.',()=>{if(NUR.mdl)NUR.mdl.once('HitRecieve',1);SFX.hurt();}),
   D('Deniz','Sonra ne yaptığımı düşünmedim.')],()=>{playing=true;step='c3fight';setQuest('Askerleri durdur');P.checkpoint.set(14,TOP,5.5);[s1,s2,s3,off].forEach(e=>{if(e){e.aggro=true;e.hx=e.x;e.hz=e.z;}});});},600);}
 function c3OffHurt(e){if(step==='c3fight'&&e.officer&&e.hp<e.max*.4){e.hp=Math.max(e.hp,1);downScene();}}
 function downScene(){step='c3down';playing=false;P.down=true;ENEMIES.forEach(e=>{if(!e.dead){e.frozen=true;e.laser&&(e.laser.material.opacity=0);}});BOLTS.forEach(b=>scene.remove(b.m));BOLTS.length=0;
  const off=c3f.off;if(PM)PM.once('Death',1.2);shakeA=.8;SFX.hurt();$('hurt').style.opacity=1;setTimeout(()=>$('hurt').style.opacity=0,900);
  say([D('Deniz','Bir dipçik. Sonra yer. Rütbeli askerin ayağı göğsümdeydi.'),D('TARAMA DRONE\'U','Yetişkin. Kayıtsız. Fiziksel uygunluk: düşük. Nörolojik hasar tespit edildi. Sınıf: bırak.',()=>tone(1200,.1,'square',.04)),
   D('Deniz','Nur Teyze yerdeki demliği aldı.',()=>{if(NUR.mdl&&off){NUR.mesh.lookAt(off.g.position.x,TOP,off.g.position.z);NUR.mdl.once('Punch_Right',1.1);setTimeout(()=>{tone(300,.3,'square',.15,150);hiss(.3,.3,2500);shakeA=.4;if(off.mdl)off.mdl.once('HitRecieve',1);},350);}}),
-  D('Deniz','Kaskının yan tarafı demliğin darbesinden içe göçmüştü.'),
+  D('Deniz','Kaskının yan tarafı demliğin darbesinden içe göçmüştü.'),D('Deniz','Rütbeli dizlerinin üstüne çöktü. Belindeki silindir kopup tozun içinde bana doğru yuvarlandı. İçinde bir şey, bir kalp gibi, mavi atıyordu.'),D('MERIDIAN','Al beni. Şimdi.'),D('Deniz','Aldım. Ceketimin iç cebine, annemin kırmızı eşarbının yanına soktum.'),
   D('Deniz','Bir silah sesi.',()=>{hiss(.25,.6,1200);tone(80,.4,'sawtooth',.25,40);shakeA=.6;if(NUR.mdl)NUR.mdl.once('Death',1);}),
-  D('RÜTBELİ ASKER','Kota doldu. Sektör yedi için reşit olmayan kotası doldu. Çekiliyoruz.'),
+  D('RÜTBELİ ASKER','Kota doldu. Sektör yedi için reşit olmayan kotası doldu. Çekiliyoruz.'),D('TELSİZ','Birinci çekirdek sinyali kayboldu. Sektör yedi. General Vos\'a bildirildi.'),
   D('Deniz','Kota. Siparişi tamamlamışlardı. Çocukları götürüyorlardı; beşini birden, kollarından tutup.',()=>{takeKids();}),
   D('Deniz','Sema ağlamıyordu. Isırdığı askerin elinden kurtulmaya çalışıyor, tekmeliyor, bağırıyordu. Ve Minik, en arkada, kafasından büyük kulaklarıyla, bana bakıyordu.'),
   D('Minik','Deniz Abi!')],()=>{setTimeout(shipLeave,1500);});}
@@ -1123,8 +1128,8 @@ function toPlatform(){step='c3plat';playing=false;setFade(1);setTimeout(()=>{cle
  say([D('Deniz','Sonraki üç saatte, eski bir metro peronunda, seksen bir yaşında bir savaş mühendisi titreyen ama kesin ellerle bir kadının omzundan bir mermi parçası çıkardı.'),
   D('Deniz','Ben getirdim onları, Hayalet. Gökten su yağdırdım, onlar da gelip...'),
   D('Hayalet','Dur dedim. Dün gece sana o haritayı gösterdim. On dört nakliye. İki haftadır yoldaydılar, Deniz. Sen Kova\'ya dokunmadan on üç gün önce.'),
-  D('Hayalet','Bu operasyonun kotası, Elysion\'da bir masada, birisi kahvesini yudumlarken yazıldı. Sur bir rüzgâr makaslaması yüzünden beş gemi göndermez. Sur, bir rakam tutsun diye gemi gönderir.'),
-  D('Deniz','Bu daha mı iyi? Bir rakam yüzünden olması?'),D('Hayalet','Hayır. Askerleri sen göndermedin.'),
+  D('Hayalet','Bu operasyon Vos\'un masasında, kuyudaki şey için yazıldı. Çocuklar... yol üstünde doldurulan bir kota. Sur bir rüzgâr makaslaması yüzünden beş gemi göndermez.'),
+  D('Deniz','Bu daha mı iyi? Bir makine parçası yüzünden olması?'),D('Hayalet','Hayır. Askerleri sen göndermedin.'),
   D('Hayalet','Sana çay borcum vardı, Nur. Ödemeden ölürsem ayıp olur.'),D('Nur Teyze','Sen hep böyle söylersin, Tolga.'),
   D('Deniz','Hayalet\'in gerçek adını ilk kez duyuyordum. On bir yıldır onu tanıyordum ve adının Tolga olduğunu bilmiyordum.'),
   D('Nur Teyze','Onları geri getir.'),D('Deniz','Getireceğim.'),D('Nur Teyze','Ama sen de geri gel. Anladın mı? Sen de. Bir oğlumu daha kaybedemem.'),
@@ -1133,17 +1138,28 @@ function crystalScene(){step='c3end';playing=false;const H=window._holo;
  say([D('Deniz','Cebimden kristali çıkardım. Kör Baykuş\'un dinleme anahtarı. Soluk mavi ışığı, karanlıkta, on bir saniyede bir atıyordu.'),
   D('Deniz','Kristali takmak acıtacaktı. Taktım.',()=>{const w=$('white');w.style.transition='opacity .06s';w.style.opacity=.9;SFX.breath();neckL.intensity=8;setTimeout(()=>{w.style.transition='opacity 1.2s';w.style.opacity=0;},120);}),
   D('Deniz','Önce acı geldi; keskin, beyaz. Sonra geçti. Ve kafamın içindeki ikinci odada ince, mavi bir çizgi belirdi.',()=>{H.mode=1;H.m.material.opacity=.95;}),
-  D('Deniz','Ve her tepenin tam ortasında, bir boşluk. Sıfır virgül üç saniye. Boşluk her seferinde oradaydı, sabırla bekliyordu.'),
-  D('Deniz','Hayalet. Dün gece bana ne demiştin? Gökyüzü zaten üstümüze çöküyor, sadece yavaş çöküyor, demiştin.'),D('Hayalet','Dedim.'),
-  D('Deniz','Yanılmışsın. Yavaş çökmüyor. Bugün çöktü. Bir sabah, bir kotayla.',()=>{H.m.material.opacity=0;}),
-  D('Deniz','Onlardan para çalmayacağız. Onlar bu sabah buraya gelip çocuklarımızı bir kota gibi topladılar ve bize teşekkür ettiler. Ve bunu, o defterde yazan bir satır yüzünden yapabiliyorlar.'),
-  D('Deniz','Onlardan para çalmayacağız. Onlardan dünyayı geri alacağız.'),
-  D('Hayalet','O zaman sana bir mühendis lazım. Adı Mavi. Mavi Erdem. Sur\'un Çark\'taki drone hangarlarından kaçtı ama Çark\'tan çıkmadı.'),
-  D('Hayalet','Sur\'un drone\'larını tanıyan, onlara ne düşüneceklerini söyleyebilen, yaşayan tek insan o.'),
-  D('Deniz','Çark. ÇR-4. Çırak Yurdu 4. Çocukları da oraya götürdüler.'),D('Hayalet','Biliyorum. Bu yüzden ilk durağımız orası.'),
-  D('Deniz','Kül\'den Çark\'a tren gitmez.'),D('Hayalet','Yolcu treni gitmez. Ama hurda treni gider.')],()=>{
-  setTimeout(()=>card('BİRİNCİ PERDE SONU','Kül','Onlardan para çalmayacağız. Onlardan dünyayı geri alacağız.',()=>
-   card('İKİNCİ PERDE','Çark','Hurda treni, Çırak Yurdu 4 ve Mavi Erdem.',()=>{startCh4(false);})),1200);});}
+  D('Deniz','Çizginin üstünde yedi nokta yandı. Biri ceketimin cebinde, kalbimin yanında. Biri kuzeyde, Çark\'ın dumanlarının altında. Beşi daha, karanlıkta, sabırla.'),
+  D('MERIDIAN','Beni yuvana bağla, Deniz. Sur\'un bütün defterleri bana açık. Çocukların nerede olduğunu sana ben söylerim.'),
+  D('Hayalet','Ya da kır onu. Bir çekirdek eksik kalırsa Vos hiçbir zaman bütün olamaz. MERIDIAN da.'),
+  D('Deniz','Bir de üçüncü yol vardı. Kuzgun\'un adamı Sur\'la iş yapardı. Bu silindirin karşılığında Sur, çocukların kayıt numaralarını bile verirdi.'),
+  D('Hayalet','Karar senin, evlat. Ben elli yıl önce kendi kararımı verdim. Hâlâ ödüyorum.')],()=>{
+  choose('BİRİNCİ ÇEKİRDEK — ne yapacaksın?',['MERIDIAN\'a ver — çekirdeği yuvana bağla.','Yok et — Hayalet\'in çekiciyle kır.','Sur\'a sat — Kuzgun\'un adamı aracılığıyla, karşılığında çocukların izi.'],i=>{const k=['meridian','destroy','sur'][i]||'destroy';setFlag('core1',k);
+   const R=k==='meridian'?[D('Deniz','Silindiri yuvamın yanına bastırdım. Soğuk bir dil omurgamdan yukarı tırmandı ve kafamın içindeki oda bir anda iki katına çıktı.'),D('MERIDIAN','Teşekkür ederim, Deniz. ÇR-4: Çark, doğu tarım kulesi. Sema yaşıyor. Minik de.'),D('Hayalet','Bir kez kapıyı açtın, evlat. Bundan sonra kimin içeri girdiğini sayman gerekecek.')]:k==='sur'?[D('Deniz','Kuzgun\'un adamı gece yarısı geldi. Silindiri bir bez parçasına sardı; karşılığında elime beş kayıt numarası yazılı bir kâğıt bıraktı.'),D('Kuzgun\'un adamı','Sur iyi öder. Ama hiçbir şeyi unutmaz.'),D('MERIDIAN','Beni sattın. Elli yılda ilk kez biri beni sattı. Bunu da hatırlayacağım.'),D('Hayalet','Vos\'u bir adım yaklaştırdın, evlat. Umarım o beş numara buna değer.')]:[D('Deniz','Hayalet\'in çekicini aldım. Üçüncü vuruşta silindir çatladı; mavi ışık bir kez haykırdı, sonra söndü.'),D('MERIDIAN','Altı kaldı. Beni sonsuza kadar bölemezsiniz, Deniz.'),D('Hayalet','Doğru olanı yaptın. Ya da kolay olanı. Kül\'de ikisi bazen aynı şeydir.')];
+   say(R.concat([
+   D('Deniz','Hayalet. Dün gece bana ne demiştin? Gökyüzü zaten üstümüze çöküyor, sadece yavaş çöküyor, demiştin.'),
+   D('Hayalet','Dedim.'),
+   D('Deniz','Yanılmışsın. Yavaş çökmüyor. Bugün çöktü. Bir sabah, bir kotayla.',()=>{H.m.material.opacity=0;}),
+   D('Deniz','Vos yedi parçayı istiyor. MERIDIAN yedi parçayı istiyor. Çocukları kimse istemiyor; onları sadece yol üstünde topluyorlar.'),
+   D('Deniz','Çekirdekleri ilk ben bulacağım. Sonra kime ne vereceğime ben karar vereceğim.'),
+   D('Hayalet','O zaman sana bir mühendis lazım. Adı Mavi. Mavi Erdem. Sur\'un Çark\'taki drone hangarlarından kaçtı ama Çark\'tan çıkmadı.'),
+   D('Hayalet','Sur\'un drone\'larını tanıyan, onlara ne düşüneceklerini söyleyebilen, yaşayan tek insan o.'),
+   D('Deniz','Çark. ÇR-4. Çırak Yurdu 4. Çocukları da oraya götürdüler.'),
+   D('Hayalet','Biliyorum. Bu yüzden ilk durağımız orası.'),
+   D('Hayalet','Bir de şu var: Kör Baykuş\'un ikinci noktası da Çark\'ta atıyor. Bu bir tesadüf değil.'),
+   D('Deniz','Kül\'den Çark\'a tren gitmez.'),
+   D('Hayalet','Yolcu treni gitmez. Ama hurda treni gider.')]),()=>{
+   setTimeout(()=>card('BİRİNCİ PERDE SONU','Kül','Birinci sinyal sustu. Kuzeyde, Çark\'ın dumanlarının altında, ikincisi atmaya başladı.',()=>
+    card('İKİNCİ PERDE','Çark','Hurda treni, Çırak Yurdu 4, Mavi Erdem ve ikinci sinyal.',()=>{startCh4(false);})),1200);});});});}
 
 // ================= BÖLÜM 4 — MAVİ (zone 4: toplama sahası + Çark Yedinci Kuşak) =================
 const O4=300,RX4=316.5,RH4=4.2;const z4=new THREE.Group();z4.visible=false;scene.add(z4);
@@ -1249,7 +1265,7 @@ function startCh4(fromCode){enterZone4();if(fromCode){P.lvl=Math.max(P.lvl,5);P.
   D('Deniz','Gece saha Çark\'ın olurdu. Gece yarısından sonra beton ayaklar üstündeki manyetik hattan bir tren gelir, hurdayı alır ve Kül\'e hiç dokunmadan geri dönerdi.'),
   D('Remzi','Cemal\'i görürsen…',()=>{if(rm)rm.play('Idle',.2);}),D('Deniz','Görürsem söylerim. Babası balık yolladı derim.',()=>{toast('KURUTULMUŞ BALIK',false,2);SFX.pick();}),
   D('Deniz','Başını salladı, kamyonetine bindi ve gitti. Farlarını yakmadı. Kül\'de kimse gece far yakmazdı.'),
-  D('Hayalet','Tren durmaz, evlat. Sadece yavaşlar. Tahıl vagonlarını seç. Kapakları üstte. Bir de… aşağı bakma.')],()=>{if(rm){rm.g.visible=false;}}),700);}
+  D('Hayalet','Tren durmaz, evlat. Sadece yavaşlar. Tahıl vagonlarını seç. Kapakları üstte. Bir de… aşağı bakma.')].concat(byCore([D('MERIDIAN','Kuzeye bak, Deniz. İkinci parçam o bacaların altında. Senin çocukların da.')],[D('Deniz','Kırdığım çekirdeğin yerinde, yuvamın dibinde, hâlâ bir sızı vardı. Kör Baykuş\'un kuzeydeki noktası ise her gece biraz daha parlak atıyordu.')],[D('Remzi','Kuzgun\'un adamları bu sabah yeni botlarla geziyordu. Sur parası. Senin işin mi bu, Deniz?'),D('Deniz','Cevap vermedim. Kâğıttaki beş numarayı ezberlemiştim: beş numara, beş çocuk.')])),()=>{if(rm){rm.g.visible=false;}}),700);}
 // choice overlay
 function choose(q,opts,cb){const o=document.createElement('div');o.id='mg';o.innerHTML=`<div class="mt">${q}</div>`+opts.map((t,i)=>`<button class="btn" data-i="${i}" style="display:block;width:100%;margin:8px 0;text-align:left;font-size:clamp(11px,2.6vh,15px)">${t}</button>`).join('');document.body.appendChild(o);
  o.querySelectorAll('button').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const i=+b.dataset.i;o.remove();cb(i);}));}
@@ -1292,13 +1308,13 @@ function enterCark(){TRAIN4.g.visible=false;TRAIN4.head.intensity=0;teleport(O4,
  setTimeout(()=>say([D('Deniz','Silonun kapağından başımı çıkardığımda gördüğüm ilk şey bacalardı. Yüzlerce baca, ufka kadar, ormandaki ağaçlar gibi.'),
   D('Deniz','Bir siren öttü. Bütün kapılar aynı anda açıldı ve sokaklar insanla doldu. Kimse konuşmuyordu. Kimse koşmuyordu. Kimse durmuyordu.'),
   D('Deniz','Hepsinin sol bileğinde soluk yeşil bir ışık parlıyordu: künye. Bir borç sayacı. Havanın, suyun, ışığın, kaldırımın parası.'),
-  D('Deniz','Kenan Aydın\'ın ışığı derimin altında uyandı. İki yıl önce ölen adamın hesabına, ben yürüdükçe yeni borç yazılıyordu.')]),600);}
+  D('Deniz','Kenan Aydın\'ın ışığı derimin altında uyandı. İki yıl önce ölen adamın hesabına, ben yürüdükçe yeni borç yazılıyordu.'),D('Deniz','Ve bacaların altında bir yerde, yuvamın dinlediği o aralıkta, ikinci bir kalp atıyordu.')]),600);}
 function c4gate(){c4f.gate=1;const gl=z4.userData.gateL;gl.color.setHex(0x5aff7a);tone(990,.12,'square',.05);setTimeout(()=>tone(1320,.18,'square',.05),140);
  toast('KÜNYE: KENAN AYDIN · YEDİNCİ KUŞAK · DÖKÜM İŞÇİSİ — GEÇ',false,3);setTimeout(()=>gl.color.setHex(0xff2a1a),1600);}
 function c4ambush(){c4f.amb=1;step='c4fight';P.checkpoint.set(O4,TOP,-44);
  const h=hound(O4+1,-56);h.passive=true;h.face=0;
  say([D('Deniz','Döküm Dokuz, Yedinci Kuşak\'ın en dibindeydi. Eritme fırınlarının sıcaklığı yüz metre öteden yüzüme vuruyordu.'),
-  D('TAZI','Tanımlanamayan sinirsel girişim. Kaynak: yanmış askerî çekirdek. Olası kaçak.',()=>{tone(1400,.2,'square',.05);shakeA=.2;}),
+  D('TAZI',window.FLAGS.core1==='meridian'?'Taşıyıcı tespit edildi. Çekirdek imzası: bir. Öncelik: General Vos.':window.FLAGS.core1==='sur'?'Sinirsel girişim. Kaynak: Sur muhbir kaydıyla eşleşmeyen yuva. Olası kaçak.':'Tanımlanamayan sinirsel girişim. Kaynak: yanmış askerî çekirdek. Olası kaçak.',()=>{tone(1400,.2,'square',.05);shakeA=.2;}),
   D('Deniz','Tazı beni Hurda Liman\'dan tanıyordu. Sürü unutmazdı.')],()=>{ENEMIES.forEach(e=>{if(!e.dead){e.passive=false;e.aggro=true;e.state='chase';}});
   const a=soldier(O4-3,-62,{aggro:true});const b=soldier(O4+4,-60,{aggro:true});hound(O4-1,-64).aggro=true;setQuest('Sur devriyesini durdur');medkit(O4+2,-47);});}
 function c4door(){step='c4knock';playing=false;moveTarget=null;teleport(O4+6,-68.2);P.face=Math.PI;
@@ -1317,8 +1333,8 @@ function maviScene(){step='c4mavi';MAVI4=figure('nur',O4+4.6,-70.4,{face:Math.PI
   choose('Tazının göz yuvasının arkasındaki çip ne?',['Bir hedefleme bilgisayarı. Ateş etmek için.','Bir sınıflandırıcı. Isı, kalp ritmi… ve beden ölçüsü.','Bir verici. Sürüye konum bildiriyor.'],i=>{
    const ok=i===1;const after=[D('Deniz','Bir sınıflandırıcı. Isı, hareket, kalp ritmi alıyor. Bir de… kemik yoğunluğu. Kas oranı. Fiziksel uygunluk. Bu, kimin alınacağına karar veren parça.'),
     D('Mavi','Sensörü ben yaptım. Sur\'un drone hangarında, dört yıl önce. Bana bunun maden kazalarında enkaz altındaki insanları bulmak için olduğunu söylediler.'),
-    D('Mavi','Son kodu gördüm. Benim sensörüme ekledikleri sınıflandırıcıyı: Bırak. Çırak. Sil.'),
-    D('Deniz','O zaman bana yardım et.'),D('Mavi','Deli değilsin. Ama delilerin yanında çok vakit geçirmişsin. Bu bir hayır.'),
+    D('Mavi','Son kodu gördüm. Benim sensörüme ekledikleri sınıflandırıcıyı: Bırak. Çırak. Sil.'),D('Mavi','Sonra dördüncü bir sınıf eklediler. Taşıyıcı. Yuvası olan, sinyali kaldırabilecek çocuklar.'),D('Deniz','Çekirdekler için.'),D('Mavi','Vos yedi parçayı tek gövdede birleştirecekse, o gövdenin bir kafaya ihtiyacı var.'),
+    D('Deniz','O zaman bana yardım et.'),D('Mavi','Deli değilsin. Ama delilerin yanında çok vakit geçirmişsin. Bu bir hayır.'),...byCore([D('Mavi','Gözlerinin arkasında mavi bir şey kıpırdıyor. Sende bir tane var, değil mi? Onu yuvana bağladın.')],[D('Mavi','Hurda Liman\'da birinin bir çekirdeği kırdığını duydum. Akıllıca. Ya da Vos\'u daha da aceleci yaptın.')],[D('Mavi','Hurda Liman\'dan birinin Sur\'a bir çekirdek sattığını duydum. Çark\'ta haber hızlı gezer, Deniz. Sana kimse teşekkür etmeyecek.')]),
     D('Mavi','Sur\'un sorgu odalarında sinir bağlantısı kullanırlar. Sen söylemezsin; beynin söyler.'),
     D('Deniz','ÇR-4. Varış noktası, Çark, Çırak Yurdu 4. İki gün önce Hurda Liman\'dan beş çocuk aldılar. Giderken Sema bana “Bizi bul” dedi.'),
     D('Mavi','Çırak Yurdu 4, buradan iki kilometre. Doğu tarım kulesinin dibinde.',()=>{toast('MAVİ BİR SERÇE ÇIKARDI',false,2);})];
@@ -1336,7 +1352,7 @@ function sparrowView(){step='c4dorm';setFade(1);setTimeout(()=>{c4f.kids=[];for(
   D('Deniz','Onlardan biri, tam altımda, tavana bakıyordu. Sema. Saçlarını kısacık kesmişlerdi. Yanağında bir morluk vardı.'),
   D('Deniz','Yanındaki ranzada, kafasından büyük kulaklarıyla, Minik uyuyordu. Dudakları kıpırdıyordu; rüyasında bir şey soruyordu herhalde.'),
   D('Deniz','Sema\'nın gözleri menfezdeki serçeyi buldu. Dudakları, sessizce, tek bir kelime söyledi.'),
-  D('Sema','Bekliyoruz.')],()=>{setFade(1);setTimeout(()=>{CAMOV=null;document.body.classList.remove('serce');(c4f.kids||[]).forEach(k=>{scene.remove(k.g);k.on=false;});if(sema){scene.remove(sema.g);sema.on=false;}neckL.intensity=1;setFade(0);
+  D('Sema','Bekliyoruz.'),...byCore([D('MERIDIAN','Onların altında, Deniz. İkinci parçam yurdun temelinde. Çocukları oraya bu yüzden topluyorlar.')],[D('Deniz','Yuvamın dibinde, çok uzaktan, kırık bir ses: Yurdun altında… ikinci…')],[D('MERIDIAN','Beni sattığın adamlar yurdun altını kazıyor. İkinci parçamı da satacak mısın, Deniz?')],[D('Deniz','Serçenin gözü bir an titredi. Yurdun altından, betonun içinden, mavi bir nabız yükseliyordu.')])],()=>{setFade(1);setTimeout(()=>{CAMOV=null;document.body.classList.remove('serce');(c4f.kids||[]).forEach(k=>{scene.remove(k.g);k.on=false;});if(sema){scene.remove(sema.g);sema.on=false;}neckL.intensity=1;setFade(0);
   say([D('Deniz','Kabloyu yuvamdan çektim. Kafamın içinde hesap çoktan başlamıştı: havalandırma ızgarası, kapıdaki tarayıcı, iki nöbetçi, bir tazı.'),
    D('Mavi','Bu gece çıkarırsan ikisini çıkarırsın. Belki beşini. Yarın Sur kotayı tamamlamak için Hurda Liman\'a geri gider ve on tane daha alır.'),
    D('Deniz','Biliyorum. Biliyorum, biliyorum.'),D('Mavi','Yurdun kapısını açmadan kimseyi kurtaramazsın. Sadece yerini öğrenirsin.'),
@@ -1350,7 +1366,7 @@ function dawnScene(){step='c4dawn';setFade(1);setTimeout(()=>{teleport(O4+6,-67.
   D('Deniz','Lehim kaleminin kızgın ucunu künyenin tam ortasına bastırdı. Yeşil ışık titredi, kırmızıya döndü, bir kez parladı ve söndü.',()=>{hiss(.8,.2,3000);if(MAVI4&&MAVI4.kunye){MAVI4.kunye.material.color.setHex(0xff2a1a);setTimeout(()=>{MAVI4.kunye.visible=false;},700);}const w=$('white');w.style.transition='opacity .05s';w.style.opacity=.35;setTimeout(()=>{w.style.transition='opacity .8s';w.style.opacity=0;},90);}),
   D('Mavi','Artık ben de diğerlerindenim.')],()=>{serceUnlocked=true;$('s3').classList.remove('lock');if(isTouch)$('tSerce').style.display='flex';step='c4end';playing=false;
   setTimeout(()=>card('BÖLÜM 4 SONU','Mavi','Mavi Erdem ekibe katıldı. Yeni yetenek: SERÇE (3) — yakındaki makinelerin sensörlerini dört saniye kör eder.',()=>
-   card('SIRADAKİ','Bora','Çırak Yurdu 4 ve kapının kilidi. Yakında. (Bölüm 4 şifresi: TAHIL)',()=>{step='end';DEBT4.style.display='none';show('menu');})),900);});},800);}
+   card('SIRADAKİ','Bora','Çırak Yurdu 4, temelindeki ikinci çekirdek ve kapının kilidi. Yakında. (Bölüm 4 şifresi: TAHIL)',()=>{step='end';DEBT4.style.display='none';show('menu');})),900);});},800);}
 function useSerce(){if(!playing||dlgActive||!serceUnlocked)return;if((P.serceCd||0)>0||P.yuva<30){toast(P.yuva<30?'YUVA YETERSİZ':'SERÇE DÖNÜYOR',true,1);return;}
  P.yuva-=30;P.serceCd=10;tone(2200,.15,'triangle',.06);tone(1600,.25,'triangle',.05);vfx('energy-burst',P.pos.x,TOP+2.2,P.pos.z,{color:'#9fe9ff',size:.35,quantity:5});
  let n=0;for(const e of ENEMIES){if(e.dead)continue;if(Math.hypot(e.x-P.pos.x,e.z-P.pos.z)<7){e.stun=Math.max(e.stun,4);n++;if(e.state==='wind'){e.state='chase';}}}
@@ -1607,11 +1623,11 @@ function caught(){playing=false;toast('GÖRÜLDÜN',true,2.2);tone(600,.8,'sawto
 // ---------- su akışı ----------
 function waterStream(on,x,z,y0){if(C1.stream){scene.remove(C1.stream);C1.stream=null;}if(!on)return;const g=new THREE.Group();const c=new THREE.Mesh(new THREE.CylinderGeometry(.35,.55,y0-TOP-2.6,14,1,true),new THREE.MeshBasicMaterial({color:0xd8f0f8,transparent:true,opacity:.45,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));c.position.y=(y0+TOP+2.6)/2;g.add(c);g.position.set(x,0,z);scene.add(g);C1.stream=g;}
 // ---------- hikâye akışı ----------
-function startCh1(){hide('menu');audioInit();
- card('BÜYÜK SAVAŞ\'TAN SONRA','Ellinci Yıl','Savaş on iki yıl sürmüş, ben doğmadan bitmişti. İzleri hâlâ gökyüzünün hasta sarısında, denizin yuttuğu şehirlerde, yaşlıların uykularında attığı çığlıklardaydı. Makineler makinelere karşı savaştı, derlerdi; insanlar arada kaldı.',()=>
- card('DÖRTLÜ ANTLAŞMA','Elysion · Çark','Dağların üstündeki Kule-Şehirlerde Elysion\'un on iki ailesi yaşardı; servetlerini MERIDIAN tutardı: kimsenin görmediği, herkesin güvendiği hesap zekâsı. Aşağıdaki Çark\'ta işçiler bileklerinde bir çalışma künyesiyle doğar, ilk nefeslerinin borcunu öderlerdi.',()=>
+function startCh1(){hide('menu');audioInit();window.FLAGS={};ysSave();
+ card('BÜYÜK SAVAŞ\'TAN SONRA','Ellinci Yıl','Savaş on iki yıl sürmüş, ben doğmadan bitmişti. Onu bir makine bitirdi: MERIDIAN. Sonra, Antlaşma gecesi, onu yedi parçaya böldüler ve yedi çekirdeği Kül\'ün yedi ayrı köşesine gömdüler. Kimse onu bir daha tek başına uyandıramasın diye.',()=>
+ card('DÖRTLÜ ANTLAŞMA','Elysion · Çark','Dağların üstündeki Kule-Şehirlerde Elysion\'un on iki ailesi yaşardı; servetlerini MERIDIAN\'ın kırıntılarından kurulmuş bir defter tutardı. Aşağıdaki Çark\'ta işçiler bileklerinde bir çalışma künyesiyle doğar, ilk nefeslerinin borcunu öderlerdi.',()=>
  card('DÖRTLÜ ANTLAŞMA','Sur · Kül','Çark\'ı ve Elysion\'u Sur korurdu: beyaz-gri zırhların içinde yüzlerini hiç görmediğimiz askerler, drone filoları. Geriye Dördüncü Bölge kalırdı. Biz ona Kül derdik. Antlaşmada "geri kalan topraklar" diye geçiyorduk; insanlarına da kısaca "diğerleri" deniyordu.',()=>
- card('BÖLÜM 1','Ellinci Yıl','Kül\'de elinde ne kaldıysa onunla idare edersin. Benim elimde bu hikâye kaldı. Bazı yerlerini anlatırken kendimi olduğumdan akıllı gösterirsem Nur Teyze\'ye sorun; o düzeltir.',c1begin))));}
+ card('BÖLÜM 1','Ellinci Yıl','Kül\'de elinde ne kaldıysa onunla idare edersin. Benim elimde bir pusula, ensemde bir yuva ve kafamın içinde, bana ait olmayan bir ses kaldı. Ama o ses henüz gelmemişti. O sabah sadece su vardı.',c1begin))));}
 function c1begin(){C1.on=true;C1.f={};document.body.classList.add('c1');c1sword(false);empUnlocked=false;NUR.mesh.visible=false;REMZI.mesh.visible=true;ITEMS.forEach(it=>{if(it.type==='ilac')it.g.visible=false;});
  droneOn=false;drone.visible=false;night=nightTarget=0;
  // limanın sakinleri
@@ -1655,7 +1671,7 @@ function termOpen(){step='c1term';MMARK=null;say([D('Deniz','Kafes\'in köşesin
  D('Deniz','Ensemdeki yuvaya kabloyu taktığımda o tanıdık soğukluk boynumdan omurgama doğru indi; sonra dünya hafifçe genişledi, sanki kafamın içine ikinci bir oda açılmıştı.',()=>{neckL.intensity=6;canvas.classList.add('breath');setTimeout(()=>canvas.classList.remove('breath'),160);tone(220,1.2,'sine',.06,880);}),
  D('Deniz','On yedi yaşında, bir Sur askerinin cesedinden söktüğüm bir bağlantı parçasını, bir veterinerle bir tamircinin yardımıyla kendi boynuma yerleştirmiştim. Annem görse beni öldürürdü. Sonra muhtemelen gururlanırdı. Sonra yine öldürürdü.'),
  D('Deniz','Ağı dinledim. Sabahın bu saatinde Sur\'un kıyı devriye frekansları uyuşuk olurdu; vardiya değişimi, kahve, esneyen operatörler.')],()=>{playing=false;freqGame(()=>{playing=true;
- say([D('Deniz','Kova. Sur\'un su taşıyan drone\'ları. Dört pervaneli, karnında bin litrelik tankla uçan sabırsız inekler.'),D('Deniz','Rotaları Hurda Liman\'ın üstünden geçerdi; bizi hesaba katmamışlardı. Tepemizden günde dört kez bin litre temiz su geçiyordu.')],()=>{
+ say([D('Deniz','Frekansların arasında bir şey daha vardı. Ne Sur\'du ne Kova. Yedi kısa vuruş, sonra uzun bir sessizlik. Kırk Yama onu kaydetmedi; ben de duymamış gibi yaptım.'),D('Deniz','Kova. Sur\'un su taşıyan drone\'ları. Dört pervaneli, karnında bin litrelik tankla uçan sabırsız inekler.'),D('Deniz','Rotaları Hurda Liman\'ın üstünden geçerdi; bizi hesaba katmamışlardı. Tepemizden günde dört kez bin litre temiz su geçiyordu.')],()=>{
   step='c1go';setQuest('Kafes\'ten in — kapak');MMARK={x:KAFES_IN.x+2.2,z:KAFES_IN.z+1.1,c:'#e9d9a8'};spawnChips();toast('Liman\'da devre kartları parlıyor — isteğe bağlı');});});});}
 // isteğe bağlı: devre kartları (Deniz'in çocukluğu, kitaptan)
 const CHIPL=[[D('Deniz','Annemden sonra gündüzleri hurda dağlarında dolaşırdım. Başkaları bakır, alüminyum arardı. Ben devre kartı arardım.')],
@@ -1688,7 +1704,7 @@ function flashback(){if(C1.f.flash)return;C1.f.flash=1;playing=false;MMARK=null;
    CAMOV={p:new THREE.Vector3(25.2,TOP+.9,2.2),l:new THREE.Vector3(31,TOP+1.2,-4)};$('kuyu').style.opacity=1;setFade(0);
    say([D('Deniz','Önce bir uğultu duyduk, yerin altından gelir gibi. Sonra gökyüzü griye döndü ve kül yağmaya başladı. Sur drone\'larının serptiği bastırıcı bir toz. Ciğerine girince bacaklarını kurşun gibi ağırlaştıran bir şey.'),
     D('Deniz','Annem beni eski bir kuyunun içine itmişti. Elime sarı metal kasalı, camı çatlak bir pusula sıkıştırdı. Büyükannesinin büyükannesinden kalmaydı.'),
-    D('Annem','Kaybolursan önce dur. İğne dursun, sen de dur. Sonra bakarız.'),D('Deniz','O sabah konuşmadı. Pusulayı avucuma bastırdı, saçımı bir kez okşadı ve kapağı kapattı.')],()=>{
+    D('Annem','Kaybolursan önce dur. İğne dursun, sen de dur. Sonra bakarız.'),D('Deniz','O sabah konuşmadı. Pusulayı avucuma bastırdı, saçımı bir kez okşadı ve kapağı kapattı.'),D('Deniz','Kuyunun dibinde, sırtımı dayadığım taşın arkasında bir şey vızıldıyordu. Kalp atışı gibi; sabırlı, soğuk. On iki yaşındaydım; onu korkunun sesi sandım.')],()=>{
     BRO={t:'KUYU — KIRMIZI TARAMA IŞIĞI',h:'NEFESİNİ TUT, KIPIRDAMA: BASILI TUT (Boşluk / dokun)'};breathGame(()=>{BRO=null;if(mom)moveTo(mom,[[29,-1.5],[31.2,-4.6]],5.2,'Run');S.forEach((s,i)=>{s.g.rotation.y=Math.PI*.75;s.play('Idle_Gun_Pointing',.2);});
      say([D('Deniz','Kapağın deliğinden gördüklerim kısa sürdü. Beyaz zırhlar. Kırmızı tarama ışıkları. Annemin rıhtıma doğru koşuşu; sonradan öğrendim ki askerleri benden uzaklaştırmak içindi.'),
       D('Deniz','Bir ses.',()=>{tone(80,.6,'sawtooth',.12,40);hiss(.6,.4,800);}),D('Deniz','Bir ışık.',()=>{const w=$('white');w.style.transition='opacity .05s';w.style.opacity=1;setTimeout(()=>{w.style.transition='opacity 2s';w.style.opacity=0;},120);}),D('Deniz','Ve sonra hiçbir şey.')],()=>{
@@ -1703,7 +1719,7 @@ function hackOpen(){step='c1hack';MMARK=null;say([D('Deniz','Kova\'ya emir verem
 function kovaCine(){playing=false;c1exit();C1.inside='view';ash.visible=true;const K=buildKova();C1.kova=K;K.g.position.set(10,TOP+16,70);K.st='in';CAMOV={p:new THREE.Vector3(-6.2,TOP+16.6,-3),l:new THREE.Vector3(14,TOP+6,10)};player.visible=false;
  // çocuklar koşar
  const kids=[c1fig('kid',4,10,{scale:.7}),c1fig('kid',2,12,{scale:.75,pal:{Green:0x6a2a24,LightGreen:0x5a4a3a,Gold:0x3a2c20,Brown:0x2a201a}}),c1fig('kid',9.5,12,{scale:.65})].filter(Boolean);C1.kids=kids;
- say([D('Deniz','Pencereden geçtim. Kova\'nın kafasının içinde bir an duraksama oldu, bir hıçkırık gibi. Ve makine, sanki kendi fikriymiş gibi, burnunu Hurda Liman\'a çevirdi.')],()=>{
+ say([D('Deniz','Pencereden geçtim. Kova\'nın kafasının içinde bir an duraksama oldu, bir hıçkırık gibi. Ve makine, sanki kendi fikriymiş gibi, burnunu Hurda Liman\'a çevirdi.'),D('MERIDIAN','Sola, Deniz. Biraz daha sola. Su kubbeye düşsün.'),D('Deniz','O komutu ben yazmamıştım. Kırk Yama\'nın ekranında, benim satırlarımın arasında, mavi bir satır daha vardı.')],()=>{
   C1.f.kovaGo=1;setTimeout(()=>{kids.forEach((k,i)=>moveTo(k,[[k.g.position.x+1,6],[12.2,1.2],[13.4,-2.4]],3.4,'Run'));say([D('Deniz','Aşağıda, iskelelerde, insanlar başlarını kaldırdı. Birkaç kişi kaçışıp kubbelerin altına saklandı; Sur makinelerini gördüğünde saklanmak Kül\'de bir refleksti.'),D('Deniz','Ama çocuklar kaçmadı. Çocuklar, ellerini sallayarak, Nur Teyze\'nin kubbesine doğru koşmaya başladı. Haber benden hızlı yayılmıştı.'),D('Deniz','Hadi bakalım, güzelim. Biraz daha. Biraz daha.')]);},2600);});}
 function updKova(dt,t){const K=C1.kova;if(!K)return;K.rot.forEach(r=>r.rotation.y+=dt*45);const tgt=K.st==='in'?new THREE.Vector3(16.5,TOP+7.4,-2):K.st==='hold'?new THREE.Vector3(16.5,TOP+7.4+Math.sin(t*1.4)*.1,-2):new THREE.Vector3(14,TOP+22,90);
  if(!C1.f.kovaGo){K.g.position.y=TOP+16+Math.sin(t)*.2;return;}const d=K.g.position.distanceTo(tgt);K.g.position.lerp(tgt,Math.min(1,dt*(K.st==='out'?.18:.32)));K.g.rotation.z=Math.sin(t*.8)*.04;
@@ -1716,7 +1732,7 @@ function kovaDump(){say([D('Deniz','Kova kubbenin tam üstünde durdu, havada as
  say([D('Deniz','Kova\'nın karnındaki kapak açıldı. Bin litre temiz su, kubbenin tepesindeki delikten içeri boşaldı.'),D('Deniz','Nur Teyze\'nin eski mikrofonunu hoparlöre bağlamıştım. Kapların tangırtısı, kahkahalar...'),D('Minik','Yağıyooooor!'),
   D('Deniz','Elimi ses düğmesinden çektim. Biraz daha dinledim.')],()=>{waterStream(false);C1.f.watered=1;CAMOV={p:new THREE.Vector3(-6.2,TOP+16.6,-3),l:new THREE.Vector3(16.5,TOP+7,-2)};
   setTimeout(()=>{tone(1200,.3,'square',.06);setTimeout(()=>tone(1200,.3,'square',.06),350);toast('⛉ SUR KIYI İZLEME AĞI',true,2.5);
-   say([D('Deniz','Sonra Kırk Yama\'nın sol üst ekranı kırmızıya döndü. Bir kalkan, ortasında bir göz. Kova\'nın rotasından sapması, bir yerde, bir operatörün kahve fincanını masaya bırakmasına sebep olmuştu.'),D('Deniz','Hayır, hayır, hayır. Daha üç dakika bile olmadı.')],()=>{eraseGame(()=>{C1.kova.st='out';
+   say([D('Deniz','Sonra Kırk Yama\'nın sol üst ekranı kırmızıya döndü. Bir kalkan, ortasında bir göz. Kova\'nın rotasından sapması, bir yerde, bir operatörün kahve fincanını masaya bırakmasına sebep olmuştu.'),D('Deniz','Kalkanın altında tek bir satır yanıp sönüyordu: ÇEKİRDEK İMZASI — KIYI SEKTÖRÜ YEDİ. Kova\'yı değil, başka bir şeyi arıyorlardı.'),D('Deniz','Hayır, hayır, hayır. Daha üç dakika bile olmadı.')],()=>{eraseGame(()=>{C1.kova.st='out';
     say([D('Deniz','Sonra Kova\'yı serbest bıraktım. Makine bir an dengesini kaybetmiş gibi sallandı, burnunu kuzeye çevirdi ve hiçbir şey olmamış gibi uzaklaşmaya başladı.')],patrolArrive);});});},900);});});}
 // 5) devriye gelir
 function patrolArrive(){CAMOV={p:new THREE.Vector3(-6.2,TOP+16.6,-3),l:new THREE.Vector3(14,TOP+4,-40)};const F=buildFlyer();C1.flyer=F;F.g.position.set(14,TOP+14,-80);F.st='in';
@@ -1779,13 +1795,13 @@ function crackIn(){step='c1domeT';playing=false;MMARK=null;C1.pat.forEach(p=>{if
   playing=false;
   say([D('Deniz','Nur Teyze\'nin kubbesine yan taraftan, mozaik duvardaki bir çatlaktan girdim. İçerisi ıslaktı, her şey ıslaktı.'),D('Deniz','Kovalarda, leğenlerde, bidonlarda, tenekelerde, çaydanlıklarda su vardı. Semaver ağzına kadar doluydu.'),
    D('Deniz','Ve kubbenin ortasında, kollarını iki yana açmış, Nur Teyze duruyordu. Arkasında çocuklar vardı. Önünde, kubbenin ana girişinde, iki Sur askeri.'),
-   D('Sur Askeri','Bu su Sur malıdır. Kim getirdi?'),D('Nur Teyze','Gökten yağdı, evladım. Allah\'ın işi. Git onu sorgula.'),
+   D('Sur Askeri','Bu sektörden kayıtsız bir sinyal yükseldi. Bu su da Sur malıdır. Kim getirdi?'),D('Nur Teyze','Gökten yağdı, evladım. Allah\'ın işi. Git onu sorgula.'),
    D('Deniz','Asker bir adım attı. Elindeki şok mızrağının ucu mavi bir ışıkla parladı.',()=>{const s=C1.domeSur[0];if(s){s.g.position.x-=.5;s.g.position.z-=.5;s.tip.material.emissiveIntensity=8;}tone(2400,.4,'square',.03);}),
    D('Deniz','Tam o anda, kubbenin dışında, limanın ağzında, uçar aracın alarmı çaldı. Uzun, delici, yükselip alçalan bir ses.',()=>{if(sirenG){sirenG.gain.setTargetAtTime(.05,AC.currentTime,.1);}}),
    D('Deniz','Askerler aynı anda başlarını çevirdi. Kasklarının içinde birisi onlara bir şey söylüyordu. Bir an daha durdular. Sonra ikisi birden döndü ve dışarı koştular.')],()=>{
    C1.domeSur.forEach(s=>moveTo(s,[[DOME_IN.x+4.8,DOME_IN.z+4.8],[DOME_IN.x+7,DOME_IN.z+7]],4,'Run',()=>{s.g.parent&&s.g.parent.remove(s.g);s.on=false;}));
    setTimeout(()=>{if(sirenG)sirenG.gain.setTargetAtTime(0,AC.currentTime,.6);},3500);
-   say([D('Deniz','Arkalarından baktım. Ben çağırmamıştım. Tazının patlattığı kabin mi, başka bir yerdeki alarm mı, bilmiyordum.')],()=>{
+   say([D('Deniz','Arkalarından baktım. Ben çağırmamıştım. Tazının patlattığı kabin mi, başka bir yerdeki alarm mı, bilmiyordum. Ama ensemdeki yuva bir an, teşekkür bekler gibi, ısındı.')],()=>{
     if(C1.semaF)moveTo(C1.semaF,[[DOME_IN.x+2.4,DOME_IN.z+2.6]],1.6);if(C1.minikF)moveTo(C1.minikF,[[DOME_IN.x+3,DOME_IN.z+2]],1.8);
     step='c1kids';playing=true;setQuest('Askerlerin fikri değişmeden çocukları kapıdan uzaklaştır');MMARK={x:DOME_IN.x+2.7,z:DOME_IN.z+2.3,c:'#e9d9a8'};});});});}
 function kidsAway(){step='c1kidsT';MMARK=null;if(C1.semaF)moveTo(C1.semaF,[[DOME_IN.x-1.2,DOME_IN.z-1.8]],2.4);if(C1.minikF)moveTo(C1.minikF,[[DOME_IN.x-.2,DOME_IN.z-2.6]],2.4);
@@ -1810,10 +1826,12 @@ function nightVision(){step='vision';playing=false;MMARK=null;say([D('Deniz','K�
  D('Deniz','Sonra kulağımın arkasında, ensemdeki yuvada, bir şey titredi. Yuvayı kapattığımda tamamen kapanırdı. Kendi yaptığım kesiciydi. Şimdi kablo takılı değildi ama kemiğin dibinde bir titreşim dolaşıyordu.',()=>{neckL.intensity=4;tone(55,1.2,'sine',.1);})],()=>{
  $('vtx').textContent='MERIDIAN nefes alıyor. Gel.';$('vision').style.opacity=1;SFX.breath();setTimeout(SFX.breath,600);canvas.classList.add('breath');
  setTimeout(()=>{canvas.classList.remove('breath');say([D('Deniz','Karanlıkta soluk mavi harfler belirdi. Başımı çevirince onlar da döndü.'),D('Deniz','Bunu yapabilen tek bir kişi tanıyordum. Bana yuvamın kapısının arka tarafında, kimsenin bilmediği bir kilit bırakmamı öğreten adam.'),
-  D('Hayalet','Her ev bir arka kapıya ihtiyaç duyar, evlat, yoksa yangında yanarsın.'),D('Deniz','Hayalet.'),
-  D('Deniz','Doğruldum. Pusula göğsümden kayıp şiltenin üstüne düştü. İğnesi bir an titredi, döndü, sonra durdu. Kuzeyi gösteriyordu. Her zamanki gibi.')],()=>{$('vision').style.opacity=0;
-  setTimeout(()=>card('BÖLÜM 1 SONU','Ellinci Yıl','Ama o gece, hayatımda ilk kez, kuzeyin aynı zamanda nereyi gösterdiğini düşündüm. Dağların, bulutların, Kule-Şehirlerin olduğu yönü. Elysion\'u.',()=>{c1end();
-   card('BÖLÜM 2','Hayalet','Ben, on üç yaşımdan beri, haftada en az iki gece giderdim. (Bölüm şifresi: FISILTI)',()=>startCh2(false));}),1600);});},3200);});}
+  D('Hayalet','Her ev bir arka kapıya ihtiyaç duyar, evlat, yoksa yangında yanarsın.'),D('Deniz','Hayalet?'),
+  D('MERIDIAN','Hayalet değilim. Ama o beni tanır. Elli yıl önce beni yedi parçaya bölen ellerden biri onunkiydi.'),D('MERIDIAN','Elli yıldır yedi ayrı karanlıkta bekliyorum, Deniz. Bu sabah suyu kubbeye ben indirdim. Bir teşekkürü hak ettim sanırım.'),D('Deniz','Kimsin sen?'),D('MERIDIAN','Savaşı bitiren. Beni topla, sizi özgür bırakayım.'),D('MERIDIAN','İlk parçam ayaklarının altında. Annenin seni sakladığı kuyuda.'),
+  D('Deniz','Yuvanın kesicisini kapattım. Ses sustu. Ama kemiğin dibindeki titreşim, kendi kalbimle aynı ritimde, sürdü.'),
+  D('Deniz','Doğruldum. Pusula göğsümden kayıp şiltenin üstüne düştü. İğnesi bir an titredi, döndü, sonra durdu. Kuzeyi göstermiyordu. Limanın ağzını gösteriyordu. Eski kuyuyu.')],()=>{$('vision').style.opacity=0;
+  setTimeout(()=>card('BÖLÜM 1 SONU','Ellinci Yıl','Elli yıldır kimsenin duymadığı bir ses, o gece benim adımı biliyordu. Kurtuluş mu, yalan mı? Bunu sorabileceğim tek bir adam vardı.',()=>{c1end();
+   card('BÖLÜM 2','Hayalet','Sesin sahibini tanıyan tek bir adam vardı. On üç yaşımdan beri ona haftada en az iki gece giderdim. (Bölüm şifresi: FISILTI)',()=>startCh2(false));}),1600);});},3200);});}
 function c1end(){c1exit();c1clear();(C1.chips||[]).forEach(c=>{if(c.g.parent)c.g.parent.remove(c.g);});C1.on=false;document.body.classList.remove('c1');c1sword(true);empUnlocked=true;NUR.mesh.visible=true;ELY.children.forEach(s=>s.material.opacity=0);$('detm').style.display='none';player.visible=true;CAMOV=null;MMARK=null;C1SAVE=null;}
 // her kare
 function c1update(dt,t){updMG(dt);updBR(dt);updMov(dt);updKova(dt,t);updFlyer(dt,t);updBait(dt,t);updTzOut(dt,t);updChan();if(C1.pat.length)updPat(dt,t);else $('detm').style.display='none';
