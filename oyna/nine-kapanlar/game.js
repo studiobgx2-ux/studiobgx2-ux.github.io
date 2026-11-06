@@ -992,8 +992,28 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
         o.traverse((n) => {
           const g = n.geometry; if (g && !g.userData.cached && g.id > _geoBase) g.dispose();
           if (mats === false || !n.material) return;
-          (Array.isArray(n.material) ? n.material : [n.material]).forEach((m) => { if (m.id > _matBase) m.dispose(); });
+          (Array.isArray(n.material) ? n.material : [n.material]).forEach((m) => { if (!m.userData.cached && m.id > _matBase) m.dispose(); });
         });
+      }
+      // Ayı Kapanı 3D model (bear3d.js): geometries and materials built once, shared by every trap, never disposed
+      let _bearCache = null;
+      function bearParts() {
+        if (_bearCache || typeof BEAR3D === "undefined") return _bearCache;
+        _bearCache = {}; const mats = {};
+        for (const grp of ["base", "a", "b"]) {
+          _bearCache[grp] = [];
+          for (const hex in BEAR3D[grp] || {}) {
+            const bin = atob(BEAR3D[grp][hex]), u8 = new Uint8Array(bin.length);
+            for (let k = 0; k < bin.length; k++) u8[k] = bin.charCodeAt(k);
+            const n = u8.length >> 1, dv = new DataView(u8.buffer), pos = new Float32Array(n);
+            for (let k = 0; k < n; k++) pos[k] = dv.getInt16(k * 2, true) / 10000;
+            const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+            geo.computeVertexNormals(); geo.userData.cached = true;
+            if (!mats[hex]) { mats[hex] = new THREE.MeshLambertMaterial({ color: "#" + hex }); mats[hex].userData.cached = true; }
+            _bearCache[grp].push({ geo, mat: mats[hex] });
+          }
+        }
+        return _bearCache;
       }
 
       /* ===== TNT barrel texture ===== */
@@ -1496,6 +1516,9 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
       [[-109.99, 0, 200, 200], [109.99, 0, 200, 200], [0, 109.99, 20, 200], [0, -109.99, 20, 200]].forEach(([x, y, w, h]) => dark.add(box(w, h, darkMat, x, y)));
       dark.children.forEach((m) => (m.renderOrder = 10));
       dark.visible = false; scene.add(dark);
+      // lights for the Lambert-shaded 3D props (MeshBasicMaterial ignores them)
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.55), sunLight = new THREE.DirectionalLight(0xffe2c4, 0.9);
+      sunLight.position.set(3, 6, 8); scene.add(ambLight, sunLight);
       let warnT = 0;
 
       /* ===== Game state ===== */
@@ -2289,6 +2312,17 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
             [-0.75, 0.75].forEach((dx) => g.add(box(0.12, CHAIN_L, chainMat, dx, CHAIN_L / 2, -0.01)));
             g.position.set(c + 1, cy + 0.85, 1.3); level.add(g);
             plats.push({ x: c + 1, y: cy + 0.85, bx: c + 1, by: cy + 0.85, t, ph: c * 0.7, drop: null, vy: 0, fallen: false, mesh: g });
+          } else if (t === "Y" && bearParts()) {
+            // Ayı Kapanı: 3D model, tilted toward the camera; jaws hinge on x at y = 0.024
+            const bp = bearParts(), g = new THREE.Group(), inner = new THREE.Group();
+            inner.scale.setScalar(2.6); inner.rotation.x = 0.6;
+            const base = bp.base.map((q) => new THREE.Mesh(q.geo, q.mat)); base.forEach((m) => inner.add(m));
+            const piv = (parts) => { const pv = new THREE.Group(); pv.position.set(0, 0.024, 0); parts.forEach((q) => { const m = new THREE.Mesh(q.geo, q.mat); m.position.y = -0.024; pv.add(m); }); inner.add(pv); return pv; };
+            const pivotA = piv(bp.a), pivotB = piv(bp.b);
+            g.add(inner); g.position.set(x, cy, 1.0); level.add(g);
+            base.forEach((m) => { m.updateMatrix(); m.matrixAutoUpdate = false; });
+            const jaws = [{ m: pivotA, to: 1.54, ax: "x" }, { m: pivotB, to: -1.54, ax: "x" }];
+            bears.push({ x, y: cy, jaws, shut: false });
           } else if (t === "Y") {
             // Ayı Kapanı: two toothed steel jaws lying open on the floor
             const g = new THREE.Group(), jaws = [];
@@ -3052,6 +3086,7 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
         player.rotation.z = 0; player.visible = true; player.position.z = 2; shakeT = 0;
         player.traverse((o) => { if (o.userData.mat0) { o.material = o.userData.mat0; delete o.userData.mat0; } }); // undo the welder's char
         cane.visible = true; bunO = 0; bunV = 0; lastVy = 0;
+        ambLight.intensity = mod === "dark" ? 0.55 * 0.25 : 0.55; sunLight.intensity = mod === "dark" ? 0.9 * 0.25 : 0.9;
         dark.visible = mod === "dark"; torch.visible = dark.visible; armB.visible = torch.visible; dipT = 0; wobT = 0; beamA = p && p.face < 0 ? -Math.PI + 0.1 : -0.1;
         clearTimeout(warnT);
         if (mod === "rev") { toast.textContent = T("Kontroller ters!"); toast.classList.add("is-on"); warnT = setTimeout(() => { if (state !== "dead") toast.classList.remove("is-on"); }, 1800); }
@@ -3912,7 +3947,7 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
         // Ayı Kapanı: stepping on it snaps the jaws shut with a clank (jump over it to pass)
         for (const b of bears) {
           if (!b.shut && state === "play" && overlap(p.x, p.y, HW, HH, b.x, b.y + 0.08, 0.3, 0.08)) { b.shut = true; p.x = b.x; SFX.click(); SFX.bang(); die("squash"); }
-          if (b.shut) b.jaws.forEach((j) => (j.m.rotation.z += (j.to - j.m.rotation.z) * Math.min(1, dt * 30)));
+          if (b.shut) b.jaws.forEach((j) => { const r = j.ax === "x" ? "x" : "z"; j.m.rotation[r] += (j.to - j.m.rotation[r]) * Math.min(1, dt * 30); });
         }
         // Sarkaç: the blade swings across the path; touching it cuts you in two
         for (const s of blades) {
