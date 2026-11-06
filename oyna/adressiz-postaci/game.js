@@ -1494,15 +1494,18 @@
           const u = m.scale.x, bone = (n) => m.getObjectByName(n), wp = (o) => (hold.updateMatrixWorld(true), o.getWorldPosition(new THREE.Vector3()));
           const hm = bone("HeadMesh"), hb = hm ? boxOf(hm) : new THREE.Box3(new THREE.Vector3(-0.16, 1.47, -0.13).multiplyScalar(u), new THREE.Vector3(0.16, 1.81, 0.12).multiplyScalar(u));
           const hair = bone("Hair"), top = Math.max(hb.max.y, hair ? boxOf(hair).max.y : 0), hc = hb.getCenter(new THREE.Vector3()), hs = hb.getSize(new THREE.Vector3());
-          // postal cap on the head top: blue flared crown, yellow band, visor, gold envelope badge
-          const r = Math.min(hs.x, hs.z) * 0.54, cap = new THREE.Group(); cap.position.set(hc.x, top - r * 0.55, hc.z); hold.add(cap);
-          tpart(new THREE.CylinderGeometry(r * 1.12, r, r * 0.75, 24), own("#3f6fc4", "cap", 1), cap, 0, r * 0.375, 0, 1, 1, 1, true);
-          tpart(new THREE.CylinderGeometry(r * 1.02, r * 1.01, r * 0.16, 24), "#f3c74b", cap, 0, r * 0.09, 0);
-          tpart(new THREE.CylinderGeometry(r, r, r * 0.07, 20, 1, false, -Math.PI / 2, Math.PI), own("#2b4f94", "cap", 0.68), cap, 0, r * 0.02, r * 0.5, 1, 1, 0.9).rotation.x = 0.15;
-          const bd = new THREE.Group(); bd.position.set(0, r * 0.42, r * 1.07); bd.rotation.x = -0.12; cap.add(bd);
-          tpart(new THREE.CylinderGeometry(r * 0.2, r * 0.2, r * 0.06, 16).rotateX(Math.PI / 2), "#d9a520", bd, 0, 0, 0);
-          tpart(new THREE.BoxGeometry(r * 0.24, r * 0.16, r * 0.02), "#fff8ec", bd, 0, 0, r * 0.035);
-          tpart(new THREE.ShapeGeometry(new THREE.Shape([new THREE.Vector2(-r * 0.12, r * 0.08), new THREE.Vector2(0, -r * 0.01), new THREE.Vector2(r * 0.12, r * 0.08)])), "#9a6a3f", bd, 0, 0, r * 0.047);
+          // postal cap fitted to the skull (hat1106): elliptical crown sized from the head box (~0.15 wide, 0.21 deep at the brow on
+          // this model), band just above the eyebrows, short bill tipped slightly down so it never hides the face, gold envelope badge
+          const rx = hs.x * 0.255, rz = hs.z * 0.465, cy = hb.max.y - hs.y * 0.22, ch = hb.max.y - cy + hs.y * 0.05, fl = 1.09;
+          if (hair) hair.visible = false; // the short crest sits wholly under the crown; hidden so it cannot poke through
+          const cap = new THREE.Group(); cap.position.set(hc.x, cy, hc.z); hold.add(cap); cap.name = "PostCap";
+          tpart(new THREE.CylinderGeometry(fl, 1, 1, 28), own("#3f6fc4", "cap", 1), cap, 0, ch / 2, 0, rx, ch, rz, true);
+          tpart(new THREE.CylinderGeometry(1.025, 1.02, 1, 28), "#f3c74b", cap, 0, ch * 0.09, 0, rx, ch * 0.18, rz);
+          tpart(new THREE.CylinderGeometry(1, 1, 1, 20, 1, false, -Math.PI / 2, Math.PI), own("#2b4f94", "cap", 0.68), cap, 0, ch * 0.02, 0, rx * 1.02, hs.y * 0.03, rz * 1.42).rotation.x = 0.1;
+          const r = rx, bd = new THREE.Group(); bd.position.set(0, ch * 0.5, rz * (1 + (fl - 1) * 0.5) + r * 0.02); bd.rotation.x = -0.06; cap.add(bd);
+          tpart(new THREE.CylinderGeometry(r * 0.3, r * 0.3, r * 0.06, 16).rotateX(Math.PI / 2), "#d9a520", bd, 0, 0, 0);
+          tpart(new THREE.BoxGeometry(r * 0.36, r * 0.24, r * 0.02), "#fff8ec", bd, 0, 0, r * 0.035);
+          tpart(new THREE.ShapeGeometry(new THREE.Shape([new THREE.Vector2(-r * 0.18, r * 0.12), new THREE.Vector2(0, -r * 0.015), new THREE.Vector2(r * 0.18, r * 0.12)])), "#9a6a3f", bd, 0, 0, r * 0.047);
           // brown leather satchel on his left hip (+X), with flap, brass buckle and two envelopes peeking out
           const sat = new THREE.Group(); sat.position.set(0.25 * u, 0.86 * u, 0); hold.add(sat);
           const sw = 0.08 * u, sh = 0.2 * u, sd = 0.26 * u;
