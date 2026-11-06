@@ -3568,7 +3568,7 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
       pickGrid.addEventListener("click", (e) => {
         const b = e.target.closest("button"); if (!b) return;
         const k = +b.dataset.k; pickEl.hidden = true;
-        if (pickPrev === "menu" || pickPrev === "won") { if (isTouch) goLandscape(); startGame(k); return; }
+        if (pickPrev === "menu" || pickPrev === "won") { autoFs(); startGame(k); return; }
         toast.classList.remove("is-on"); flashEl.classList.remove("is-on");
         levelIdx = k; cpActive = null; buildLevel(k); state = "play"; showIntro(k);
       });

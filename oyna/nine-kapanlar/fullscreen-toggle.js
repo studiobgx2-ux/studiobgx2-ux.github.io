@@ -29,6 +29,7 @@
   b.addEventListener("click", function (e) { e.stopPropagation(); go(); });
   d.addEventListener("fullscreenchange", sync); d.addEventListener("webkitfullscreenchange", sync);
   var start = function () {
+    if (d.getElementById("fsBtn")) return; // the game ships its own full screen button
     d.body.appendChild(b); sync();
     if (window.matchMedia && matchMedia("(pointer: coarse)").matches) {
       var first = function () { d.removeEventListener("pointerup", first, true); go(); };

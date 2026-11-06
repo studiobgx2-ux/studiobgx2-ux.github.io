@@ -163,6 +163,7 @@
       .x-hud { z-index: 11; }
       .x-hud button { pointer-events: auto; cursor: pointer; font: var(--type-label); font-weight: var(--weight-bold); color: #d9d3cb;
         background: rgb(12 10 10 / 0.7); border: 1px solid rgb(255 255 255 / 0.12); border-radius: var(--r-pill); padding: 8px 14px; min-height: var(--tap, 44px); }
+      .x-hud #fsBtn { min-width: var(--tap, 44px); }
       .x-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; }
       .x-code { margin-top: 16px; width: 7.5em; min-height: var(--tap, 44px); font: var(--type-body); font-family: "Geist Mono", monospace; text-transform: uppercase;
         letter-spacing: 0.2em; text-align: center; color: #ece4dc; background: rgb(0 0 0 / 0.4); border: 1px solid rgb(150 20 20 / 0.4);

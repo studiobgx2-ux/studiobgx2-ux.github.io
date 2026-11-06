@@ -12,7 +12,8 @@
         "Bu oturumda ulaştığın bölümler": "Levels you've reached this session", "Kapat": "Close",
         "Telefonu yan çevir 📱↻": "Turn your phone sideways 📱↻", "Tebrikler!": "You did it!",
         "Nine bayrağa ulaştı.": "Granny made it to the flag.", "Tekrar Oyna": "Play Again", "ölüm": "deaths",
-        "Bölüm": "Level", "Ölüm sayısı": "Deaths", "Müziği kapat": "Mute music", "Müziği aç": "Unmute music",
+        "Bölüm": "Level", "Ölüm sayısı": "Deaths", "Müziği kapat": "Mute music", "Müziği aç": "Unmute music", "Tam ekran": "Fullscreen", "Tam ekran açılamadı": "Couldn't go fullscreen",
+        "iPhone'da tam ekran için: Paylaş → Ana Ekrana Ekle": "On iPhone: Share → Add to Home Screen",
         "ZIPLA": "JUMP", "Zıpla": "Jump", "Sola": "Left", "Sağa": "Right", "Hikâye": "Story",
         "Kukla can barı": "Puppet health bar", "KUKLA": "PUPPET", "NİNE": "GRANNY", "KUKLA · TV'DE": "THE PUPPET · ON TV",
         "Geçmek için dokun": "Tap to skip", "Kod": "Code", "MEKAN": "AREA",
@@ -126,15 +127,41 @@
       }
       ["resize", "orientationchange"].forEach((ev) => addEventListener(ev, () => { checkOrient(); setTimeout(checkOrient, 250); }));
       checkOrient();
-      function goLandscape() {
+      function goLandscape(onFail) { // returns false when no fullscreen API exists (iPhone)
         const lock = () => { try { const o = screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape"); if (o && o.catch) o.catch(() => {}); } catch (_) {} };
+        const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (!req) { lock(); return false; }
+        const fail = () => { lock(); if (onFail) onFail(); };
         try {
-          const el = document.documentElement, r = el.requestFullscreen && !document.fullscreenElement ? el.requestFullscreen() : null;
-          if (r && r.then) r.then(lock, lock); else lock();
-        } catch (_) { lock(); }
+          const r = !(document.fullscreenElement || document.webkitFullscreenElement) ? req.call(el) : null;
+          if (r && r.then) r.then(lock, fail); else lock();
+        } catch (_) { fail(); }
+        return true;
       }
+      const fsBtns = [document.getElementById("fsBtn"), document.getElementById("startFs")];
+      const syncFs = () => { const on = !!(document.fullscreenElement || document.webkitFullscreenElement); fsBtns.forEach((b) => b.setAttribute("aria-pressed", String(on))); };
+      ["fullscreenchange", "webkitfullscreenchange"].forEach((ev) => document.addEventListener(ev, syncFs));
+      syncFs();
+      function fsToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = T(msg); t.classList.add("is-on");
+        clearTimeout(fsToastT); fsToastT = setTimeout(() => t.classList.remove("is-on"), 2600);
+      }
+      // first Başla / Devam Et / level tap tries fullscreen silently; touch devices keep trying on later starts
+      let fsTried = false;
+      function autoFs() { if (isTouch || !fsTried) goLandscape(); fsTried = true; }
+      let fsToastT = 0;
+      function onFsBtn(e) {
+        if (e && e.currentTarget) e.currentTarget.blur();
+        if (document.fullscreenElement || document.webkitFullscreenElement) { // already fullscreen: the badge exits it
+          try { const x = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (x && x.catch) x.catch(() => {}); } catch (_) {}
+          return;
+        }
+        if (!goLandscape(() => fsToast("Tam ekran açılamadı"))) fsToast("iPhone'da tam ekran için: Paylaş → Ana Ekrana Ekle");
+      }
+      fsBtns.forEach((b) => b.addEventListener("click", onFsBtn));
       function onStart() {
-        if (isTouch) goLandscape();
+        autoFs();
         document.getElementById("startScreen").hidden = true;
         document.getElementById("endScreen").hidden = true;
         if (window.gameReady) { window.startGame(); return; }
@@ -147,7 +174,7 @@
       document.getElementById("againBtn").addEventListener("click", onStart);
       document.getElementById("contBtn").addEventListener("click", () => {
         if (!window.gameReady) { onStart(); return; }
-        if (isTouch) goLandscape();
+        autoFs();
         document.getElementById("startScreen").hidden = true;
         document.getElementById("endScreen").hidden = true;
         window.continueGame();
