@@ -1702,7 +1702,7 @@
         const joy = { x: 0, y: 0, id: null };
         const toastEl = document.getElementById("toast");
         let toastT = 0;
-        function toast(msg, ms = 2200) { xIcoText(toastEl, msg); toastEl.classList.add("is-on"); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("is-on"), ms); }
+        function toast(msg, ms = 2200) { xIcoText(toastEl, msg); toastEl.classList.add("is-on"); try { safeLayout(); } catch (e) { /* before the layout code exists */ } clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("is-on"), ms); }
         addEventListener("keydown", (e) => {
           keys[e.code] = true;
           if (e.code === "KeyE" && game.started && !e.repeat) game.onInteract();
@@ -2620,6 +2620,7 @@
           bubbleEl.append(b, tn);
           bubble.type = { tn, text, i: 0, t0: performance.now(), voice, next: 1 };
           bubble.pos.copy(pos); bubble.follow = follow || null; bubble.until = performance.now() + (secs + text.length / CPS) * 1000;
+          if (isShort()) bubble.until = Math.min(bubble.until, performance.now() + Math.max(3000, (text.length / CPS) * 1000 + 1500)); // fix1106b: phones: short-lived
           bubbleEl.hidden = false;
         }
         // type the bubble out, with a chatter blip every 2 to 3 letters
@@ -2643,9 +2644,71 @@
           proj.copy(bubble.pos).project(camera);
           if (proj.z > 1) { bubbleEl.style.visibility = "hidden"; return; }
           bubbleEl.style.visibility = "";
-          bubbleEl.style.left = ((proj.x + 1) / 2) * innerWidth + "px";
-          bubbleEl.style.top = ((1 - proj.y) / 2) * innerHeight - 8 + "px";
+          bubble.sx = ((proj.x + 1) / 2) * innerWidth; bubble.sy = ((1 - proj.y) / 2) * innerHeight - 8;
+          if (isShort()) return; // fix1106b: safeLayout() places it
+          bubbleEl.style.left = bubble.sx + "px";
+          bubbleEl.style.top = bubble.sy + "px";
         }
+        // ---------- fix1106b: safe spots for bubbles on short screens (phones in landscape, at most 500 px tall) ----------
+        // tutorial strip and toasts go top-centre, villager lines stay near the speaker; each is moved to the nearest spot that
+        // overlaps no HUD part, button, joystick zone or other bubble (rects re-read every frame), and hidden when none is free.
+        function isShort() { return innerHeight <= 500; }
+        const safeProbe = document.createElement("div"); safeProbe.className = "x-safeprobe"; safeProbe.setAttribute("aria-hidden", "true"); document.body.append(safeProbe);
+        const SAFE_UI = ["#hud .x-bar", "#mailchip", "#combochip", "#tipchip", "#bikechip", "#dogchip", "#shopchip", "#notechip", "#notes", "#minimap", "#maptoggle", "#sndbtn", "#sndpanel", "#act", "#joy", "#intro-skip", "#lv-paper", "#prompt", ".x-hint", "#bgxBack", "#bgxFs"];
+        const SAFE = { was: false };
+        function safeIns() { const r = safeProbe.getBoundingClientRect(); return { l: r.left, t: r.top, r: innerWidth - r.right, b: innerHeight - r.bottom }; }
+        function shownRect(el) {
+          if (!el || el.hidden) return null;
+          const cs = getComputedStyle(el); if (cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0") return null;
+          const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? r : null;
+        }
+        function uiRects() {
+          const out = [], m = 6;
+          for (const s of SAFE_UI) for (const el of document.querySelectorAll(s)) { const r = shownRect(el); if (r) out.push({ l: r.left - m, t: r.top - m, r: r.right + m, b: r.bottom + m }); }
+          if (document.body.classList.contains("is-touch")) {
+            const W = innerWidth, H = innerHeight, ins = safeIns();
+            out.push({ l: 0, t: H * 0.45, r: Math.min(W * 0.36, 300), b: H }); // joystick: where the left thumb lands
+            out.push({ l: W - ins.r - 24 - 64 - 14, t: H - ins.b - 28 - 64 - 14, r: W, b: H }); // the Al / Teslim button, even while it is hidden
+          }
+          return out;
+        }
+        function freeSpot(w, h, px, py, obs, B) {
+          if (w > B.r - B.l || h > B.b - B.t) return null;
+          const hit = (x, y) => { for (const o of obs) if (x < o.r && x + w > o.l && y < o.b && y + h > o.t) return true; return false; };
+          const x0 = Math.max(B.l, Math.min(B.r - w, px)), y0 = Math.max(B.t, Math.min(B.b - h, py));
+          if (!hit(x0, y0)) return [x0, y0];
+          let best = null, bd = Infinity;
+          for (let y = B.t; y <= B.b - h + 0.5; y += 6) for (let x = B.l; x <= B.r - w + 0.5; x += 8) {
+            const d = (x - x0) * (x - x0) + 2 * (y - y0) * (y - y0);
+            if (d < bd && !hit(x, y)) { bd = d; best = [x, y]; }
+          }
+          return best;
+        }
+        function safeLayout() {
+          const tut = document.getElementById("tut"), sp = document.getElementById("starpop"), els = [tut, toastEl, sp, bubbleEl];
+          if (!isShort()) {
+            if (SAFE.was) { SAFE.was = false; for (const e of els) { e.style.left = e.style.top = ""; e.classList.remove("x-nospot"); } placeTut(); }
+            return;
+          }
+          SAFE.was = true;
+          const W = innerWidth, H = innerHeight, ins = safeIns(), bar = document.body.classList.contains("x-intro-on") ? H * 0.09 : 0;
+          const B = { l: ins.l + 6, t: Math.max(ins.t, bar) + 6, r: W - ins.r - 6, b: H - Math.max(ins.b, bar) - 6 };
+          const obs = uiRects();
+          const put = (el, fx, fy) => {
+            const w = el.offsetWidth, h = el.offsetHeight, p = freeSpot(w, h, fx(w, h), fy(w, h), obs, B);
+            el.classList.toggle("x-nospot", !p);
+            if (!p) return;
+            el.style.left = Math.round(p[0]) + "px"; el.style.top = Math.round(p[1]) + "px";
+            obs.push({ l: p[0] - 4, t: p[1] - 4, r: p[0] + w + 4, b: p[1] + h + 4 });
+          };
+          if (!tut.hidden) put(tut, (w) => W / 2 - w / 2, () => B.t);
+          if (toastEl.classList.contains("is-on")) put(toastEl, (w) => W / 2 - w / 2, () => B.t);
+          if (!sp.hidden) put(sp, (w) => W / 2 - w / 2, () => H * 0.2);
+          if (!bubbleEl.hidden && bubbleEl.style.visibility !== "hidden" && bubble.sx != null) put(bubbleEl, (w) => bubble.sx - w / 2, (w, h) => bubble.sy - h);
+        }
+        // tap a bubble to dismiss it (short screens only: elsewhere bubbles ignore the pointer)
+        bubbleEl.addEventListener("pointerdown", (e) => { e.stopPropagation(); bubbleEl.hidden = true; bubble.type = null; });
+        addEventListener("resize", () => { try { safeLayout(); } catch (e) {} });
 
         // ---------- delivery state and HUD ----------
         const $ = (id) => document.getElementById(id);
@@ -4452,8 +4515,15 @@
           cycle() { if (S.bag.length > 1) { S.active = (S.active + 1) % S.bag.length; renderHUD(); } },
           refreshLang() {
             renderHUD(); renderNotes(); poSign.refresh(); renderPerf(); if (!$("start").hidden) renderStreak();
-            if (TUT.msg && !$("tut").hidden) $("tut").textContent = T(TUT.msg[0], TUT.msg[1]);
+            if (TUT.msg && !$("tut").hidden) { $("tut").textContent = T(TUT.msg[0], TUT.msg[1]); safeLayout(true); }
             if (!$("end").hidden) showEnd();
+            if (!$("shop").hidden) renderShop();
+            // fix1106b: a line already spoken or toasted in the old language is dropped rather than left on screen
+            bubbleEl.hidden = true; bubble.type = null; toastEl.classList.remove("is-on"); toastEl.textContent = "";
+            $("prompt").textContent = ""; $("act").textContent = "";
+            const L = (id, a, tr, en) => { const e = $(id); if (e) e.setAttribute(a, T(tr, en)); };
+            L("minimap", "aria-label", "Köy haritası", "Village map"); L("maptoggle", "aria-label", "Harita", "Map"); L("dogchip", "aria-label", "Köpek", "Dog");
+            L("lv-paper", "aria-label", "Mektup", "Letter"); L("shop-tabs", "aria-label", "Kategoriler", "Categories"); L("shop-svg", "aria-label", "Önizleme", "Preview");
           },
           onUpdate(dt, t) {
             try { audioTick(dt); } catch (e) { /* audio never stops the game */ }
@@ -4473,7 +4543,7 @@
               c.vx *= 0.98; c.vz *= 0.98; c.m.rotation.x += c.spin * dt; c.m.rotation.y += c.spin * 0.7 * dt;
               if (c.life <= 0) { scene.remove(c.m); c.m.material.dispose(); confetti.splice(i, 1); }
             }
-            placeBubble();
+            placeBubble(); safeLayout();
             const pr = $("prompt");
             let msg = "";
             const R = scooter.riding, door = game.started && !S.over && !busy && S.bag.length && game.nearestHouse(R ? 4.5 : 3.5);
@@ -4531,7 +4601,7 @@
           const fr = HOUSES.map((h) => [h, frOf(h)]).filter((p) => p[1] > 0).sort((a, b) => b[1] - a[1]);
           if (!fr.length) return;
           const li = document.createElement("li"); li.className = "x-frli";
-          li.textContent = T("Dostluk: ", "Friendship: ") + fr.map(([h, n]) => `${h.name} ${"♥".repeat(n)}${"♡".repeat(5 - n)}`).join(" · ");
+          li.textContent = T("Dostluk: ", "Friendship: ") + fr.map(([h, n]) => `${nm(h)} ${"♥".repeat(n)}${"♡".repeat(5 - n)}`).join(" · ");
           ul.prepend(li);
         }
         // ---------- chain letters: some deliveries come back with a reply for another villager (2-3 links, bonus at the end) ----------
@@ -4593,10 +4663,11 @@
           TUT.msg = [tr, en]; TUT.anchor = anchor || null; TUT.bubT = secs;
           const el = $("tut"); el.textContent = T(tr, en); el.hidden = false;
           el.classList.remove("is-pop"); void el.offsetWidth; el.classList.add("is-pop");
-          placeTut(); SND.sfx("sfx_paper_rustle_2", { vol: 0.35 });
+          placeTut(); safeLayout(); SND.sfx("sfx_paper_rustle_2", { vol: 0.35 });
         }
+        $("tut").addEventListener("pointerdown", (e) => { e.stopPropagation(); $("tut").hidden = true; TUT.bubT = 0; });
         function placeTut() {
-          const el = $("tut"); if (el.hidden) return;
+          const el = $("tut"); if (el.hidden || isShort()) return;
           const a = TUT.anchor && $(TUT.anchor), r = a && !a.hidden && a.offsetParent ? a.getBoundingClientRect() : null;
           if (r && r.width) {
             const w = el.offsetWidth, x = Math.max(w / 2 + 8, Math.min(innerWidth - w / 2 - 8, r.left + r.width / 2));

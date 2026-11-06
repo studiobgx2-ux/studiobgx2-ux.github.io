@@ -4,5 +4,7 @@
   function sync() { var en = window.__lang === "en";
     a.href = en ? "/en/web-games/" : "/web-oyunlari/";
     a.setAttribute("aria-label", en ? "Back to BGX2 Games web games" : "BGX2 Games web oyunlarına dön"); }
-  sync(); document.querySelectorAll(".x-lang button").forEach(function (b) { b.addEventListener("click", function () { setTimeout(sync, 0); }); });
+  function fs() { var f = document.getElementById("bgxFs"); if (!f) return; var en = window.__lang === "en";
+    f.textContent = en ? "Full screen" : "Tam ekran"; f.setAttribute("aria-label", en ? "Play in full screen" : "Tam ekran oyna"); }
+  sync(); document.addEventListener("DOMContentLoaded", fs); document.querySelectorAll(".x-lang button").forEach(function (b) { b.addEventListener("click", function () { setTimeout(function () { sync(); fs(); }, 0); }); });
 })();

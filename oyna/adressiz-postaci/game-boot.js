@@ -1,15 +1,33 @@
       // Start button works even if WebGL or the 3D library fails to load.
       window.__startQueue = [];
-      window.__lang = "tr";
-      document.querySelectorAll(".x-lang button").forEach(function (b) {
-        b.addEventListener("click", function () {
-          var l = b.getAttribute("data-lang");
+      // fix1106b: one language for the whole game. Order: the player's own saved choice (title or in-game TR/EN),
+      // else the site's language (link from bgx2games.com.tr: /en/ pages = English), else ?lang=, else the browser language (tr -> TR, anything else -> EN).
+      (function () {
+        var LK = "adressiz-lang", ok = function (v) { return v === "tr" || v === "en"; }, pick = null, src = "";
+        try { var sv = localStorage.getItem(LK); if (ok(sv)) { pick = sv; src = "saved"; } } catch (e) {}
+        if (!pick) { try { var sl = localStorage.getItem("bgx2.lang"); if (ok(sl)) { pick = sl; src = "site"; } } catch (e) {} }
+        if (!pick) {
+          try {
+            var r = document.referrer ? new URL(document.referrer) : null;
+            if (r && r.origin === location.origin && !/^\/oyna\//.test(r.pathname)) { pick = /^\/en(\/|$)/.test(r.pathname) ? "en" : "tr"; src = "site"; }
+          } catch (e) {}
+        }
+        if (!pick) { try { var q = new URLSearchParams(location.search).get("lang"); if (ok(q)) { pick = q; src = "url"; } } catch (e) {} }
+        if (!pick) { var nl = String((navigator.languages && navigator.languages[0]) || navigator.language || ""); pick = /^tr\b/i.test(nl) ? "tr" : "en"; src = "browser"; }
+        window.__langSrc = src;
+        window.__setLang = function (l, save) {
+          l = l === "en" ? "en" : "tr";
           window.__lang = l;
           document.documentElement.lang = l;
           document.querySelectorAll(".x-lang button").forEach(function (o) { o.setAttribute("aria-pressed", String(o.getAttribute("data-lang") === l)); });
           document.querySelectorAll("[data-" + l + "]").forEach(function (el) { el.textContent = el.getAttribute("data-" + l); });
+          if (save) { try { localStorage.setItem(LK, l); } catch (e) {} }
           if (window.game && window.game.refreshLang) window.game.refreshLang();
-        });
+        };
+        window.__setLang(pick, false);
+      })();
+      document.querySelectorAll(".x-lang button").forEach(function (b) {
+        b.addEventListener("click", function () { window.__setLang(b.getAttribute("data-lang"), true); });
       });
       document.getElementById("go").addEventListener("click", function () {
         var st = document.getElementById("start");
@@ -78,7 +96,7 @@
         var hasSave = !!(prof && ((+prof.xp || 0) > 0 || (+prof.coins || 0) > 0 || (prof.x && (prof.x.tut || prof.x.total))));
         window.__apHasSave = hasSave; if (!hasSave) st.classList.add("is-fresh");
         var go = $t("go"), goL = $t("go-l");
-        if (hasSave) { goL.setAttribute("data-tr", "Devam Et"); goL.setAttribute("data-en", "Continue"); goL.textContent = "Devam Et"; $t("t-new").hidden = false; go.querySelector(".x-tbtn__ico").innerHTML = window.xSvg("play"); }
+        if (hasSave) { goL.setAttribute("data-tr", "Devam Et"); goL.setAttribute("data-en", "Continue"); goL.textContent = tr("Devam Et", "Continue"); $t("t-new").hidden = false; go.querySelector(".x-tbtn__ico").innerHTML = window.xSvg("play"); }
         var RK = [[0, "Çırak", "Apprentice"], [150, "Postacı", "Postman"], [450, "Usta Postacı", "Expert"], [1000, "Baş Postacı", "Head Postman"], [2000, "Efsane Postacı", "Legend"]];
         function summary() {
           var el = $t("title-sum"); if (!hasSave) return;
@@ -171,8 +189,4 @@
       })();
       // never leave the loading screen up, even if the 3D scripts fail
       setTimeout(function () { document.getElementById("load").hidden = true; }, 23000);
-          // BGX2 site: ?lang=tr|en from the site picks the starting language
-      try {
-        var q = new URLSearchParams(location.search).get("lang");
-        if (q === "en" || q === "tr") { var lb = document.querySelector('.x-lang button[data-lang="' + q + '"]'); if (lb) lb.click(); }
-      } catch (e) {}
+    
