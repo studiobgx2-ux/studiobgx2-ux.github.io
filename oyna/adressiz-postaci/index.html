@@ -37,12 +37,13 @@
           <img id="art-confetti" src="confetti.png" alt="" />
           <img id="art-wrong" src="wrong_puff.png" alt="" />
         </div>
+        <div class="x-vig" id="vig" aria-hidden="true"></div>
         <canvas class="x-map" id="minimap" width="300" height="300" aria-label="Köy haritası"></canvas>
-        <button class="x-maptoggle x-glass" id="maptoggle" type="button" aria-pressed="true" aria-controls="minimap" aria-label="Harita"><span class="x-ico x-ico--6" aria-hidden="true" data-e="🗺️"></span></button>
+        <button class="x-maptoggle x-glass" id="maptoggle" type="button" aria-pressed="true" aria-controls="minimap" aria-label="Harita"><span class="x-svgw" data-svg="map"></span></button>
         <p class="x-hint" data-tr="WASD / oklar: yürü · Shift: koş · E: etkileşim · Q: mektup seç · B: scooter · G: köpek · Sürükle: kamera" data-en="WASD / arrows: walk · Shift: run · E: interact · Q: pick letter · B: scooter · G: dog · Drag: camera">WASD / oklar: yürü · Shift: koş · E: etkileşim · Q: mektup seç · B: scooter · G: köpek · Sürükle: kamera</p>
         <div class="x-hud" id="hud" hidden>
           <div class="x-bar x-glass">
-            <span class="x-clock" id="dayclock" role="img" aria-label="Sabah" title="Sabah"><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="x-clock__bg" cx="18" cy="18" r="15" /><circle class="x-clock__fg" id="dayclock-fg" cx="18" cy="18" r="15" pathLength="100" /></svg><span id="dayclock-ico" aria-hidden="true">☀️</span></span>
+            <span class="x-clock" id="dayclock" role="img" aria-label="Sabah" title="Sabah"><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="x-clock__bg" cx="18" cy="18" r="15" /><circle class="x-clock__fg" id="dayclock-fg" cx="18" cy="18" r="15" pathLength="100" /></svg><span id="dayclock-ico" aria-hidden="true" data-svg="sun"></span></span>
             <span><span class="x-ico x-ico--2" aria-hidden="true" data-e="🪙"></span> <b id="coins">0</b></span>
             <span class="x-rank" id="rank" role="img" aria-label="Rütbe"><b id="rank-n">Çırak</b><i class="x-xpbar" aria-hidden="true"><i id="xp-fill"></i></i></span>
             <span><span class="x-ico x-ico--0" aria-hidden="true" data-e="✉️"></span> <b id="done">0</b>/10</span>
@@ -50,17 +51,17 @@
           </div>
           <div class="x-row">
             <button class="x-mailchip x-glass" id="mailchip" type="button" aria-expanded="false" aria-controls="lv"><span class="x-ico x-ico--0" id="mailico" aria-hidden="true" data-e="✉️"></span> <b id="mailcount">0</b><span class="x-bagb" id="bagbadges" aria-hidden="true"></span><span class="x-rushring" id="rushring" hidden><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="x-rushring__bg" cx="18" cy="18" r="15" /><circle class="x-rushring__fg" id="rushring-fg" cx="18" cy="18" r="15" pathLength="100" /></svg><b id="rushsec">0</b></span></button>
-            <span class="x-mailchip x-glass x-combochip" id="combochip" role="status" hidden><b>🔥</b><b id="combo-n">x1</b><i class="x-combobar" aria-hidden="true"><i id="combo-fill"></i></i></span>
+            <span class="x-mailchip x-glass x-combochip" id="combochip" role="status" hidden><b class="x-svgw" data-svg="flame"></b><b id="combo-n">x1</b><i class="x-combobar" aria-hidden="true"><i id="combo-fill"></i></i></span>
             <button class="x-mailchip x-glass x-tipchip" id="tipchip" type="button" hidden>💡</button>
-            <button class="x-mailchip x-glass x-bikechip is-off" id="bikechip" type="button" aria-pressed="false"><span id="bikechip-l">🛴 Scooter</span><span class="x-key" aria-hidden="true">B</span></button>
-            <button class="x-mailchip x-glass x-dogchip" id="dogchip" type="button" aria-label="Köpek">🐶</button>
-            <button class="x-mailchip x-glass x-shopchip" id="shopchip" type="button" aria-expanded="false" aria-controls="shop"><span aria-hidden="true">🛍</span> <span id="shopchip-l">Dükkân</span></button>
+            <button class="x-mailchip x-glass x-bikechip is-off" id="bikechip" type="button" aria-pressed="false"><span class="x-svgw" data-svg="scooter"></span><span id="bikechip-l">Scooter</span><span class="x-key" aria-hidden="true">B</span></button>
+            <button class="x-mailchip x-glass x-dogchip" id="dogchip" type="button" aria-label="Köpek"><span class="x-svgw" data-svg="dog"></span></button>
+            <button class="x-mailchip x-glass x-shopchip" id="shopchip" type="button" aria-expanded="false" aria-controls="shop"><span class="x-svgw" data-svg="shop"></span><span id="shopchip-l">Dükkân</span><b class="x-new" id="shopnew" data-tr="Yeni!" data-en="New!" hidden>Yeni!</b></button>
           </div>
-          <button class="x-mailchip x-glass" id="notechip" type="button" aria-expanded="false" aria-controls="notes"><span class="x-ico x-ico--5" aria-hidden="true" data-e="📒"></span> <span id="notechip-l">Defter</span> <b id="notecount">0</b></button>
+          <button class="x-mailchip x-glass" id="notechip" type="button" aria-expanded="false" aria-controls="notes"><span class="x-svgw" data-svg="note"></span><span id="notechip-l">Defter</span> <b id="notecount">0</b></button>
           <div class="x-card x-glass x-notes" id="notes" hidden>
             <div class="x-tabs" role="tablist">
               <button type="button" role="tab" id="tab-notes" aria-selected="true" aria-controls="notelist"><span id="tab-notes-l">Defter</span></button>
-              <button type="button" role="tab" id="tab-album" aria-selected="false" aria-controls="album"><span aria-hidden="true">📮</span> <span id="tab-album-l">Pul Albümü</span> <b id="albumcount">0/16</b></button>
+              <button type="button" role="tab" id="tab-album" aria-selected="false" aria-controls="album"><span class="x-svgw" data-svg="postbox"></span> <span id="tab-album-l">Pul Albümü</span> <b id="albumcount">0/16</b></button>
             </div>
             <ul class="x-notelist" id="notelist" role="tabpanel"></ul>
             <div class="x-album" id="album" role="tabpanel" hidden>
@@ -94,6 +95,12 @@
         </div>
         <div class="x-rotate" aria-live="polite"><p>📱↻<br />Telefonu yatay çevir</p></div>
         <p class="x-prompt" id="prompt" hidden></p>
+        <p class="x-tut" id="tut" role="status" hidden></p>
+        <div class="x-intro" id="intro" hidden>
+          <div class="x-intro__bar"></div>
+          <div class="x-intro__bar is-b"></div>
+          <button class="x-intro__skip" id="intro-skip" type="button" data-tr="Geç ›" data-en="Skip ›">Geç ›</button>
+        </div>
         <div class="x-starpop x-glass" id="starpop" role="status" hidden><div class="x-starpop__row" aria-hidden="true"><span class="x-k--0">★</span><span class="x-k--1">★</span><span class="x-k--2">★</span></div><p class="x-starpop__lab" id="starpop-l"></p></div>
         <div class="x-shop" id="shop" hidden>
           <div class="x-shop__card x-glass" role="dialog" aria-modal="true" aria-labelledby="shop-h">
@@ -167,11 +174,12 @@
             <p class="x-load-sub" data-tr="Postacı yükleniyor…" data-en="Loading the postman…">Postacı yükleniyor…</p>
           </div>
         </div>
-        <button class="x-sndbtn x-glass" id="sndbtn" type="button" aria-expanded="false" aria-controls="sndpanel" aria-label="Ses ayarları">🔊</button>
+        <button class="x-sndbtn x-glass" id="sndbtn" type="button" aria-expanded="false" aria-controls="sndpanel" aria-label="Ses ayarları"><span class="x-svgw" data-svg="snd"></span></button>
         <div class="x-card x-glass x-sndpanel" id="sndpanel" hidden>
           <h3 data-tr="Ses" data-en="Sound">Ses</h3>
           <div class="x-sndrow"><span data-tr="Müzik" data-en="Music">Müzik</span><button class="x-sndtog" id="snd-music" type="button" aria-pressed="true">Açık</button></div>
           <div class="x-sndrow"><span data-tr="Sesler" data-en="Sounds">Sesler</span><button class="x-sndtog" id="snd-sfx" type="button" aria-pressed="true">Açık</button></div>
+          <div class="x-sndrow"><span data-tr="Performans modu" data-en="Performance mode">Performans modu</span><button class="x-sndtog" id="snd-perf" type="button" aria-pressed="false">Kapalı</button></div>
         </div>
         <!-- audio files, named here so they ship with the page; the engine reads each src and decodes it with Web Audio -->
         <div hidden aria-hidden="true">

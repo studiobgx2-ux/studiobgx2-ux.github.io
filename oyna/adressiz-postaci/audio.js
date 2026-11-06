@@ -21,7 +21,7 @@
           try { var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if (sv) { set.music = sv.music !== false; set.sfx = sv.sfx !== false; } } catch (e) {}
           var ctx = null, master, musicBus, duckG, sfxBus, ambBus;
           var bytes = {}, bufs = {}, pend = {}, voices = [], hid = document.hidden, ad = false, sdkMute = false;
-          var cur = null, want = null, ambH = null, riverH = null, rollH = null;
+          var cur = null, want = null, ambH = null, riverH = null, rollH = null, windH = null;
           var muted = function () { return hid || ad || sdkMute; };
           var live = function () { return ctx && ctx.state === "running" && !muted(); };
 
@@ -192,7 +192,7 @@
           function renderSet() {
             tM.setAttribute("aria-pressed", String(set.music)); tM.textContent = label(set.music);
             tS.setAttribute("aria-pressed", String(set.sfx)); tS.textContent = label(set.sfx);
-            btn.textContent = set.music || set.sfx ? "🔊" : "🔇";
+            btn.innerHTML = window.xSvg ? '<span class="x-svgw">' + window.xSvg(set.music || set.sfx ? "snd" : "mute") + "</span>" : set.music || set.sfx ? "🔊" : "🔇";
             btn.setAttribute("aria-label", window.__lang === "en" ? "Sound settings" : "Ses ayarları");
           }
           function save() { try { localStorage.setItem(KEY, JSON.stringify(set)); } catch (e) {} }
@@ -231,7 +231,26 @@
             prefetch: function (n) { fetchBytes(n).catch(noop); },
             out: function () { return live() && set.sfx ? sfxBus : null; },
             river: function (k) { if (riverH) riverH.set(0.5 * Math.max(0, Math.min(1, k))); },
-            roll: function (v) { if (!rollH) return; var k = Math.max(0, Math.min(1, v / 22)); rollH.set(v > 0.3 ? 0.08 + 0.24 * k : 0, 0.8 + 0.5 * k); },
+            // surface: 1 on dirt (louder, crunchier), about 0.55 on grass (softer, lower)
+            roll: function (v, surf) { if (!rollH) return; var k = Math.max(0, Math.min(1, v / 22)), m = surf == null ? 1 : surf; rollH.set(v > 0.3 ? (0.08 + 0.24 * k) * m : 0, (0.8 + 0.5 * k) * (0.85 + 0.15 * m)); },
+            // wind whoosh: looping filtered noise, level and brightness rise with speed (k 0..1)
+            wind: function (k) {
+              if (!ctx || !live()) return;
+              k = Math.max(0, Math.min(1, k || 0));
+              if (!windH) {
+                if (k <= 0) return;
+                try {
+                  var n = ctx.sampleRate * 2, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0), last = 0;
+                  for (var i = 0; i < n; i++) { last = last * 0.97 + (Math.random() * 2 - 1) * 0.03; d[i] = last * 6; }
+                  var src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = gain(0, sfxBus);
+                  src.buffer = b; src.loop = true; f.type = "bandpass"; f.frequency.value = 500; f.Q.value = 0.7;
+                  src.connect(f); f.connect(g); src.start();
+                  windH = { f: f, g: g, k: -1 };
+                } catch (e) { windH = null; return; }
+              }
+              if (Math.abs(k - windH.k) < 0.02) return;
+              windH.k = k; ramp(windH.g.gain, 0.16 * k * k, 0.2); ramp(windH.f.frequency, 400 + 900 * k, 0.2);
+            },
           });
           // the title theme plays on the start screen once the first tap unlocks audio
           music("music_title");

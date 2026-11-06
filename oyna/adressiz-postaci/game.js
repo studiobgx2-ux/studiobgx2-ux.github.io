@@ -51,7 +51,7 @@
           9: ["Yumurtacı Emine", "Egg Emine", "ebe", "midwife"],
           10: ["Yalnız Osman", "Lonely Osman", "çoban", "shepherd"],
           11: ["Reçelci Hatice", "Jam Hatice", "aşçı", "cook"],
-          12: ["Muhtar Kemal", "Headman Kemal", "muhtar", "village headman"],
+          12: ["Muhtar Kemal", "Headman Kemal", "muhtar", "headman"],
           13: ["Keçici Selim", "Goat Selim", "peynirci", "cheesemaker"],
           14: ["Değirmenci Gülsüm", "Miller Gülsüm", "değirmenci", "miller"],
           15: ["Demirci Rıza", "Smith Rıza", "demirci", "blacksmith"],
@@ -233,10 +233,19 @@
           c.width = 256; c.height = 64;
           const x = c.getContext("2d");
           x.fillStyle = bg; x.fillRect(0, 0, 256, 64);
-          x.fillStyle = fg; x.font = "600 38px Geist, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle";
+          let fs = 38; x.fillStyle = fg; x.font = `600 ${fs}px Geist, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
+          while (x.measureText(text).width > 236 && fs > 16) { fs -= 2; x.font = `600 ${fs}px Geist, sans-serif`; }
           x.fillText(text, 128, 34);
           const tx = new THREE.CanvasTexture(c); tx.encoding = THREE.sRGBEncoding; return tx;
         }
+        // the post office sign follows the language (TR "POSTANE", EN "POST OFFICE")
+        const poSign = { lang: window.__lang === "en" ? "en" : "tr" };
+        poSign.mat = new THREE.MeshLambertMaterial({ map: textTex(poSign.lang === "en" ? "POST OFFICE" : "POSTANE", "#ffd60a", "#b5121b") });
+        poSign.refresh = () => {
+          const l = window.__lang === "en" ? "en" : "tr"; if (l === poSign.lang) return;
+          poSign.lang = l; const old = poSign.mat.map;
+          poSign.mat.map = textTex(l === "en" ? "POST OFFICE" : "POSTANE", "#ffd60a", "#b5121b"); poSign.mat.needsUpdate = true; old.dispose();
+        };
         const anims = [];
         const colliders = [];
         const addCircle = (x, z, r) => colliders.push({ t: 0, x, z, r });
@@ -439,7 +448,7 @@
           ball(0.08, "#ffd60a", 0.6, 1.6, PO.d / 2 + 0.2, po);
           for (const s of [-3, 3]) { box(1.5, 1.3, 0.15, "#9ad7ff", s, 2.6, PO.d / 2 + 0.05, po); box(1.7, 0.15, 0.3, "#fff", s, 1.9, PO.d / 2 + 0.12, po); }
           box(5.2, 1.1, 0.3, "#ffd60a", 0, 4.2, PO.d / 2 + 0.2, po);
-          mesh(new THREE.PlaneGeometry(4.9, 0.95), new THREE.MeshLambertMaterial({ map: textTex("POSTANE", "#ffd60a", "#b5121b") }), 0, 4.2, PO.d / 2 + 0.36, po, false);
+          mesh(new THREE.PlaneGeometry(4.9, 0.95), poSign.mat, 0, 4.2, PO.d / 2 + 0.36, po, false);
           box(0.8, 1.4, 0.8, "#ffd60a", 3.8, 0.7, PO.d / 2 + 0.6, po);
           box(0.85, 0.3, 0.85, "#d62828", 3.8, 1.5, PO.d / 2 + 0.6, po);
           box(0.6, 3.8, 0.6, "#c9a27c", -3.6, 6.6, -1, po);
@@ -1095,7 +1104,7 @@
               if (key !== shownKey) {
                 shownKey = key;
                 const dark = DN.phase === "evening" || DN.phase === "night";
-                clkIco.textContent = dark ? "🌙" : "☀️";
+                clkIco.innerHTML = window.xSvg(dark ? "moon" : "sun");
                 clk.classList.toggle("is-night", dark);
                 clk.setAttribute("aria-label", NAMES[DN.phase][window.__lang === "en" ? 1 : 0]);
                 clk.title = clk.getAttribute("aria-label");
@@ -1802,6 +1811,7 @@
           torn: { tier: 2, lab: ["Yırtık", "Torn"], to: ["", ""] },
           sketch3: { tier: 3, lab: ["Çizim", "Sketch"], to: ["Bu resimdeki ev.", "the house in this drawing."] },
           hand: { tier: 3, lab: ["Elden Teslim", "Hand Delivery"], to: ["Eline vereceğin kişiye", "the person you hand this to"] },
+          chain: { tier: 2, lab: ["Zincir", "Chain"], to: ["Cevap mektubu: zincirin sıradaki halkasına", "A reply letter: to the next link in the chain"] },
         };
         // landmarks for KONUM: pond, bridge ends, windmill
         const dq = (x) => Math.hypot(x.x, x.z);
@@ -2021,6 +2031,24 @@
         const eio = (k) => (k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2), eo = (k) => 1 - (1 - k) ** 3;
         const cine = { w: 0, lock: false, pos: new THREE.Vector3(), look: new THREE.Vector3() };
         let busy = false;
+        // ---------- game feel: time scale (hitstop), camera shake / FOV punch, landing squash; shake is off under reduced motion ----------
+        const FX = { tsv: 1, slow: -1, slowD: 0.25, shA: 0, shT: 0, shD: 1, shH: 0, camS: 0, fovP: 0, land: 0, ff: 0, fov: 55,
+          calm: (() => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } })() };
+        try { matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", (e) => (FX.calm = e.matches)); } catch (e) {}
+        // hitstop: time drops to 0.3 and eases back to 1 over d seconds of real time
+        function hitstop(d = 0.25) { if (FX.calm) return; FX.slow = 0; FX.slowD = d; FX.tsv = 0.3; }
+        function feelTS(rdt) {
+          if (FX.slow >= 0) { FX.slow += rdt; const k = Math.min(1, FX.slow / FX.slowD); FX.tsv = 0.3 + 0.7 * k * k; if (k >= 1) { FX.slow = -1; FX.tsv = 1; } }
+          return FX.tsv;
+        }
+        // shake: amplitude in world units, decays over d seconds; horiz = side to side only
+        function camShake(a, d = 0.25, horiz = false) {
+          if (FX.calm) return;
+          const cur = FX.shA * Math.max(0, 1 - FX.shT / FX.shD);
+          if (a >= cur) { FX.shA = a; FX.shD = d; FX.shT = 0; FX.shH = horiz ? 1 : 0; }
+        }
+        const fovPunch = (deg) => { if (!FX.calm) FX.fovP = deg; };
+        const perf = { low: false, auto: true, acc: 0, n: 0, win: 0 }; // performance mode (see the perf block near the loop)
         function thud(at) {
           try {
             const out = SND.out(); if (!out) return; actx = out.context;
@@ -2152,6 +2180,7 @@
         }
         // spawn one puff: o = { vx, vy, vz, s0, s1, life, op }
         function dustPuff(x, y, z, o = {}) {
+          if (perf.low && Math.random() < 0.5) return;
           let s = dustPool.pop();
           if (!s) { const old = dustLive.shift(); if (!old) return; s = old.s; }
           const life = o.life || 0.6 + Math.random() * 0.3;
@@ -2348,60 +2377,174 @@
         function closeDoor(o, at, extra) {
           tw(0.25, (k) => o.g.scale.setScalar(Math.max(0.001, 1 - eio(k))), at, () => { scene.remove(o.g); o.g.scale.setScalar(1); o.lock = false; if (extra) extra(); busy = false; });
         }
+        // ---------- delivery juice: face bubbles (drawn, so identical on every device), trail sparks, coins to the HUD, vignette ----------
+        const faceTexs = {};
+        function star5(x, cx, cy, r) { x.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, q = i % 2 ? r * 0.45 : r; x.lineTo(cx + Math.cos(a) * q, cy + Math.sin(a) * q); } x.closePath(); }
+        function heart(x, cx, cy, r) { x.beginPath(); x.moveTo(cx, cy + r * 0.9); x.bezierCurveTo(cx - r * 1.4, cy - r * 0.1, cx - r * 0.7, cy - r * 1.1, cx, cy - r * 0.35); x.bezierCurveTo(cx + r * 0.7, cy - r * 1.1, cx + r * 1.4, cy - r * 0.1, cx, cy + r * 0.9); x.closePath(); }
+        // mood 1 = smile, 2 = heart eyes, 3 = star eyes, 0 = a question mark (wrong door)
+        function faceTex(m) {
+          if (faceTexs[m]) return faceTexs[m];
+          return (faceTexs[m] = canvasTex(128, 128, (x) => {
+            x.lineJoin = "round"; x.lineCap = "round";
+            // speech bubble with a little tail
+            x.fillStyle = "#fffaf0"; x.strokeStyle = "#5a3e2b"; x.lineWidth = 5;
+            x.beginPath(); x.moveTo(50, 96); x.lineTo(60, 122); x.lineTo(76, 96); x.closePath(); x.fill(); x.stroke();
+            x.beginPath(); x.arc(64, 56, 47, 0, 6.283); x.fill(); x.stroke();
+            x.beginPath(); x.moveTo(53, 95); x.lineTo(73, 95); x.lineTo(61, 112); x.closePath(); x.fill();
+            if (!m) {
+              x.fillStyle = "#c2410c"; x.font = "700 70px Georgia, serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("?", 64, 60);
+              return;
+            }
+            x.fillStyle = "#ffd166"; x.strokeStyle = "#b7791f"; x.lineWidth = 3;
+            x.beginPath(); x.arc(64, 56, 34, 0, 6.283); x.fill(); x.stroke();
+            x.fillStyle = "rgba(255,120,140,0.55)"; x.beginPath(); x.arc(44, 66, 6, 0, 6.283); x.arc(84, 66, 6, 0, 6.283); x.fill();
+            if (m === 1) { x.strokeStyle = "#5a3e2b"; x.lineWidth = 4; [50, 78].forEach((ex) => { x.beginPath(); x.arc(ex, 52, 6, Math.PI * 1.1, Math.PI * 1.9); x.stroke(); }); }
+            else if (m === 2) { x.fillStyle = "#e63946"; heart(x, 50, 50, 8); x.fill(); heart(x, 78, 50, 8); x.fill(); }
+            else { x.fillStyle = "#f59e0b"; x.strokeStyle = "#b45309"; x.lineWidth = 1.5; star5(x, 50, 50, 10); x.fill(); x.stroke(); star5(x, 78, 50, 10); x.fill(); x.stroke(); }
+            x.strokeStyle = "#5a3e2b"; x.lineWidth = 4; x.beginPath(); x.arc(64, 62, m === 3 ? 14 : 11, Math.PI * 0.15, Math.PI * 0.85); x.stroke();
+            if (m === 3) { x.fillStyle = "#8b2e2e"; x.beginPath(); x.arc(64, 62, 13, Math.PI * 0.18, Math.PI * 0.82); x.closePath(); x.fill(); }
+          }));
+        }
+        // a bubble sprite over someone's head: pops in, bobs, fades; follows obj when given
+        function popBubble(tex, pos, obj, dur = 1.25, size = 0.95) {
+          const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false, toneMapped: false, fog: false }));
+          m.renderOrder = 20; scene.add(m);
+          const base = pos.clone();
+          const side = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).setY(0).normalize().multiplyScalar(size * 0.95);
+          tw(dur, (k) => {
+            if (obj) base.set(obj.position.x, obj.position.y + 2.85, obj.position.z);
+            const s = k < 0.14 ? lerp(0.2, 1.18, eo(k / 0.14)) : k < 0.26 ? lerp(1.18, 1, (k - 0.14) / 0.12) : 1;
+            m.scale.set(size * s, size * s, 1);
+            m.position.set(base.x + side.x, base.y + Math.sin(k * 9) * 0.04 + k * 0.15, base.z + side.z);
+            m.material.opacity = k > 0.78 ? 1 - (k - 0.78) / 0.22 : 1;
+          }, 0, () => { scene.remove(m); m.material.dispose(); });
+        }
+        // little warm sparks left behind a flying envelope (round glows, pooled)
+        let sparkTex = null;
+        const sparks = [];
+        function spark(p, col) {
+          if (perf.low && Math.random() < 0.5) return;
+          sparkTex = sparkTex || canvasTex(32, 32, (x) => { const g = x.createRadialGradient(16, 16, 0, 16, 16, 16); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.35, "rgba(255,236,170,0.9)"); g.addColorStop(1, "rgba(255,200,90,0)"); x.fillStyle = g; x.fillRect(0, 0, 32, 32); });
+          let s = sparks.find((q) => q.life <= 0);
+          if (!s) {
+            if (sparks.length >= 40) return;
+            s = { m: new THREE.Sprite(new THREE.SpriteMaterial({ map: sparkTex, transparent: true, depthWrite: false, toneMapped: false, fog: false, blending: THREE.AdditiveBlending })), life: 0 };
+            scene.add(s.m); sparks.push(s);
+          }
+          s.m.visible = true; s.m.position.copy(p); s.life = s.max = 0.35 + Math.random() * 0.2;
+          s.vx = (Math.random() - 0.5) * 0.6; s.vy = 0.4 + Math.random() * 0.5; s.vz = (Math.random() - 0.5) * 0.6; s.sz = 0.22 + Math.random() * 0.14;
+          s.m.material.color.set(col || 0xffffff);
+        }
+        anims.push((t, dt) => {
+          for (const s of sparks) {
+            if (s.life <= 0) continue;
+            s.life -= dt; if (s.life <= 0) { s.m.visible = false; continue; }
+            const k = s.life / s.max;
+            s.m.position.x += s.vx * dt; s.m.position.y += s.vy * dt; s.m.position.z += s.vz * dt;
+            s.m.scale.setScalar(s.sz * (0.4 + 0.6 * k)); s.m.material.opacity = k;
+          }
+        });
+        const trail = (env) => { env.userData.tr = (env.userData.tr || 0) + 1; if (env.userData.tr % 2 === 0) spark(env.position); };
+        // HUD coin counter: coins fly from the door to the counter, which counts up as each one lands
+        const coinUI = { hold: 0 };
+        function coinShow(v) { if (performance.now() < coinUI.hold) return; const el = $("coins"); if (el.textContent !== String(v)) el.textContent = v; }
+        function flyCoins(world, gain) {
+          const el = $("coins"), chip = el.parentNode, base = Math.max(0, S.coins - gain);
+          if (!game.started || $("hud").hidden || !gain) { coinUI.hold = 0; coinShow(S.coins); return; }
+          const r = el.getBoundingClientRect(), tx = r.left + r.width / 2 - 14, ty = r.top + r.height / 2;
+          proj.copy(world).project(camera);
+          const sx = ((proj.x + 1) / 2) * innerWidth, sy = ((1 - proj.y) / 2) * innerHeight;
+          const n = Math.min(8, Math.max(3, Math.round(gain / 4))), calm = FX.calm || !el.animate;
+          coinUI.hold = performance.now() + 2500; el.textContent = base;
+          let landed = 0;
+          const land = (i) => {
+            landed++;
+            el.textContent = Math.min(S.coins, base + Math.round((gain * landed) / n));
+            if (i % 2 === 0 || landed === n) SND.sfx("sfx_coin", { vol: 0.28, rate: 0.96 + landed * 0.05 });
+            chip.classList.remove("x-coinbump"); void chip.offsetWidth; chip.classList.add("x-coinbump");
+            if (landed === n) { coinUI.hold = 0; coinShow(S.coins); }
+          };
+          for (let i = 0; i < n; i++) {
+            if (calm) { setTimeout(() => land(i), 150 + i * 60); continue; }
+            const c = document.createElement("i"); c.className = "x-flycoin"; c.setAttribute("aria-hidden", "true");
+            root.append(c);
+            const jx = sx + (Math.random() - 0.5) * 60, jy = sy + (Math.random() - 0.5) * 30, mx = (jx + tx) / 2 + (Math.random() - 0.5) * 80, my = Math.min(jy, ty) - 60 - Math.random() * 60;
+            const a = c.animate([
+              { transform: `translate(${sx}px, ${sy}px) scale(0.3)`, opacity: 0 },
+              { transform: `translate(${jx}px, ${jy - 30}px) scale(1.15)`, opacity: 1, offset: 0.22 },
+              { transform: `translate(${mx}px, ${my}px) scale(1)`, opacity: 1, offset: 0.6 },
+              { transform: `translate(${tx}px, ${ty}px) scale(0.55)`, opacity: 0.9 },
+            ], { duration: 720, delay: 60 + i * 65, easing: "cubic-bezier(0.45, 0, 0.7, 1)", fill: "both" });
+            a.onfinish = () => { c.remove(); land(i); };
+          }
+          setTimeout(() => { if (performance.now() >= coinUI.hold - 50) { coinUI.hold = 0; coinShow(S.coins); } }, 2600);
+        }
+        function vigPulse(cold) { const v = $("vig"); if (!v) return; v.classList.remove("is-on", "is-cold"); void v.offsetWidth; v.classList.toggle("is-cold", !!cold); v.classList.add("is-on"); }
+        // the shared payoff of a correct delivery: hitstop, punch, hearts and coins, the face bubble, sting, vibration
+        function payoff(head, door, gain, follow) {
+          hitstop(0.25); camShake(0.045, 0.16); fovPunch(-2.5);
+          heartBurst(head, gain, door);
+          popBubble(faceTex(FX.mood || 2), head, follow);
+          flyCoins(door, gain); vigPulse();
+          if (!SND.jingle(++deliveries % 2 ? "jingle_delivery_success" : "jingle_delivery_success_alt")) [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.45, "sine", 0.16));
+          vib([20, 40, 20]);
+        }
+        // the whole moment can be cut short by moving: tweens run fast to their end and control comes back at once
+        function momentStart() { FX.mom = { t0: performance.now(), rel: false }; FX.ff = 0; }
+        function skipMoment() { FX.mom = null; FX.ff = 7; FX.slow = -1; FX.tsv = 1; cine.lock = false; }
         let deliveries = 0;
         function happyDelivery(h, gain) {
-          busy = cine.lock = true;
-          const { o, gy, d } = knockAndOpen(h, 0.7), r = h.rot, nx = Math.sin(r), nz = Math.cos(r);
+          // whole moment: 1.6 s (knock 0.25, door 0.35, envelope 0.45-0.9, payoff 0.9, door shut by 1.6); moving skips it
+          busy = cine.lock = true; momentStart();
+          const { o, gy, d } = knockAndOpen(h, 0.35), r = h.rot, nx = Math.sin(r), nz = Math.cos(r);
           cine.pos.set(d.x + nx * 4.6 + nz * 2.8, gy + 2.3, d.z + nz * 4.6 - nx * 2.8);
           cine.look.set(d.x + nx * 0.6, gy + 1.3, d.z + nz * 0.6);
-          tw(0.5, (k) => (cine.w = eio(k)));
-          // envelope: bag -> owner's hand, arcing and spinning
+          tw(0.35, (k) => (cine.w = Math.max(cine.w, eio(k))));
+          // envelope: bag -> owner's hand, arcing and spinning, leaving warm sparks
           const env = new THREE.Group();
           tpart(CG.sphere, "#fff8ec", env, 0, 0, 0, 0.2, 0.015, 0.14);
           tpart(CG.sphere, "#e4572e", env, 0, 0.012, 0, 0.04, 0.012, 0.04).castShadow = false;
           const from = new THREE.Vector3(), to = new THREE.Vector3(), hand = o.kk ? new THREE.Vector3() : new THREE.Vector3(0, -0.42, 0.12);
-          tw(0.55, (k) => {
-            if (!env.parent) { const L = player.kk && player.kk.letter; scene.add(env); (L && L.visible ? L : player.bag).getWorldPosition(from); if (L) L.visible = false; }
+          tw(0.45, (k) => {
+            if (!env.parent) { const L = player.kk && player.kk.letter; scene.add(env); (L && L.visible ? L : player.bag).getWorldPosition(from); if (L) L.visible = false; SND.sfx("sfx_toss_whoosh", { vol: 0.25, rate: 1.15 }); }
             o.armR.localToWorld(to.copy(hand));
             env.position.lerpVectors(from, to, eio(k)); env.position.y += Math.sin(k * Math.PI) * 1.3;
             env.rotation.set(k * 6.283 * 0.25, k * 6.283 * 2, 0);
-          }, 0.95, () => { o.armR.attach(env); env.position.copy(hand); env.rotation.set(0.3, 0, 0); });
-          // correct letter: a nod as it arrives, then the cheer
-          if (o.kk) tw(0, () => o.kk.once("Yes"), 1.1);
-          // the payoff: hearts, coins, +gain, chime, buzz
+            trail(env);
+          }, 0.45, () => { o.armR.attach(env); env.position.copy(hand); env.rotation.set(0.3, 0, 0); });
+          // the payoff: hitstop, hearts, coins to the HUD, face bubble, vignette, sting
           tw(0, () => {
-            heartBurst(new THREE.Vector3(d.x, gy + 2.1, d.z), gain, new THREE.Vector3(d.x + nx * 0.7, gy + 1.2, d.z + nz * 0.7));
+            payoff(new THREE.Vector3(d.x, gy + 2.1, d.z), new THREE.Vector3(d.x + nx * 0.7, gy + 1.2, d.z + nz * 0.7), gain, o.g);
             player.act("Cheer");
-            if (o.kk) tw(0, () => o.kk.once("Cheer"), 0.15);
-            // alternate the two delivery stings; one coin chime per 5 coins earned
-            if (!SND.jingle(++deliveries % 2 ? "jingle_delivery_success" : "jingle_delivery_success_alt")) [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.45, "sine", 0.16));
-            for (let i = 0, n = Math.max(1, Math.round(gain / 5)); i < n; i++) SND.sfx("sfx_coin", { delay: 0.3 + i * 0.16, rate: 0.97 + i * 0.06 + Math.random() * 0.04 });
-            vib([20, 40, 20]);
-          }, 1.5);
+            if (o.kk) o.kk.once("Cheer");
+          }, 0.9);
           // two happy hops with arms up
-          tw(0.7, (k) => {
+          tw(0.5, (k) => {
             const p = (k * 2) % 1, up = Math.min(1, k * 5);
             o.g.position.y = gy + Math.sin(p * Math.PI) * 0.4;
             o.body.scale.set(1 + Math.sin(p * Math.PI * 2) * 0.05, 1 - Math.sin(p * Math.PI * 2) * 0.08, 1);
             o.armL.rotation.z = -lerp(0.28, 2.7, up); o.armR.rotation.z = lerp(0.28, 2.7, up);
-          }, 1.55, () => { o.g.position.y = gy; o.body.scale.set(1, 1, 1); });
-          tw(0.5, (k) => (cine.w = 1 - eio(k)), 2.5, () => (cine.lock = false));
-          closeDoor(o, 2.7, () => o.armR.remove(env));
+          }, 0.92, () => { o.g.position.y = gy; o.body.scale.set(1, 1, 1); });
+          tw(0.35, (k) => (cine.w = Math.min(cine.w, 1 - eio(k))), 1.22, () => (cine.lock = false));
+          closeDoor(o, 1.35, () => o.armR.remove(env));
         }
         function grumpyDoor(h) {
-          busy = cine.lock = true;
-          const { o, gy, d } = knockAndOpen(h, 0.65, "Talk");
-          tw(0, () => (cine.lock = false), 0.6);
-          tw(0.7, (k) => {
+          busy = cine.lock = true; momentStart();
+          const { o, gy, d } = knockAndOpen(h, 0.35, "Talk");
+          tw(0, () => (cine.lock = false), 0.4);
+          // a head shake (no "No" clip on the villagers, so the whole upper body turns side to side)
+          tw(0.6, (k) => {
             const w = Math.sin(k * Math.PI * 6) * (1 - k);
-            o.body.position.x = w * 0.16; o.body.rotation.z = -w * 0.12;
-          }, 1.1);
+            o.body.rotation.y = w * 0.38; o.body.position.x = w * 0.05;
+          }, 0.6, () => { o.body.rotation.y = 0; o.body.position.x = 0; });
           tw(0, () => {
-            if (!playFx("wrong", new THREE.Vector3(d.x + Math.sin(h.rot) * 0.5, gy + 1.9, d.z + Math.cos(h.rot) * 0.5), 1.8, 20)) cloudPuff(new THREE.Vector3(d.x, gy + 2.5, d.z));
+            popBubble(faceTex(0), new THREE.Vector3(d.x, gy + 3.05, d.z), o.g, 1.1, 0.85);
+            if (!playFx("wrong", new THREE.Vector3(d.x + Math.sin(h.rot) * 0.5, gy + 1.9, d.z + Math.cos(h.rot) * 0.5), 1.4, 20)) cloudPuff(new THREE.Vector3(d.x, gy + 2.5, d.z));
             if (!SND.jingle("jingle_wrong_house")) { tone(196, 0, 0.28, "triangle", 0.16); tone(139, 0.22, 0.4, "triangle", 0.16); }
+            thud(0); camShake(0.06, 0.28, true); vigPulse(true);
             vib(60);
-          }, 1.1);
-          closeDoor(o, 2.1);
+          }, 0.6);
+          closeDoor(o, 1.35);
         }
         const bubbleEl = document.getElementById("bubble");
         const bubble = { pos: new THREE.Vector3(), until: 0, follow: null };
@@ -2575,7 +2718,7 @@
         }
         function renderHUD() {
           $("mailcount").textContent = S.bag.length;
-          $("coins").textContent = S.coins;
+          coinShow(S.coins);
           saveCoins();
           $("done").textContent = S.done;
           renderRank();
@@ -2717,7 +2860,7 @@
           return best;
         }
         function pickup() {
-          const room = 3 - S.bag.length;
+          const room = TUT.on && S.done < 3 ? Math.max(0, 1 - S.bag.length) : 3 - S.bag.length;
           if (!S.pending.length) { toast(T("Postanede mektup kalmadı.", "No letters left at the post office.")); return; }
           if (room <= 0) { toast(T("Çantan dolu! Önce teslim et.", "Your bag is full! Deliver first.")); return; }
           const got = S.pending.splice(0, room), now = performance.now();
@@ -2725,6 +2868,7 @@
           S.bag.push(...got);
           if (S.active >= S.bag.length) S.active = 0;
           const rush = got.filter((l) => l.rush);
+          if (TUT.on) tw(0, tutOnPickup, 0.6);
           if (rush.length) {
             const r = rush[0], i = S.bag.indexOf(r); if (i >= 0) S.active = i;
             SND.sfx("sfx_bell_ring", { delay: 0.5, vol: 0.35 });
@@ -2766,13 +2910,14 @@
               tw(0, () => rushStars(stars, record), 1.5);
             }
             if (tipArm === l) tipArm = null;
+            FX.mood = l.rush ? stars : tipped ? 1 : fast ? 3 : 2;
             S.coins += gain; S.earned += gain; S.done++; saveCoins();
             gainXP(10 + 5 * stars);
             S.bag.splice(i, 1); S.active = 0;
             if (mode === "hand") handOver(h, gain); else if (mode === "night") slipUnder(h, gain); else happyDelivery(h, gain);
             awardStamp(h, stars >= 3);
             giftCheck(h, stars);
-            tw(0, () => say(h.name, (mode === "night" ? T("(kapının ardından) ", "(from behind the door) ") : "") + h.story[lang()], top, og, 5, ownerVoice(h)), 1.2);
+            tw(0, () => say(h.name, (mode === "night" ? T("(kapının ardından) ", "(from behind the door) ") : "") + h.story[lang()], top, og, 5, ownerVoice(h)), mode === "door" ? 1.0 : 1.2);
             const xpT = `${vT} · ${10 + 5 * stars} XP`;
             if (l.rush) toast(`+${gain} 🪙  ⏱ ${T("Acele", "Rush")} ${"★".repeat(stars)}${"☆".repeat(3 - stars)}${tipped ? T(" (ipucu: yarı altın)", " (hint: half coins)") : ""}${xpT}`);
             else toast((tipped ? T("+5 🪙 (ipucu: yarı altın)", "+5 🪙 (hint: half coins)") : fast ? T(`+10 🪙  ⏱ +5 hız bonusu!`, `+10 🪙  ⏱ +5 speed bonus!`) : "+10 🪙") + xpT);
@@ -2780,12 +2925,15 @@
             if (!notes.some((o) => o[0] === met[0])) { notes.push(met); renderNotes(); }
             renderHUD();
             PX().total++; saveProf(); renderNotes();
-            if (S.done >= 10) { S.over = true; setTimeout(() => storyCheck(showEnd), 3400); }
+            if (TUT.on) tw(0, tutOnDeliver, 1.5);
+            friendGain(h);
+            chainAfter(l, h, mode);
+            if (S.done >= 10) { PX().rounds = (PX().rounds || 0) + 1; saveProf(); S.over = true; setTimeout(() => storyCheck(showEnd), 3400); }
             else if (storyDue()) setTimeout(() => storyCheck(), 3600);
           } else {
             if (mode === "hand") grumpyHand(h); else grumpyDoor(h);
             S.mistakes++; S.hearts--; if (S.combo) S.combo.n = 0;
-            tw(0, () => say(h.name, T("Bu bana değil!", "This isn't for me!"), top, og, 2.5, ownerVoice(h)), mode === "hand" ? 0.4 : 1.1);
+            tw(0, () => say(h.name, T("Bu bana değil!", "This isn't for me!"), top, og, 2.5, ownerVoice(h)), mode === "hand" ? 0.4 : 0.6);
             if (S.hearts <= 0) {
               const back = S.bag.splice(S.active, 1)[0]; back.rushT0 = 0; // a rush letter's clock restarts when it is picked up again
               S.pending.unshift(back); S.active = 0; S.hearts = 3;
@@ -2900,8 +3048,9 @@
           $("notechip-l").textContent = T("Defter", "Notebook");
           renderAlbum();
           const ul = $("notelist"); ul.innerHTML = "";
-          notes.forEach((f) => { const li = document.createElement("li"); li.textContent = f[lang() === "en" ? 1 : 0]; ul.append(li); });
+          notes.forEach((f) => { const li = document.createElement("li"); xIcoText(li, f[lang() === "en" ? 1 : 0]); ul.append(li); });
           if (!notes.length) { const li = document.createElement("li"); li.textContent = T("Köylülerle konuş, dedikodular buraya yazılır.", "Talk to villagers; gossip is written here."); li.style.color = "var(--text-secondary)"; ul.append(li); }
+          if (PROF && typeof friendLi === "function") friendLi(ul);
           if (PROF && DOST_READY) dostLi(ul);
         }
         $("notechip").addEventListener("click", () => {
@@ -3066,6 +3215,7 @@
           if (PROF.rank > before) setTimeout(() => rankUp(PROF.rank), 2700);
         }
         function rankUp(r) {
+          if (r >= 1 && !PX().villSeen && $("shopnew")) $("shopnew").hidden = false;
           const unl = Object.keys(ITEM).filter((id) => ITEM[id].rank === r).length;
           toast(T(`🎉 Rütbe atladın: ${RANKS[r].tr}!${unl ? ` Dükkânda ${unl} yeni renk açıldı.` : ""}`, `🎉 Rank up: ${RANKS[r].en}!${unl ? ` ${unl} new colours in the shop.` : ""}`), 3600);
           if (!SND.jingle("jingle_round_complete", { dur: 1.9 })) jingle();
@@ -3125,10 +3275,11 @@
           $("shop-svg").setAttribute("aria-label", T("Postacının önizlemesi", "Preview of the postman"));
           // tabs
           const tabs = $("shop-tabs"); tabs.textContent = "";
-          SHOP_CATS.concat([VTAB]).forEach((c) => {
+          if (shop.cat === VTAB.id && !unl("vill")) shop.cat = SHOP_CATS[0].id;
+          SHOP_CATS.concat(unl("vill") ? [VTAB] : []).forEach((c) => {
             const b = document.createElement("button");
             b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(c.id === shop.cat));
-            b.textContent = `${c.ico} ${c[lang()]}`;
+            xIcoText(b, `${c.ico} ${c[lang()]}`);
             b.addEventListener("click", () => { if (shop.cat === c.id) return; shop.cat = c.id; shop.sel = null; SND.sfx("ui_tap", { vol: 0.35 }); renderShop(); });
             tabs.append(b);
           });
@@ -3498,9 +3649,33 @@
         }
         const crossed = (a, b, c) => (b >= a ? a < c && c <= b : c > a || c <= b);
         const au = { p: -1, ph: null, animT: 12 + Math.random() * 15 }, _camR = new THREE.Vector3();
+        let stepSide = 1;
         function step(run) {
-          const n = 1 + Math.floor(Math.random() * 4);
-          SND.sfx((onDirt(player.pos.x, player.pos.z) ? "sfx_step_dirt_" : "sfx_step_grass_") + n, { vol: run ? 0.25 : 0.14, rate: 0.92 + Math.random() * 0.16 });
+          const n = 1 + Math.floor(Math.random() * 4), dirt = onDirt(player.pos.x, player.pos.z);
+          SND.sfx((dirt ? "sfx_step_dirt_" : "sfx_step_grass_") + n, { vol: run ? 0.25 : 0.14, rate: 0.92 + Math.random() * 0.16 });
+          // a small puff under each running footfall on the dirt paths
+          if (run && dirt && !perf.low) {
+            stepSide = -stepSide;
+            const h = player.heading, sx = Math.cos(h) * 0.16 * stepSide, sz = -Math.sin(h) * 0.16 * stepSide, x = player.pos.x + sx, z = player.pos.z + sz;
+            dustPuff(x, groundY(x, z) + 0.04, z, { vx: -Math.sin(h) * 0.5, vy: 0.25, vz: -Math.cos(h) * 0.5, s0: 0.2, s1: 0.55, life: 0.45, op: 0.35 });
+          }
+        }
+        // speed lines: thin streaks at the screen edges near top speed (off under reduced motion and in performance mode)
+        let slEl = null, slOn = -1;
+        function speedLines(k) {
+          const v = FX.calm || perf.low ? 0 : Math.max(0, Math.min(1, (k - 0.72) / 0.25));
+          if (!slEl) {
+            if (v <= 0) return;
+            slEl = document.createElement("div"); slEl.className = "x-speed"; slEl.setAttribute("aria-hidden", "true");
+            for (let i = 0; i < 14; i++) {
+              const a = (i / 14) * 6.283 + (i % 2) * 0.17, o = document.createElement("i"), b = document.createElement("b");
+              o.style.transform = `rotate(${a.toFixed(3)}rad)`; b.style.animationDelay = `${((i * 0.137) % 0.5).toFixed(2)}s`;
+              o.append(b); slEl.append(o);
+            }
+            root.append(slEl);
+          }
+          const q = Math.round(v * 20) / 20;
+          if (q !== slOn) { slOn = q; slEl.style.opacity = String(q * 0.55); slEl.classList.toggle("is-on", q > 0); }
         }
         function panAt(x, z) {
           _camR.setFromMatrixColumn(camera.matrixWorld, 0);
@@ -3524,7 +3699,10 @@
             }
           } else { au.p = -1; au.ph = null; }
           // scooter wheels: rate and level follow speed, silent when stopped
-          SND.roll(R && !scooter.hop ? scooter.v : 0);
+          const rv = R && !scooter.hop ? scooter.v : 0;
+          SND.roll(rv, rv > 0.3 && onDirt(x, z) ? 1 : 0.55);
+          if (SND.wind) SND.wind(R ? Math.max(0, Math.min(1, (rv - 8) / 13)) : 0);
+          speedLines(R && !cine.lock ? FX.camS : 0);
           // river and pond: louder within ~25 units of the water's edge
           const dRiver = z >= -112 && z <= 112 ? Math.abs(x - riverX(z)) - 6 : 99, dPond = Math.hypot(x - POND.x, z - POND.z) - POND.r;
           const dw = Math.max(0, Math.min(dRiver, dPond));
@@ -3727,7 +3905,7 @@
             } else if (!s.pose) {
               if (pd < 4 && game.started) {
                 turnY(g, angTo(g, px, pz), Math.min(1, dt * 5));
-                if (k && !s.waved) { s.waved = true; k.once("Wave"); }
+                if (k && !s.waved) { s.waved = true; k.once("Wave"); friendGreet(h, o); }
               } else turnY(g, s.face, Math.min(1, dt * 3));
               // little bits of life: chat on the square, a nod at work
               s.idle -= dt;
@@ -3764,6 +3942,7 @@
         // a letter's clue must point at exactly its own house (torn letters carry their own pairwise checks)
         const clueOK = (l) => (l.chk ? l.chk.every((c) => { const m = matches(c); return m.length === 1 && m[0] === l.house; }) : (() => { const m = matches(l.clauses); return m.length === 1 && m[0] === l.house; })());
         function markHand(P) {
+          if (typeof unl === "function" && !unl("hand")) return P; // Elden Teslim letters start in round 3
           const want = Math.max(1, Math.round(P.length / 5));
           let n = 0;
           // never among the game's first three letters, never a rush or the daily golden letter
@@ -3853,7 +4032,7 @@
             : T(`📯 Bir Dost · ${ch}/${DOST.length} bölüm · sonraki mektup ${left} teslimat sonra${ch ? " (dokun: son bölümü oku)" : ""}`, `📯 A Friend · ${ch}/${DOST.length} chapters · next letter in ${left} deliveries${ch ? " (tap to reread)" : ""}`);
         }
         function dostLi(ul) {
-          const li = document.createElement("li"); li.className = "x-dostline"; li.textContent = dostLine();
+          const li = document.createElement("li"); li.className = "x-dostline"; xIcoText(li, dostLine());
           li.addEventListener("click", () => { const ch = PX().ch; if (ch && game.started && !busy && !storyOpen) playChapter(ch, null, true); });
           ul.prepend(li);
         }
@@ -3915,7 +4094,7 @@
           tw(0.25, (k) => (dog.head.rotation.x = -Math.sin(k * Math.PI) * 0.35));
         }
         function useDog() {
-          if (!game.started || S.over || storyOpen) return;
+          if (!game.started || S.over || storyOpen || !unl("dog")) return;
           const l = S.bag[S.active];
           if (!l) { toast(T("🐶 Önce postaneden bir mektup al, sonra kokusunu koklatırız.", "🐶 Pick up a letter first, then the dog can sniff it.")); return; }
           if (dog.st === "sniff" || dog.st === "return") { toast(T("🐶 Köpek zaten iz sürüyor!", "🐶 The dog is already on the trail!")); return; }
@@ -3985,7 +4164,7 @@
           d.body.rotation.x = -sit * 0.45; d.body.position.y = Math.abs(Math.sin(d.phase)) * 0.08 * run - sit * 0.12;
           d.tail.rotation.y = Math.sin(t * (go ? 8 : 15)) * (go ? 0.3 : 0.65);
           // barks: now and then, and when the postman reaches the house of a letter the dog has sniffed
-          if (game.started && !S.over) {
+          if (game.started && !S.over && g.visible) {
             d.barkT -= dt;
             if (d.barkT <= 0) { d.barkT = 25 + Math.random() * 25; if (Math.hypot(px - p.x, pz - p.z) < 20) dogBark(0.22); }
             const l = S.bag[S.active];
@@ -4120,16 +4299,17 @@
             o.armR.localToWorld(b.copy(hand));
             env.position.lerpVectors(a, b, eio(k)); env.position.y += Math.sin(k * Math.PI) * 0.9;
             env.rotation.set(k * 1.5, k * 6.283 * 2, 0);
+            trail(env);
           }, delay, () => { o.armR.attach(env); env.position.copy(hand); env.rotation.set(0.3, 0, 0); });
           return env;
         }
         // hand-to-hand delivery out in the village: both turn to face, the owner nods and cheers
         function handOver(h, gain) {
           const o = h.owner, s = o.sch, g = o.g;
-          busy = cine.lock = true; o.lock = true;
+          busy = cine.lock = true; o.lock = true; momentStart();
           const seated = s && (s.pose === "Sit" || s.pose === "Turn" || s.pose === "Up");
           if (seated) { if (s.pose === "Sit" && o.kk) o.kk.once("StandUp", "Idle", true); s.pose = ""; if (s.seat) { s.seat.v = null; s.seat = null; } }
-          const pre = seated ? 1.1 : 0, r0 = g.rotation.y;
+          const pre = seated ? 0.9 : 0, r0 = g.rotation.y;
           let ra = angTo(g, player.pos.x, player.pos.z) - r0; while (ra > Math.PI) ra -= 6.283; while (ra < -Math.PI) ra += 6.283;
           tw(0.3, (k) => (g.rotation.y = r0 + ra * eio(k)), pre);
           const h0 = player.heading; let da = Math.atan2(g.position.x - player.pos.x, g.position.z - player.pos.z) - h0; while (da > Math.PI) da -= 6.283; while (da < -Math.PI) da += 6.283;
@@ -4137,19 +4317,15 @@
           player.act("Interact");
           const mx = (g.position.x + player.pos.x) / 2, mz = (g.position.z + player.pos.z) / 2, dx = g.position.x - player.pos.x, dz = g.position.z - player.pos.z, L = Math.hypot(dx, dz) || 1, gy = g.position.y;
           cine.pos.set(mx - (dz / L) * 5.2, gy + 2.6, mz + (dx / L) * 5.2); cine.look.set(mx, gy + 1.3, mz);
-          tw(0.5, (k) => (cine.w = eio(k)));
-          const env = envFly(o, 0.45 + pre);
-          if (o.kk) tw(0, () => o.kk.once("Yes"), 0.95 + pre);
+          tw(0.35, (k) => (cine.w = Math.max(cine.w, eio(k))));
+          const env = envFly(o, 0.3 + pre);
           tw(0, () => {
-            heartBurst(new THREE.Vector3(g.position.x, gy + 2.5, g.position.z), gain, new THREE.Vector3(mx, gy + 1.4, mz));
+            payoff(new THREE.Vector3(g.position.x, gy + 2.5, g.position.z), new THREE.Vector3(mx, gy + 1.4, mz), gain, g);
             player.act("Cheer");
-            if (o.kk) tw(0, () => o.kk.once("Cheer"), 0.15);
-            if (!SND.jingle(++deliveries % 2 ? "jingle_delivery_success" : "jingle_delivery_success_alt")) [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.45, "sine", 0.16));
-            for (let i = 0, n = Math.max(1, Math.round(gain / 5)); i < n; i++) SND.sfx("sfx_coin", { delay: 0.3 + i * 0.16, rate: 0.97 + i * 0.06 + Math.random() * 0.04 });
-            vib([20, 40, 20]);
-          }, 1.35 + pre);
-          tw(0.5, (k) => (cine.w = 1 - eio(k)), 2.4 + pre, () => (cine.lock = false));
-          tw(0, () => { if (env.parent) env.parent.remove(env); o.lock = false; busy = false; if (s) s.idle = 5; }, 3 + pre);
+            if (o.kk) o.kk.once("Cheer");
+          }, 0.8 + pre);
+          tw(0.35, (k) => (cine.w = Math.min(cine.w, 1 - eio(k))), 1.15 + pre, () => (cine.lock = false));
+          tw(0, () => { if (env.parent) env.parent.remove(env); o.lock = false; busy = false; if (s) s.idle = 5; }, 1.55 + pre);
         }
         function grumpyHand(h) {
           const o = h.owner, g = o.g, s = o.sch;
@@ -4160,7 +4336,8 @@
           tw(0.7, (k) => { const w = Math.sin(k * Math.PI * 6) * (1 - k); o.body.rotation.y = w * 0.3; }, 0.35, () => (o.body.rotation.y = 0));
           tw(0, () => {
             const p = new THREE.Vector3(g.position.x, g.position.y + 2.5, g.position.z);
-            if (!playFx("wrong", p, 1.8, 20)) cloudPuff(p);
+            popBubble(faceTex(0), p, g, 1.1, 0.85); thud(0); camShake(0.06, 0.28, true); vigPulse(true);
+            if (!playFx("wrong", p, 1.4, 20)) cloudPuff(p);
             if (!SND.jingle("jingle_wrong_house")) { tone(196, 0, 0.28, "triangle", 0.16); tone(139, 0.22, 0.4, "triangle", 0.16); }
             vib(60);
           }, 0.45);
@@ -4168,7 +4345,7 @@
         }
         // night: the house is asleep, so the letter goes under the door
         function slipUnder(h, gain) {
-          busy = true;
+          busy = true; momentStart();
           const [dx, dz] = wpos(h, 0, h.d / 2 + 0.25), gy = groundY(dx, dz);
           const h0 = player.heading; let da = h.rot + Math.PI - h0; while (da > Math.PI) da -= 6.283; while (da < -Math.PI) da += 6.283;
           tw(0.2, (k) => (player.heading = h0 + da * eio(k)));
@@ -4179,17 +4356,15 @@
           const a = new THREE.Vector3(), b = new THREE.Vector3(dx, gy + 0.04, dz), c = new THREE.Vector3(dx - Math.sin(h.rot) * 0.6, gy + 0.04, dz - Math.cos(h.rot) * 0.6);
           if (!scooter.riding) tw(0.5, (k) => {
             if (!env.parent) { const L = player.kk && player.kk.letter; scene.add(env); (L && L.visible ? L : player.bag).getWorldPosition(a); if (L) L.visible = false; }
-            env.position.lerpVectors(a, b, eio(k)); env.position.y += Math.sin(k * Math.PI) * 0.4; env.rotation.set(0, h.rot + k * 3, 0);
+            env.position.lerpVectors(a, b, eio(k)); env.position.y += Math.sin(k * Math.PI) * 0.4; env.rotation.set(0, h.rot + k * 3, 0); trail(env);
           }, 0.25);
           SND.sfx("sfx_paper_rustle_1", { delay: 0.6, rate: 1.1 });
           if (!scooter.riding) tw(0.35, (k) => env.position.lerpVectors(b, c, k), 0.8, () => scene.remove(env));
           tw(0, () => {
-            heartBurst(new THREE.Vector3(dx, gy + 2.2, dz), gain, new THREE.Vector3(dx, gy + 1.0, dz));
-            if (!SND.jingle(++deliveries % 2 ? "jingle_delivery_success" : "jingle_delivery_success_alt")) [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.11, 0.45, "sine", 0.16));
-            for (let i = 0, n = Math.max(1, Math.round(gain / 5)); i < n; i++) SND.sfx("sfx_coin", { delay: 0.3 + i * 0.16, rate: 0.97 + i * 0.06 + Math.random() * 0.04 });
-            vib([20, 40, 20]);
-          }, 1.15);
-          tw(0, () => (busy = false), 1.6);
+            FX.mood = 1;
+            payoff(new THREE.Vector3(dx, gy + 2.2, dz), new THREE.Vector3(dx, gy + 1.0, dz), gain, null);
+          }, 1.0);
+          tw(0, () => (busy = false), 1.5);
         }
 
         // ---------- game object ----------
@@ -4207,6 +4382,7 @@
             const ow = !R && S.bag.length ? nearOwner() : null;
             if (ow && (!h || !ow.home || (al && al.hand))) { deliver(ow.h, "hand"); return; }
             if (h && S.bag.length) { if (!doorGate(h)) return; if (R) tossLetter(h); else deliver(h); }
+            else if (nearPO() && !S.bag.length && S.pending.length) pickup(); // an empty bag at the post office: letters first, chat later
             else if (v) { if (R) toast(T("Scooterdan in (B), sonra konuş.", "Get off the scooter (B) to talk.")); else hint(v); }
             else if (nearPO()) pickup();
             else if (h) toast(T("Çantanda mektup yok. Önce postaneye uğra.", "No letters in your bag. Visit the post office first."));
@@ -4214,7 +4390,8 @@
           },
           cycle() { if (S.bag.length > 1) { S.active = (S.active + 1) % S.bag.length; renderHUD(); } },
           refreshLang() {
-            renderHUD(); renderNotes();
+            renderHUD(); renderNotes(); poSign.refresh(); renderPerf();
+            if (TUT.msg && !$("tut").hidden) $("tut").textContent = T(TUT.msg[0], TUT.msg[1]);
             if (!$("end").hidden) showEnd();
           },
           onUpdate(dt, t) {
@@ -4222,8 +4399,10 @@
             tipSparkle(t || 0);
             rushTick(false); comboTick();
             runDust(dt); updateFx(dt);
+            if (!busy) { FX.mom = null; FX.ff = 0; }
+            const tdt = dt * (FX.ff || 1);
             for (let i = 0; i < tweens.length; i++) {
-              const w = tweens[i]; w.t += dt; if (w.t < 0) continue;
+              const w = tweens[i]; w.t += tdt; if (w.t < 0) continue;
               const k = w.dur ? Math.min(1, w.t / w.dur) : 1; w.fn(k);
               if (k >= 1) { tweens.splice(i--, 1); if (w.done) w.done(); }
             }
@@ -4243,33 +4422,392 @@
             if (game.started && !S.over && !busy) {
               if (hand) msg = T(`E: Eline ver · ${ow.h.name}`, `E: Hand it to ${ow.h.name}`);
               else if (door) msg = R ? T("E: Mektubu at", "E: Toss the letter") : T("E: Teslim et", "E: Deliver");
+              else if (nearPO() && !S.bag.length && S.pending.length) msg = T("E: Mektupları al", "E: Pick up letters");
               else if (nearVillager()) msg = T("E: Konuş", "E: Talk");
               else if (nearPO() && S.pending.length && S.bag.length < 3) msg = T("E: Mektupları al", "E: Pick up letters");
               else if (!R && nearScooter()) { msg = T("B: Scootera bin", "B: Ride the scooter"); bikeOnly = true; }
             }
             if (pr.textContent !== msg) pr.textContent = msg;
             pr.hidden = !msg;
-            const bc = $("bikechip"), bl = R ? T("🛴 İn", "🛴 Get off") : "🛴 Scooter";
+            const bc = $("bikechip"), bl = R ? T("İn", "Get off") : "Scooter";
             if ($("bikechip-l").textContent !== bl) $("bikechip-l").textContent = bl;
             bc.classList.toggle("is-off", !R && !nearScooter());
             if (bc.getAttribute("aria-pressed") !== String(R)) bc.setAttribute("aria-pressed", String(R));
             const act = $("act");
             let lab = "";
-            if (msg && !bikeOnly) lab = hand ? T("Ver", "Give") : door ? (R ? T("At", "Toss") : T("Teslim", "Deliver")) : nearVillager() ? T("Konuş", "Talk") : T("Al", "Take");
+            if (msg && !bikeOnly) lab = hand ? T("Ver", "Give") : door ? (R ? T("At", "Toss") : T("Teslim", "Deliver")) : nearPO() && !S.bag.length && S.pending.length ? T("Al", "Take") : nearVillager() ? T("Konuş", "Talk") : T("Al", "Take");
             if (act.textContent !== lab) act.textContent = lab;
             act.classList.toggle("is-on", !!lab);
           },
+        });
+        // ---------- friendship: 0-5 hearts per villager from deliveries; 3+ greet you, 5 share a gossip clue (once a round) ----------
+        const frOf = (h) => { const x = PX(); if (!x.fr || typeof x.fr !== "object") x.fr = {}; return Math.max(0, Math.min(5, +x.fr[h.id] || 0)); };
+        function friendGain(h) {
+          const x = PX(), lv = frOf(h); if (lv >= 5) return;
+          x.fr[h.id] = lv + 1; saveProf();
+          if (lv + 1 === 3) tw(0, () => toast(T(`♥ ${h.name} artık dostun! Yanından geçerken seni selamlar.`, `♥ ${h.name} is your friend now! They'll greet you as you pass.`), 3000), 2.4);
+          if (lv + 1 === 5) tw(0, () => toast(T(`♥♥♥♥♥ ${h.name} en yakın dostun! Ona uğra, köyün sırlarını anlatır.`, `♥♥♥♥♥ ${h.name} is your best friend! Drop by to hear the village's secrets.`), 3200), 2.4);
+        }
+        const GREET = [["Hoş geldin postacım!", "Welcome, my postman!"], ["Yolun açık olsun!", "Safe travels!"], ["Bugün de koşturuyorsun!", "Busy as ever today!"], ["Çay içmeye gel bir ara!", "Come round for tea sometime!"]];
+        function friendGreet(h, o) {
+          const lv = frOf(h); if (lv < 3 || busy || !game.started || S.over || !bubbleEl.hidden) return;
+          const now = performance.now(); if (now < (o.frT || 0)) return; o.frT = now + 30000;
+          const top = new THREE.Vector3(o.g.position.x, o.g.position.y + 3, o.g.position.z);
+          if (lv >= 5 && o.frRound !== round) {
+            o.frRound = round;
+            const other = shuffle(HOUSES.filter((q) => q !== h))[0], f = gossipAbout(other);
+            const isNew = !notes.some((n) => n[0] === f[0]);
+            if (isNew) { notes.push(f); renderNotes(); const nc = $("notechip"); nc.classList.remove("is-pop"); void nc.offsetWidth; nc.classList.add("is-pop"); }
+            say(h.name, T("Sana bir sır vereyim: ", "Let me tell you a secret: ") + f[lang() === "en" ? 1 : 0], top, o.g, 3.5, ownerVoice(h));
+            if (isNew) tw(0, () => toast(T("📒 Deftere yeni bir ipucu yazıldı.", "📒 A new clue went into your notebook.")), 1.2);
+          } else {
+            const g = GREET[Math.floor(Math.random() * GREET.length)];
+            say(h.name, T(g[0], g[1]), top, o.g, 1.6, ownerVoice(h));
+          }
+          floatSprite(getFxTex().hearts[0], top.x, top.y - 0.4, top.z, 0.4, 0.4, 0.8, 1.1);
+        }
+        function friendLi(ul) {
+          const fr = HOUSES.map((h) => [h, frOf(h)]).filter((p) => p[1] > 0).sort((a, b) => b[1] - a[1]);
+          if (!fr.length) return;
+          const li = document.createElement("li"); li.className = "x-frli";
+          li.textContent = T("Dostluk: ", "Friendship: ") + fr.map(([h, n]) => `${h.name} ${"♥".repeat(n)}${"♡".repeat(5 - n)}`).join(" · ");
+          ul.prepend(li);
+        }
+        // ---------- chain letters: some deliveries come back with a reply for another villager (2-3 links, bonus at the end) ----------
+        let chainSeq = 0;
+        function chainAfter(l, h, mode) {
+          if (TUT.on || mode === "night") return;
+          const x = PX(), c0 = l.chain;
+          if (c0) {
+            if (l.ck >= c0.n) {
+              const bonus = 10 * c0.n; S.coins += bonus; S.earned += bonus; saveCoins();
+              c0.note[0] = `Zincir tamam: ${c0.path.map((q) => q.name).join(" → ")} (+${bonus} 🪙)`; c0.note[1] = `Chain complete: ${c0.path.map((q) => q.name).join(" → ")} (+${bonus} 🪙)`;
+              renderNotes(); renderHUD();
+              tw(0, () => { toast(T(`🎉 Zincir tamamlandı! +${bonus} 🪙 bonus`, `🎉 Chain complete! +${bonus} 🪙 bonus`), 3000); SND.sfx("sfx_coins_bag"); }, 2.6);
+              return;
+            }
+          } else if (S.over || (!x.unl && (x.rounds || 0) < 1) || S.done > 6 || l.rush || l.hand || Math.random() > 0.3 || S.bag.concat(S.pending).some((b) => b.chain)) return;
+          if (S.over) return;
+          const c = c0 || { id: ++chainSeq, n: Math.random() < 0.5 ? 2 : 3, k: 0, path: [h], note: ["", ""] };
+          if (!c0) notes.push(c.note);
+          const used = new Set(S.bag.concat(S.pending).map((b) => b.house).concat(c.path)), cand = HOUSES.filter((q) => !used.has(q));
+          if (!cand.length) return;
+          const tgt = cand[Math.floor(Math.random() * cand.length)];
+          c.k++; c.path.push(tgt);
+          const nl = {
+            house: tgt, kind: "chain", tier: 2, n: 200 + c.id * 10 + c.k, picked: performance.now(), hl: 0, hc: null, extra: null, sketch: false, torn: null, chk: null, omit: null,
+            clauses: [C_(() => true, `${h.name} bu cevabı yazdı`, `${h.name} wrote this reply`), C_((q) => q.job.tr === tgt.job.tr, ...RIDDLES[tgt.job.tr])],
+            chain: c, ck: c.k,
+          };
+          if (S.bag.length < 3) S.bag.push(nl); else S.pending.unshift(nl);
+          c.note[0] = `Zincir ${c.k}/${c.n}: ${c.path.map((q, i) => (i === c.path.length - 1 ? "?" : q.name)).join(" → ")}`;
+          c.note[1] = `Chain ${c.k}/${c.n}: ${c.path.map((q, i) => (i === c.path.length - 1 ? "?" : q.name)).join(" → ")}`;
+          renderNotes();
+          tw(0, () => {
+            toast(T(`📮 ${h.name} sana bir cevap mektubu verdi! Zincir ${c.k}/${c.n}${S.bag.indexOf(nl) < 0 ? " (çantan dolu: postanede bekliyor)" : ""}`, `📮 ${h.name} gave you a reply letter! Chain ${c.k}/${c.n}${S.bag.indexOf(nl) < 0 ? " (bag full: it waits at the post office)" : ""}`), 3200);
+            SND.sfx("sfx_paper_rustle_2"); renderHUD();
+          }, 2.2);
+        }
+        // ---------- onboarding: intro scene, three guided letters, progressive unlocks ----------
+        // PX(): tut 1 = intro seen, 9 = tutorial done; unl 1 = everything unlocked (saves from before onboarding); rounds = rounds finished
+        {
+          const x = PX();
+          if (x.tut !== 9 && !x.unl && (x.total > 0 || PROF.xp > 0 || PROF.owned.length > SHOP_CATS.length || stampCount() > 0)) { x.tut = 9; x.unl = 1; saveProf(); }
+        }
+        function unl(k) {
+          const x = PX(); if (x.unl) return true;
+          const r = x.rounds || 0;
+          return k === "shop" || k === "dog" ? r >= 1 : k === "hand" ? r >= 2 : k === "vill" ? PROF.rank >= 1 : true;
+        }
+        function applyUnlocks() {
+          $("shopchip").hidden = !unl("shop");
+          $("dogchip").hidden = !unl("dog");
+          dog.g.visible = unl("dog");
+          const x = PX();
+          if (!x.unl && ((unl("shop") && !x.shopSeen) || (unl("vill") && !x.villSeen))) $("shopnew").hidden = false;
+        }
+        $("shopchip").addEventListener("click", () => { const x = PX(); x.shopSeen = 1; if (unl("vill")) x.villSeen = 1; saveProf(); $("shopnew").hidden = true; });
+        const TUT = { on: false, msg: null, anchor: null, bubT: 0, stuck: 0, arrow: null, arrowOn: false, seen: false };
+        function tutSay(tr, en, anchor, secs = 8) {
+          TUT.msg = [tr, en]; TUT.anchor = anchor || null; TUT.bubT = secs;
+          const el = $("tut"); el.textContent = T(tr, en); el.hidden = false;
+          el.classList.remove("is-pop"); void el.offsetWidth; el.classList.add("is-pop");
+          placeTut(); SND.sfx("sfx_paper_rustle_2", { vol: 0.35 });
+        }
+        function placeTut() {
+          const el = $("tut"); if (el.hidden) return;
+          const a = TUT.anchor && $(TUT.anchor), r = a && !a.hidden && a.offsetParent ? a.getBoundingClientRect() : null;
+          if (r && r.width) {
+            const w = el.offsetWidth, x = Math.max(w / 2 + 8, Math.min(innerWidth - w / 2 - 8, r.left + r.width / 2));
+            el.style.left = x + "px"; el.style.top = r.bottom + 14 + "px"; el.classList.add("is-up");
+          } else {
+            // no anchor: low on the screen, under the postman and above the prompt (touch screens have no prompt or key hint)
+            const touch = document.body.classList.contains("is-touch");
+            el.style.left = "50%"; el.style.top = Math.max(60, innerHeight - el.offsetHeight - (touch ? 22 : 112)) + "px"; el.classList.remove("is-up");
+          }
+        }
+        // a bobbing arrow pointing down at a spot (no crosses: a plain cone and shaft)
+        function tutArrow(x, z, y) {
+          if (!TUT.arrow) {
+            const g = new THREE.Group(), mat = new THREE.MeshBasicMaterial({ color: "#ff9f1c", transparent: true, toneMapped: false, fog: false, depthWrite: false });
+            const tip = new THREE.Mesh(new THREE.ConeGeometry(0.55, 0.9, 16), mat); tip.rotation.x = Math.PI; g.add(tip);
+            const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.9, 12), mat); sh.position.y = 0.85; g.add(sh);
+            g.renderOrder = 15; TUT.arrow = g;
+          }
+          const g = TUT.arrow; g.userData.y = y; g.position.set(x, y, z); g.scale.setScalar(0.001);
+          if (!g.parent) scene.add(g);
+          TUT.arrowOn = true;
+          tw(0.45, (k) => g.scale.setScalar(Math.max(0.001, eo(k))));
+        }
+        const tutArrowOff = () => { TUT.arrowOn = false; if (TUT.arrow && TUT.arrow.parent) scene.remove(TUT.arrow); };
+        const arrowAtHouse = (h) => tutArrow(h.door2.x, h.door2.z, h.y + h.h + 3.2);
+        const arrowAtPO = () => tutArrow(PO.x, PO.z + PO.d / 2 + 1, 6.2);
+        const pulseHint = (on) => ["tipchip", "lv-tip"].forEach((id) => $(id).classList.toggle("x-pulse", on));
+        // the first round's letters: the three nearest the post office first; #1 a plain colour clue, #3 a rush letter with extra time
+        function tutLetters(P) {
+          const dPO = (l) => Math.hypot(l.house.door2.x - PO.x, l.house.door2.z - (PO.z + PO.d / 2 + 1));
+          P.forEach((l) => { l.rush = false; l.limit = 0; l.gold = false; });
+          P.sort((a, b) => dPO(a) - dPO(b));
+          // letter 1: among the four nearest, the first whose roof and/or door colour alone picks out the house
+          const easyFor = (h) => {
+            const dc = colName(h.door), cc = colName(h.chimney);
+            const roof = C_((x) => x.roofName.tr === h.roofName.tr, `çatım ${h.roofName.tr}`, `my roof is ${h.roofName.en}`), door = C_((x) => colName(x.door) === dc, `kapım ${dc[0]}`, `my door is ${dc[1]}`), chim = C_((x) => colName(x.chimney) === cc, `bacam ${cc[0]}`, `my chimney is ${cc[1]}`);
+            return [[roof], [door], [roof, door], [roof, chim], [door, chim]].find((c) => matches(c).length === 1 && matches(c)[0] === h) || null;
+          };
+          for (let i = 0; i < Math.min(4, P.length); i++) {
+            const easy = easyFor(P[i].house);
+            if (easy) { const l = P.splice(i, 1)[0]; Object.assign(l, { kind: "look", tier: 1, clauses: easy, omit: null, torn: null, chk: null, sketch: false, svg: null, extra: null }); P.unshift(l); break; }
+          }
+          const r = P[2]; if (r) { r.rush = true; r.limit = Math.round(25 + dPO(r) / 6) + 15; r.rushT0 = 0; }
+          return P;
+        }
+        function tutStart() {
+          TUT.on = true;
+          tutSay("Postaneden ilk mektubunu al: kapının önünde E'ye (ya da Al'a) bas.", "Pick up your first letter at the post office: press E (or Take) at its door.", null, 12);
+          arrowAtPO();
+        }
+        function tutOnPickup() {
+          if (!TUT.on) return;
+          tutArrowOff();
+          const n = S.done;
+          if (n === 0) { tutSay("Zarfa dokun ve mektubu oku. Tarif edilen evi bul, kapısına teslim et!", "Tap the envelope to read the letter. Find the house it describes and deliver at its door!", "mailchip", 10); TUT.stuck = 20; }
+          else if (n === 1) { tutSay("Takılırsan İpucu düğmesi aranacak yeri haritada gösterir.", "Stuck? The hint button marks the area on the map.", "tipchip", 10); pulseHint(true); TUT.stuck = 30; }
+          else if (n === 2) { tutSay("ACELE mektup! Halkadaki süre bitmeden teslim et; çabuk olursan ★★★. Scooter (B) çok hızlıdır.", "RUSH letter! Deliver before the ring runs out; be quick for ★★★. The scooter (B) is fast.", "mailchip", 10); TUT.stuck = 25; }
+        }
+        function tutOnDeliver() {
+          if (!TUT.on) return;
+          tutArrowOff(); pulseHint(false); TUT.stuck = 0;
+          const n = S.done;
+          if (n === 1) { tutSay("Harika! Postaneye dön, sıradaki mektubu al.", "Great! Head back to the post office for the next letter.", null, 8); arrowAtPO(); }
+          else if (n === 2) { tutSay("Çok iyi! Postanede seni bir ACELE mektup bekliyor.", "Well done! A RUSH letter is waiting at the post office.", null, 8); arrowAtPO(); }
+          else if (n >= 3) {
+            tutSay("Tebrikler, artık köyün postacısısın! Kalan mektuplar senin.", "Congratulations, you're the village postman now! The rest of the letters are yours.", null, 6);
+            TUT.on = false; const x = PX(); x.tut = 9; saveProf();
+          }
+        }
+        anims.push((t, dt) => {
+          const el = $("tut");
+          if (!el.hidden) { TUT.bubT -= dt; if (TUT.bubT <= 0) el.hidden = true; else placeTut(); }
+          if (TUT.arrowOn && TUT.arrow) { const g = TUT.arrow; g.position.y = g.userData.y + Math.sin(t * 3.2) * 0.3; g.rotation.y += dt * 1.6; }
+          if (TUT.on && TUT.stuck > 0 && S.bag.length && !busy) {
+            TUT.stuck -= dt;
+            if (TUT.stuck <= 0) { const l = S.bag[S.active]; if (l) { arrowAtHouse(l.house); tutSay("Bak, ok doğru evi gösteriyor!", "Look, the arrow shows the right house!", null, 6); } }
+          }
+        });
+        // new things at the start of later rounds: the dog (round 2)
+        function roundIntro() {
+          const x = PX(); applyUnlocks();
+          if (x.unl) return;
+          if (unl("dog") && !x.dogSeen) {
+            x.dogSeen = 1; saveProf();
+            const hd = player.heading, p = dog.g.position;
+            p.set(player.pos.x - Math.sin(hd) * 1.8 - Math.cos(hd) * 1.1, 0, player.pos.z - Math.cos(hd) * 1.8 + Math.sin(hd) * 1.1); p.y = groundY(p.x, p.z);
+            dog.g.scale.setScalar(0.001); tw(0.5, (k) => dog.g.scale.setScalar(Math.max(0.001, eo(k))), 0.3);
+            tw(0, () => dogBark(0.4), 0.7); tw(0, () => dogBark(0.35), 1.1);
+            tw(0, () => tutSay("Yeni dostun: köyün köpeği! Mektubun kokusunu koklatırsan (G ya da köpek düğmesi) seni doğru kapıya götürür.", "Meet your new friend, the village dog! Let it sniff a letter (G or the dog button) and it leads you to the right door.", "dogchip", 9), 0.8);
+          } else if (unl("shop") && !x.shopSeen) tutSay("Dükkân açıldı! Kazandığın altınlarla scooterını ve kıyafetini süsle.", "The shop is open! Spend your coins on your scooter and outfit.", "shopchip", 7);
+        }
+        $("again").addEventListener("click", () => setTimeout(roundIntro, 400));
+        // ---------- intro scene (first run, about 12 s, skippable): flyover, ride to the post office, the headman hands over the bag ----------
+        let INTRO = null;
+        function dismountNow() {
+          if (!scooter.riding) return;
+          Object.assign(scooter, { riding: false, kick: false, v: 0, hop: null }); player.radius = 0.5;
+          const bx = player.pos.x, bz = player.pos.z, sh = Math.sin(player.heading), ch = Math.cos(player.heading);
+          scooter.park(bx, bz, player.heading);
+          player.pos.x = bx - ch * 0.9; player.pos.z = bz + sh * 0.9; collide();
+          player.pos.y = groundY(player.pos.x, player.pos.z);
+          mv.x = mv.z = 0; pm.pivot.position.set(0, 0, 0);
+          if (player.kk) player.kk.ride(false);
+          tone(330, 0, 0.08, "triangle", 0.12);
+        }
+        function runIntro(done) {
+          const h = byId(12), o = ownerOf(h), g = o.g;
+          const snap = { parent: g.parent, pos: g.position.clone(), rot: g.rotation.y, vis: g.visible, lock: o.lock };
+          const start = { x: 17, z: 9 }, dest = { x: 1.2, z: -6.4 };
+          INTRO = { t: 0, done, o, h, snap, start, dest, auto: null, step: 0 };
+          busy = true; cine.lock = true; cine.w = 1;
+          document.body.classList.add("x-intro-on"); $("intro").hidden = false; $("tut").hidden = true;
+          // the scooter waits at the edge of the square with the postman on it
+          const hd0 = Math.atan2(dest.x - start.x, dest.z - start.z);
+          scooter.park(start.x, start.z, hd0);
+          Object.assign(scooter, { riding: true, hop: null, v: 0, kp: 0, kick: false, boost: 0 });
+          player.radius = 0.75; player.pos.set(start.x, groundY(start.x, start.z), start.z); player.heading = feel.h = hd0;
+          scooter.g.position.copy(player.pos); scooter.g.rotation.set(0, hd0, 0); scooter.ks.rotation.set(-1.45, 0, 0);
+          if (player.kk) player.kk.ride(true);
+          camFollow.set(start.x, 10, start.z + 12); cam.yaw = hd0 + Math.PI;
+          // the headman waits by the post office door
+          o.lock = true; g.visible = true; g.scale.setScalar(1); if (!g.parent) scene.add(g);
+          g.position.set(PO.x + 2.6, groundY(PO.x + 2.6, PO.z + PO.d / 2 + 1.3), PO.z + PO.d / 2 + 1.3); g.rotation.y = angTo(g, start.x, start.z);
+          if (o.kk) o.kk.set("Idle");
+          SND.sfx("sfx_bell_ring", { delay: 0.4, vol: 0.3 });
+        }
+        function endIntro(skipped) {
+          const I = INTRO; if (!I) return;
+          INTRO = null;
+          if (skipped || scooter.riding) {
+            dismountNow();
+            player.pos.set(0, 0, -8.5); player.pos.y = groundY(0, -8.5); player.heading = feel.h = Math.PI + 0.35; cam.yaw = 0.35;
+            scooter.park(PO.x + 4.2, PO.z + PO.d / 2 + 2.6, Math.PI / 2);
+            camFollow.set(player.pos.x + Math.sin(cam.yaw) * 11, 7, player.pos.z + Math.cos(cam.yaw) * 11);
+          }
+          bubbleEl.hidden = true;
+          cine.w = 0; cine.lock = false; busy = false;
+          document.body.classList.remove("x-intro-on"); $("intro").hidden = true;
+          // the headman steps back to where his day had him (shrinking out like at a closing door)
+          const o = I.o, g = o.g, back = () => {
+            g.scale.setScalar(1); o.lock = I.snap.lock;
+            if (o.sch) {
+              const st = o.sch.st, h = I.h;
+              if (st === "in") { if (g.parent) scene.remove(g); }
+              else if (st === "walk" || !h.sc) { g.position.copy(I.snap.pos); g.rotation.y = I.snap.rot; if (!I.snap.parent && g.parent) scene.remove(g); }
+              else { const p = st === "door" ? h.sc.stand : st === "work" ? h.sc.slot : h.sc.fount; g.position.set(p[0], groundY(p[0], p[1]), p[1]); g.rotation.y = o.sch.face || 0; }
+            } else { g.position.copy(I.snap.pos); g.rotation.y = I.snap.rot; g.visible = I.snap.vis; if (!I.snap.parent && g.parent) scene.remove(g); }
+          };
+          if (skipped) back();
+          else { if (o.kk) o.kk.set("Walk"); const r0 = g.rotation.y; tw(1.2, (k) => { g.rotation.y = r0 + Math.PI * Math.min(1, k * 3); g.position.x += 0.03; }, 0, () => tw(0.3, (k) => g.scale.setScalar(Math.max(0.001, 1 - k)), 0, back)); }
+          const x = PX(); if (!x.tut) { x.tut = 1; saveProf(); }
+          if (I.done) I.done();
+        }
+        $("intro-skip").addEventListener("click", (e) => { e.stopPropagation(); SND.sfx("ui_tap"); endIntro(true); });
+        $("intro-skip").addEventListener("pointerdown", (e) => e.stopPropagation());
+        addEventListener("keydown", (e) => { if (INTRO && (e.code === "Escape" || e.code === "Enter")) endIntro(true); });
+        anims.push((t, dt) => {
+          const I = INTRO; if (!I) return;
+          I.t += dt; const tt = I.t, o = I.o, g = o.g;
+          // 0-4.4 s: a slow arc high over the village, settling on the square
+          if (tt < 4.4) {
+            const k = eio(Math.min(1, tt / 4.4)), a = lerp(0.9, 2.5, k), R = lerp(78, 26, k);
+            cine.pos.set(Math.cos(a) * R, lerp(46, 13, k), Math.sin(a) * R);
+            cine.look.set(lerp(0, I.start.x, k), lerp(0, 1.5, k), lerp(4, I.start.z - 6, k));
+            cine.w = 1;
+          }
+          // 3.6 s: the ride to the post office (autopilot input), the follow camera takes over
+          if (tt >= 3.6 && I.step === 0) { I.step = 1; I.auto = I.dest; }
+          if (tt >= 4.4 && tt < 5.2) cine.w = 1 - eio((tt - 4.4) / 0.8);
+          if (I.auto) {
+            const d = Math.hypot(I.dest.x - player.pos.x, I.dest.z - player.pos.z);
+            cam.yaw = lerp(cam.yaw, player.heading + Math.PI, Math.min(1, dt * 2));
+            if (d < 3.2 || tt > 9) { I.auto = null; I.brake = true; }
+          }
+          if (I.brake && scooter.riding) {
+            scooter.v *= Math.exp(-7 * dt);
+            if (scooter.v < 0.6) {
+              I.brake = false; dismountNow();
+              // a slow device may not have made it all the way: cut to the post office for the hand-over
+              if (Math.hypot(I.dest.x - player.pos.x, I.dest.z - player.pos.z) > 5) { scooter.park(PO.x + 4.2, PO.z + PO.d / 2 + 2.6, Math.PI / 2); player.pos.set(I.dest.x - 1, 0, I.dest.z + 1.5); player.pos.y = groundY(player.pos.x, player.pos.z); }
+              player.heading = feel.h = angTo({ position: player.pos }, g.position.x, g.position.z);
+            }
+          }
+          // after the ride: a two-shot, the headman's two lines, the bag
+          if (I.step === 1 && !scooter.riding && !I.brake && !I.auto) {
+            I.step = 2; I.t2 = tt;
+            const mx = (g.position.x + player.pos.x) / 2, mz = (g.position.z + player.pos.z) / 2, dx = g.position.x - player.pos.x, dz = g.position.z - player.pos.z, L = Math.hypot(dx, dz) || 1;
+            cine.pos.set(mx - (dz / L) * 5.4 + (dx / L) * -1.5, player.pos.y + 2.4, mz + (dx / L) * 5.4 + (dz / L) * -1.5); cine.look.set(mx, player.pos.y + 1.4, mz);
+            g.rotation.y = angTo(g, player.pos.x, player.pos.z);
+            if (o.kk) o.kk.once("Wave");
+          }
+          if (I.step === 2) {
+            const u = tt - I.t2;
+            turnY(player.group, angTo({ position: player.pos }, g.position.x, g.position.z), Math.min(1, dt * 8)); player.heading = feel.h = player.group.rotation.y;
+            cine.w = Math.min(1, u / 0.5);
+            const name = T(`${I.h.name} (Muhtar)`, `${I.h.name} (Headman)`), head = new THREE.Vector3(g.position.x, g.position.y + 3, g.position.z);
+            if (u >= 0.4 && !I.l1) { I.l1 = 1; say(name, T("Hoş geldin, yeni postacı! Köyde adres yok ama herkes birbirini tanır.", "Welcome, new postman! There are no addresses here, but everyone knows everyone."), head, g, 1.0, ownerVoice(I.h)); if (o.kk) o.kk.once("Talk"); }
+            if (u >= 2.9 && !I.l2) { I.l2 = 1; say(name, T("Al bakalım çantanı. İpuçlarını oku, doğru kapıyı bul!", "Here's your bag. Read the clues and find the right door!"), head, g, 1.2, ownerVoice(I.h)); }
+            if (u >= 4.2 && !I.bag) { I.bag = 1; player.act("PickUp"); SND.sfx("sfx_paper_rustle_1"); SND.sfx("sfx_bell_ding", { delay: 0.3, vol: 0.4 }); }
+            if (u >= 5.0 || tt > 12) endIntro(false);
+          } else if (tt > 12.5) endIntro(false);
         });
         const begin = () => {
           if (game.started) return;
           game.started = true;
           cam.yaw = 0.35; player.heading = Math.PI + 0.35;
           resetState();
+          applyUnlocks();
           $("hud").hidden = false;
+          const x = PX();
+          if (x.tut !== 9 && !x.unl) {
+            // first run: guided letters (the intro scene only the very first time)
+            TUT.on = true; S.pending = tutLetters(S.pending); renderHUD();
+            const go = () => { dailyStart(); tutStart(); };
+            if (!x.tut && !/[?&]nointro\b/.test(location.search)) setTimeout(() => runIntro(go), 0); // after the loop's state exists
+            else go();
+            return;
+          }
           dailyStart();
           toast(T("Köye hoş geldin! Önce postaneden mektupları al.", "Welcome to the village! First pick up letters at the post office."), 3200);
         };
         if (window.__started) begin(); else window.__startQueue.push(begin);
+
+        // ---------- performance mode: no shadows, pixel ratio 1, far villagers hidden, fewer particles ----------
+        // auto: switches on when the average frame rate stays under 40 fps for 5 s; the settings toggle overrides it (remembered)
+        const PERF_KEY = "adressiz-perf";
+        try { const v = localStorage.getItem(PERF_KEY); if (v === "1" || v === "0") { perf.auto = false; perf.low = v === "1"; } } catch (e) {}
+        function setPerf(on, why) {
+          perf.low = !!on;
+          sun.castShadow = !on; // three recompiles the lit materials without the shadow map
+          renderer.setPixelRatio(on ? 1 : Math.min(window.devicePixelRatio || 1, 1.5));
+          renderer.setSize(innerWidth, innerHeight);
+          if (!on) perfHide(false);
+          renderPerf();
+          if (why === "auto") toast(T("Oyun akıcı olsun diye performans modu açıldı (ses ayarlarından kapatabilirsin).", "Performance mode is on to keep things smooth (you can turn it off in the sound settings)."), 3600);
+        }
+        function renderPerf() {
+          const b = $("snd-perf"); if (!b) return;
+          b.setAttribute("aria-pressed", String(perf.low)); b.textContent = perf.low ? T("Açık", "On") : T("Kapalı", "Off");
+        }
+        $("snd-perf").addEventListener("click", (e) => {
+          e.stopPropagation(); perf.auto = false; setPerf(!perf.low);
+          try { localStorage.setItem(PERF_KEY, perf.low ? "1" : "0"); } catch (e2) {}
+          SND.sfx("ui_toggle"); e.currentTarget.blur();
+        });
+        document.querySelectorAll(".x-lang button").forEach((b) => b.addEventListener("click", renderPerf));
+        // villagers more than 50 units away are not drawn in performance mode
+        function perfHide(on) {
+          const px = player.pos.x, pz = player.pos.z;
+          const each = (g) => {
+            if (!g) return;
+            const far = on && Math.hypot(g.position.x - px, g.position.z - pz) > 50;
+            if (far && g.visible) { g.visible = false; g.userData.pfHid = true; }
+            else if (!far && g.userData.pfHid) { g.visible = true; g.userData.pfHid = false; }
+          };
+          villagers.forEach((v) => each(v.p && v.p.g));
+          HOUSES.forEach((h) => { if (h.owner && !h.owner.lock) each(h.owner.g); });
+        }
+        if (perf.low) setPerf(true);
+        function perfTick() {
+          const now = performance.now();
+          if (perf.low) { if (now - perf.hideT > 500) { perf.hideT = now; perfHide(true); } }
+          if (!perf.auto || perf.low || !game.started || document.hidden) { perf.win = 0; return; }
+          if (!perf.win) { perf.win = now; perf.n = 0; return; }
+          perf.n++;
+          if (now - perf.win >= 5000) {
+            const fps = (perf.n * 1000) / (now - perf.win); perf.win = 0; perf.fps = fps;
+            if (fps < 40) { perf.auto = false; setPerf(true, "auto"); }
+          }
+        }
+        perf.hideT = 0;
+        if (window.__dbg) window.__dbg.perf = () => ({ low: perf.low, auto: perf.auto, fps: perf.fps });
 
         // ---------- loop ----------
         const clock = new THREE.Clock();
@@ -4286,6 +4824,7 @@
               jump.t = -1;
               dustBurst(x, player.pos.y + 0.05, z, 7, mv.x * 0.12, mv.z * 0.12, 1.15);
               SND.sfx("sfx_letter_land", { rate: 0.55, vol: 0.7 });
+              FX.land = 0.24; camShake(0.14, 0.32);
               vib(18);
             }
             return;
@@ -4301,14 +4840,24 @@
             }
           }
         }
-        let t = 0;
+        let t = 0, stepDt = null;
         function tick() {
-          const dt = Math.min(clock.getDelta(), 0.05); t += dt;
+          const rdt = stepDt != null ? stepDt : Math.min(clock.getDelta(), 0.05), dt = rdt * feelTS(rdt); t += dt;
           let ix = 0, iy = 0;
+          if (FX.mom) {
+            const rl = Math.hypot((keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + joy.x, (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) + joy.y);
+            FX.mom.age = (FX.mom.age || 0) + rdt;
+            if (rl < 0.1) FX.mom.rel = true; else if (rl > 0.3 && FX.mom.rel && FX.mom.age > 0.3) skipMoment();
+          }
           if (game.started && !cine.lock) {
             ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + joy.x;
             iy = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) + joy.y;
-          } else cam.yaw += dt * 0.08;
+          } else if (!(INTRO && INTRO.step)) cam.yaw += dt * 0.08;
+          if (INTRO && INTRO.auto) {
+            // intro autopilot: steer toward the post office (inverse of the camera-relative stick mapping)
+            const dx = INTRO.auto.x - player.pos.x, dz = INTRO.auto.z - player.pos.z, dl = Math.hypot(dx, dz) || 1, sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
+            ix = (cy * dx - sy * dz) / dl; iy = -(sy * dx + cy * dz) / dl;
+          }
           const riding = scooter.riding, hop = riding && scooter.hop;
           if (hop) ix = iy = 0;
           const il = Math.hypot(ix, iy); if (il > 1) { ix /= il; iy /= il; }
@@ -4324,8 +4873,9 @@
             let a = Math.atan2(mxv, mzv) - player.heading; while (a > Math.PI) a -= 6.283; while (a < -Math.PI) a += 6.283;
             ang = a;
             // a scooter carves wider turns, a little wider still at speed (radius ~3 m at cruise, ~7 m flat out)
-            const turn = riding ? Math.max(3.2, 4.6 - scooter.v * 0.06) : 12;
-            player.heading += Math.max(-turn * dt, Math.min(turn * dt, a));
+            const turn = riding ? Math.max(3.2, 4.6 - scooter.v * 0.06) : 13;
+            const da = riding ? a : a * (1 - Math.exp(-15 * dt));
+            player.heading += Math.max(-turn * dt, Math.min(turn * dt, da));
           }
           if (riding) {
             // scooter: kick while pushing below 85% of top speed (or right after mounting), coast with slow friction otherwise
@@ -4343,7 +4893,7 @@
                 if (sc.v < vmax) sc.v = Math.min(vmax, sc.v + (vmax / 0.9) * dt);
                 sc.v = Math.min(vmax * 1.12, sc.v + (vmax * 0.25 * ov) / 0.15);
               }
-              if (p0 < 0.4 && p1 >= 0.4) { kickDust(); SND.sfx("sfx_scooter_kick", { rate: 0.94 + Math.random() * 0.12 }); }
+              if (p0 < 0.4 && p1 >= 0.4) { kickDust(); SND.sfx("sfx_scooter_kick", { rate: 0.94 + Math.random() * 0.12 }); camShake(0.03, 0.14); }
               if (p1 >= 1) { sc.kp = 0; sc.kick = want; } else sc.kp = p1;
             }
             const fr = push ? 0.45 : il > 0.05 ? 10 : 1.1; // reversing the stick brakes
@@ -4407,7 +4957,10 @@
               const c = Math.cos(feel.roll), s = Math.sin(feel.roll);
               pm.pivot.rotation.set(0, 0, feel.roll);
               pm.pivot.position.set(ox * c - oy * s, ox * s + oy * c, F.oz * hk);
-              pm.pivot.scale.set(1, 1, 1);
+              // take-off stretch, landing squash (subtle)
+              FX.land = Math.max(0, FX.land - dt);
+              const lq = FX.land > 0 ? Math.sin(Math.PI * (1 - FX.land / 0.24)) * 0.13 : 0, js = jump.t >= 0 && jump.t < 0.22 ? Math.sin((Math.PI * jump.t) / 0.22) * 0.07 : 0;
+              pm.pivot.scale.set(1 + lq * 0.5 - js * 0.4, 1 - lq + js, 1 + lq * 0.5 - js * 0.4);
             } else {
               pm.pivot.rotation.set(feel.pitch, 0, feel.roll);
               pm.pivot.scale.set(1 + sq * 0.5, 1 - sq, 1 + sq * 0.5);
@@ -4443,23 +4996,39 @@
           if (game.onUpdate) game.onUpdate(dt, t);
 
           // smooth follow (6/s) with a 1.5-unit look-ahead in the movement direction
-          const cl = 1 - Math.exp(-6 * dt), aw = Math.min(1, player.speed / 5) * 1.5 / Math.max(player.speed, 1e-3);
+          // speed feel: on the scooter the view widens (FOV +9°) and pulls back ~20% and looks further ahead as speed builds
+          const cl = 1 - Math.exp(-6 * rdt);
+          FX.camS = lerp(FX.camS, riding && !cine.lock ? Math.min(1, Math.max(0, (player.speed - 3) / 16)) : 0, 1 - Math.exp(-2.5 * rdt));
+          const cs = FX.camS, aw = (Math.min(1, player.speed / 5) * (1.5 + 2.5 * cs)) / Math.max(player.speed, 1e-3), cd = cam.dist * (1 + 0.2 * cs);
           camAhead.lerp(fv.set(mv.x * aw, 0, mv.z * aw), cl);
           camTarget.set(player.pos.x + camAhead.x, player.pos.y + 1.8, player.pos.z + camAhead.z);
           const cp = Math.cos(cam.pitch);
-          const want = new THREE.Vector3(camTarget.x + Math.sin(cam.yaw) * cp * cam.dist, camTarget.y + Math.sin(cam.pitch) * cam.dist, camTarget.z + Math.cos(cam.yaw) * cp * cam.dist);
+          const want = new THREE.Vector3(camTarget.x + Math.sin(cam.yaw) * cp * cd, camTarget.y + Math.sin(cam.pitch) * cd, camTarget.z + Math.cos(cam.yaw) * cp * cd);
           want.y = Math.max(want.y, groundY(want.x, want.z) + 0.8);
           camFollow.lerp(want, cl);
           camera.position.copy(camFollow).lerp(cine.pos, cine.w);
           camera.lookAt(camLook.copy(camTarget).lerp(cine.look, cine.w));
+          FX.fovP *= Math.exp(-7 * rdt);
+          const fov = 55 + 9 * cs * (1 - cine.w) + FX.fovP;
+          if (Math.abs(fov - FX.fov) > 0.02) { FX.fov = fov; camera.fov = fov; camera.updateProjectionMatrix(); }
+          if (FX.shA > 0) {
+            FX.shT += rdt; const k = 1 - FX.shT / FX.shD;
+            if (k <= 0) FX.shA = 0;
+            else { const a = FX.shA * k * k, tt = performance.now() / 1000; camera.translateX(Math.sin(tt * 53.1) * a + Math.sin(tt * 31.7) * a * 0.4); if (!FX.shH) camera.translateY(Math.sin(tt * 47.3 + 1.7) * a * 0.7); }
+          }
 
           updateDay(dt, t, player.pos);
           sun.position.copy(player.pos).add(DN.sunOff);
           sun.target.position.copy(player.pos);
+          if (stepDt != null) return; // ?debug stepping: no draw, no new frame
+          perfTick();
           drawMap();
           renderer.render(scene, camera);
           requestAnimationFrame(tick);
         }
+        // ?debug: run n whole frames of fixed dt (for headless tests on slow software GL)
+        if (window.__dbg) window.__dbg.step = (n, d = 1 / 30) => { stepDt = d; try { for (let i = 0; i < n; i++) tick(); } finally { stepDt = null; clock.getDelta(); } };
+        if (window.__dbg) Object.assign(window.__dbg, { FX, TUT, scooter, cam, chainAfter, friendGreet, frOf, notes });
         camera.position.set(10, 8, 6);
         tick();
       })();
