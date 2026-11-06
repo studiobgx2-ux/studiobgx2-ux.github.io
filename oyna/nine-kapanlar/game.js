@@ -1100,6 +1100,12 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
         g.add(box(0.08, 2.6, MAT.pole, 0, 1.3, 0)); g.add(circle(0.08, MAT.flag, 0, 2.62, 0.01));
         g.add(tri([0.04, 2.5, 0.85, 2.2, 0.04, 1.9], MAT.flag, 0.01)); return g;
       }
+      const fakeFlagMat = M(0xd9822b);
+      function fakeFlagMesh() { // shorter pole, smaller mustard cloth
+        const g = new THREE.Group();
+        g.add(box(0.08, 1.7, MAT.pole, 0, 0.85, 0)); g.add(circle(0.08, fakeFlagMat, 0, 1.72, 0.01));
+        g.add(tri([0.04, 1.6, 0.65, 1.375, 0.04, 1.15], fakeFlagMat, 0.01)); return g;
+      }
 
       /* ===== Back walls (parallax): grimy concrete and tiles, then rusty pipes and chains ===== */
       function wallTex(draw, alpha) {
@@ -1549,8 +1555,12 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
         for (const ck of checkpoints) {
           if (ck.lit) { const u = ck.mesh.userData, t = performance.now() / 1000; u.chair.rotation.z = Math.sin(t * 1.6 + ck.x) * 0.05; u.glow.scale.setScalar(1 + Math.sin(t * 2.3 + ck.x) * 0.03); }
           if (state !== "play" || !p) continue;
-          if (Math.abs(p.x - ck.x) > 0.6 || p.y - HH < ck.y - 0.3 || p.y - HH > ck.y + 1.4) continue;
-          if (!cpActive || cpActive.lvl !== levelIdx || cpActive.key !== ck.key) { cpActive = { lvl: levelIdx, key: ck.key }; lsSave(); }
+          if (p.x < ck.x - 1.0 || p.y - HH < ck.y - 1 || p.y - HH > ck.y + 5) continue; // reached or passed it, even mid-jump
+          if (!cpActive || cpActive.lvl !== levelIdx) { cpActive = { lvl: levelIdx, key: ck.key }; lsSave(); }
+          else if (cpActive.key !== ck.key) {
+            if (parseFloat(ck.key) <= parseFloat(cpActive.key)) continue; // never move the respawn back
+            cpActive = { lvl: levelIdx, key: ck.key }; lsSave();
+          }
           if (ck.lit) continue;
           cpLight(ck);
           tone("sine", 784, 784, 0.7, 0.07); tone("sine", 1175, 1175, 0.9, 0.05, 0.12); tone("triangle", 1568, 1568, 0.6, 0.02, 0.24); // soft chime
@@ -3001,8 +3011,8 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
             const s = { t, x, c, cy, used: false };
             if (t === "k") doorCols[c] = cy;
             if (t === "e") { s.mesh = pressButtonMesh(); s.mesh.position.set(x, cy, 0.45); level.add(s.mesh); s.pressT = -1; }
-            if (t === "f") { // looks exactly like the real flag; spikes wait flat in the ground
-              s.mesh = flagMesh(); s.mesh.position.set(x, cy, 0.4); level.add(s.mesh);
+            if (t === "f") { // shorter mustard flag; spikes wait flat in the ground
+              s.mesh = fakeFlagMesh(); s.mesh.position.set(x, cy, 0.4); level.add(s.mesh);
               s.spk = new THREE.Group();
               [-0.34, 0, 0.34].forEach((dx) => { const m = tri([dx - 0.17, 0, dx + 0.17, 0, dx, 0.75], MAT.spike, 0); m.add(tri([dx, 0, dx + 0.17, 0, dx, 0.75], MAT.spikeDark, 0.01)); s.spk.add(m); });
               s.spk.position.set(x, cy, 1.0); s.spk.scale.y = 0.001; level.add(s.spk);
@@ -5448,7 +5458,7 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
               });
             }
             p.x = s.x; p.vx = 0; p.mvx = 0; p.onGround = false; p.coyote = 0; p.buf = 0;
-          } else if (s.t === "f" && overlap(p.x, p.y, HW, HH, s.x + 0.1, s.cy + 0.9, 0.2, 0.9)) { // fake flag: spikes!
+          } else if (s.t === "f" && overlap(p.x, p.y, HW, HH, s.x + 0.1, s.cy + 0.85, 0.2, 0.85)) { // fake flag: spikes!
             s.used = true; s.sprungT = 0; SFX.laugh(); die("spike");
           }
         }

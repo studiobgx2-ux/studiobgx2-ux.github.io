@@ -9,6 +9,7 @@
   var req = de.requestFullscreen || de.webkitRequestFullscreen;
   var enabled = !!req && (d.fullscreenEnabled || d.webkitFullscreenEnabled);
   if (!enabled) return;
+  try { if (matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches) return; } catch (e) {} // installed app: already full screen
   var isFs = function () { return !!(d.fullscreenElement || d.webkitFullscreenElement); };
   var lang = "tr";
   try { var q = new URLSearchParams(location.search).get("lang"); if (q === "en" || q === "tr") lang = q; } catch (e) {}
