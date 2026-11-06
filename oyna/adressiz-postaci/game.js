@@ -21,7 +21,7 @@
         ];
         // owner details: roof colour word, landmark and story snippet (TR / EN)
         const DETAILS = {
-          1: ["kırmızı", "red", "Meydanın kuzeybatısında, fırının yanında", "Northwest of the square, by the bakery", "Oğlum İzmir'den yazmış! Bu akşam ilk simit senin.", "My son wrote from İzmir! The first simit tonight is yours."],
+          1: ["kırmızı", "red", "Meydanın kuzeybatısında, fırının yanında", "Northwest of the square, by the bakery", "Oğlum İzmir'den yazmış! Bu akşam ilk simit senin.", "My son wrote from Izmir! The first warm simit tonight is yours."],
           2: ["mavi", "blue", "Meydanın batısında, bostanlı evde", "West of the square, the house with the garden", "Torunum üniversiteyi kazanmış! Köpeğim bile seviniyor.", "My grandson got into university! Even my dog is happy."],
           3: ["kırmızı", "red", "Göletin kuzeydoğusunda, çamaşır ipli evde", "Northeast of the pond, with the washing line", "Kız kardeşimden kırk yıl sonra ilk mektup... Gözlerim doldu.", "My sister's first letter in forty years... I'm in tears."],
           4: ["turkuaz", "turquoise", "Meydanın güneyinde, salıncaklı ağacın yanında", "South of the square, by the tree swing", "Usta çırağım kendi dükkânını açmış. Helal olsun!", "My old apprentice opened his own workshop. Well done him!"],
@@ -40,23 +40,29 @@
         };
         // resident nickname and job (TR / EN)
         const PEOPLE = {
-          1: ["Simitçi Ayşe", "Simit Ayşe", "fırıncı", "baker"],
+          1: ["Simitçi Ayşe", "Simit Ayse", "fırıncı", "baker"],
           2: ["Bostancı Hasan", "Gardener Hasan", "bahçıvan", "gardener"],
           3: ["İğneci Fatma", "Needle Fatma", "terzi", "tailor"],
-          4: ["Rendeci Mehmet", "Plane Mehmet", "marangoz", "carpenter"],
+          4: ["Rendeci Mehmet", "Woody Mehmet", "marangoz", "carpenter"],
           5: ["Şair Zeynep", "Poet Zeynep", "öğretmen", "teacher"],
           6: ["Traktör Ali", "Tractor Ali", "çiftçi", "farmer"],
           7: ["Ballı Elif", "Honey Elif", "arıcı", "beekeeper"],
           8: ["Çavuş", "The Sergeant", "bekçi", "night watchman"],
-          9: ["Yumurtacı Emine", "Egg Emine", "ebe", "midwife"],
+          9: ["Yumurtacı Emine", "Eggs Emine", "ebe", "midwife"],
           10: ["Yalnız Osman", "Lonely Osman", "çoban", "shepherd"],
-          11: ["Reçelci Hatice", "Jam Hatice", "aşçı", "cook"],
-          12: ["Muhtar Kemal", "Headman Kemal", "muhtar", "headman"],
+          11: ["Reçelci Hatice", "Jammy Hatice", "aşçı", "cook"],
+          12: ["Muhtar Kemal", "Mayor Kemal", "muhtar", "mayor"],
           13: ["Keçici Selim", "Goat Selim", "peynirci", "cheesemaker"],
-          14: ["Değirmenci Gülsüm", "Miller Gülsüm", "değirmenci", "miller"],
-          15: ["Demirci Rıza", "Smith Rıza", "demirci", "blacksmith"],
+          14: ["Değirmenci Gülsüm", "Miller Gulsum", "değirmenci", "miller"],
+          15: ["Demirci Rıza", "Smith Riza", "demirci", "blacksmith"],
           16: ["Kartpostal Nermin", "Postcard Nermin", "ressam", "painter"],
         };
+        // fix1106: English display names (title translated, name kept, Turkish letters folded so they read anywhere)
+        const NAME_EN = {
+          1: "Aunt Ayse", 2: "Uncle Hasan", 3: "Granny Fatma", 4: "Master Mehmet", 5: "Ms. Zeynep", 6: "Uncle Ali", 7: "Miss Elif", 8: "Sergeant Mustafa",
+          9: "Auntie Emine", 10: "Squire Osman", 11: "Aunt Hatice", 12: "Mayor Kemal", 13: "Grandpa Selim", 14: "Granny Gulsum", 15: "Master Riza", 16: "Mrs. Nermin",
+        };
+        HOUSES.forEach((h) => { h.nameEn = NAME_EN[h.id]; h.given = { tr: h.name.split(" ")[0], en: NAME_EN[h.id].split(" ").pop() }; });
         HOUSES.forEach((h) => {
           const p = PEOPLE[h.id];
           h.nickname = { tr: p[0], en: p[1] };
@@ -173,7 +179,14 @@
           return;
         }
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-        renderer.setSize(innerWidth, innerHeight);
+        // fix1106: drawing-buffer size only (updateStyle=false); CSS keeps the canvas at 100% of #game, which is fixed to the viewport
+        const viewSize = () => {
+          const w = root.clientWidth || document.documentElement.clientWidth || innerWidth;
+          const h = root.clientHeight || document.documentElement.clientHeight || innerHeight;
+          return [Math.max(1, w), Math.max(1, h)];
+        };
+        let vw0 = 0, vh0 = 0;
+        renderer.setSize(...viewSize(), false);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         if (THREE.ColorManagement) THREE.ColorManagement.legacyMode = false; // hex colours are sRGB, lit in linear space
@@ -184,12 +197,26 @@
         root.prepend(renderer.domElement);
         const scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0xcfe8f5, 80, 230);
-        const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 700);
-        addEventListener("resize", () => {
-          renderer.setSize(innerWidth, innerHeight);
-          camera.aspect = innerWidth / innerHeight;
+        const camera = new THREE.PerspectiveCamera(55, viewSize()[0] / viewSize()[1], 0.1, 700);
+        // fitView: re-reads the real viewport (iOS reports stale sizes during rotation, so it re-checks a few times after)
+        function fitView(force) {
+          const [w, h] = viewSize();
+          if (!force && w === vw0 && h === vh0) return;
+          vw0 = w; vh0 = h;
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
           camera.updateProjectionMatrix();
-        });
+          document.body.classList.toggle("x-short", h <= 500);
+        }
+        window.__fitView = fitView;
+        const fitSoon = () => { fitView(); [60, 200, 450, 900].forEach((d) => setTimeout(fitView, d)); };
+        addEventListener("resize", fitSoon);
+        addEventListener("orientationchange", fitSoon);
+        document.addEventListener("fullscreenchange", fitSoon);
+        document.addEventListener("webkitfullscreenchange", fitSoon);
+        if (window.visualViewport) visualViewport.addEventListener("resize", fitSoon);
+        if (window.ResizeObserver) new ResizeObserver(() => fitView()).observe(root);
+        fitView(true);
 
         const hemi = new THREE.HemisphereLight(0xd6ecff, 0x8a7b52, 0.75);
         scene.add(hemi);
@@ -238,13 +265,37 @@
           x.fillText(text, 128, 34);
           const tx = new THREE.CanvasTexture(c); tx.encoding = THREE.sRGBEncoding; return tx;
         }
-        // the post office sign follows the language (TR "POSTANE", EN "POST OFFICE")
+        // fix1106: the post office sign is international: envelope + post-horn emblem and "POST" (reads the same in every language)
+        function postSignTex() {
+          const c = document.createElement("canvas"); c.width = 512; c.height = 100;
+          const x = c.getContext("2d");
+          x.fillStyle = "#ffd60a"; x.fillRect(0, 0, 512, 100);
+          x.strokeStyle = "#b5121b"; x.lineWidth = 5; x.strokeRect(8, 8, 496, 84);
+          // envelope
+          x.fillStyle = "#fffaf0"; x.strokeStyle = "#b5121b"; x.lineWidth = 5; x.lineJoin = "round";
+          x.fillRect(40, 26, 74, 50); x.strokeRect(40, 26, 74, 50);
+          x.beginPath(); x.moveTo(40, 26); x.lineTo(77, 54); x.lineTo(114, 26); x.stroke();
+          // post horn: a curled horn with a bell
+          x.lineWidth = 6; x.lineCap = "round";
+          x.beginPath(); x.arc(150, 50, 15, 0.2 * Math.PI, 2.05 * Math.PI); x.stroke();
+          x.beginPath(); x.moveTo(163, 43); x.lineTo(186, 36); x.stroke();
+          x.fillStyle = "#b5121b"; x.beginPath(); x.moveTo(184, 28); x.lineTo(196, 22); x.lineTo(198, 52); x.lineTo(186, 44); x.closePath(); x.fill();
+          x.fillStyle = "#b5121b"; x.font = "800 64px Geist, sans-serif"; x.textAlign = "left"; x.textBaseline = "middle";
+          x.fillText("POST", 222, 54);
+          const tx = new THREE.CanvasTexture(c); tx.encoding = THREE.sRGBEncoding; return tx;
+        }
+        // other painted signs (bakery…) switch with the language
+        const langSigns = [];
+        function langSignMat(tr, en, bg, fg) {
+          const m = new THREE.MeshLambertMaterial({ map: textTex(window.__lang === "en" ? en : tr, bg, fg) });
+          langSigns.push({ m, tr, en, bg, fg }); return m;
+        }
         const poSign = { lang: window.__lang === "en" ? "en" : "tr" };
-        poSign.mat = new THREE.MeshLambertMaterial({ map: textTex(poSign.lang === "en" ? "POST OFFICE" : "POSTANE", "#ffd60a", "#b5121b") });
+        poSign.mat = new THREE.MeshLambertMaterial({ map: postSignTex() });
         poSign.refresh = () => {
           const l = window.__lang === "en" ? "en" : "tr"; if (l === poSign.lang) return;
-          poSign.lang = l; const old = poSign.mat.map;
-          poSign.mat.map = textTex(l === "en" ? "POST OFFICE" : "POSTANE", "#ffd60a", "#b5121b"); poSign.mat.needsUpdate = true; old.dispose();
+          poSign.lang = l;
+          for (const g of langSigns) { const old = g.m.map; g.m.map = textTex(l === "en" ? g.en : g.tr, g.bg, g.fg); g.m.needsUpdate = true; old.dispose(); }
         };
         const anims = [];
         const colliders = [];
@@ -600,7 +651,7 @@
             box(0.15, 2.55, 0.15, "#6b3e26", 0, 1.275, 0, p); box(1.4, 0.1, 0.1, "#6b3e26", 0.7, 2.5, 0, p);
             const sign = new THREE.Group(); sign.position.set(0.9, 2.45, 0); p.add(sign);
             box(1.3, 0.6, 0.08, "#f6bd60", 0, -0.35, 0, sign);
-            const tex = new THREE.MeshLambertMaterial({ map: textTex("FIRIN", "#f6bd60", "#7f4f24") });
+            const tex = langSignMat("FIRIN", "BAKERY", "#f6bd60", "#7f4f24");
             for (const s of [1, -1]) { const pl = mesh(new THREE.PlaneGeometry(1.2, 0.5), tex, 0, -0.35, s * 0.05, sign, false); if (s < 0) pl.rotation.y = Math.PI; }
             const loaf = ball(0.3, "#d4a373", 0, -0.85, 0, sign); loaf.scale.set(1.4, 0.7, 0.8);
             anims.push((t) => (sign.rotation.x = Math.sin(t * 1.6) * 0.08));
@@ -1743,7 +1794,17 @@
 
         // ---------- clues: generated from house data ----------
         const lang = () => (window.__lang === "en" ? "en" : "tr");
-        const T = (tr, en) => (lang() === "en" ? en : tr);
+        // fix1106: English text always shows the English names, even when a line was built from the Turkish name
+        const EN_SWAP = [["Hasan Dede", "Grandpa Hasan"], ["Bir Dost", "A Friend"], ["İzmir", "Izmir"]]
+          .concat(HOUSES.map((h) => [h.name, h.nameEn]), HOUSES.map((h) => [h.nickname.tr, h.nickname.en]))
+          .filter((p) => p[0] !== p[1]).sort((a, b) => b[0].length - a[0].length);
+        const enFix = (x) => { if (typeof x !== "string") return x; for (const [a, b] of EN_SWAP) if (x.includes(a)) x = x.split(a).join(b); return x; };
+        window.__enFix = enFix;
+        const T = (tr, en) => (lang() === "en" ? enFix(en) : tr);
+        const nm = (h) => T(h.name, h.nameEn);
+        // fix1106: wording for the device: touch screens get button words, keyboards get key names
+        const isTouchUI = () => document.body.classList.contains("is-touch");
+        const TK = (trKey, enKey, trTouch, enTouch) => (isTouchUI() ? T(trTouch, enTouch) : T(trKey, enKey));
         const isEast = (h) => h.x > riverX(h.z) - 4;
         const band = (h) => { const d = Math.hypot(h.x, h.z); return d < 36 ? "near" : d > 60 ? "edge" : "mid"; };
         // neighbours (two nearest houses, nearest first) and river side
@@ -1786,16 +1847,16 @@
         const RIDDLES = {
           "fırıncı": ["Herkes uyurken ben kalkarım, ekmeğin kokusunu köye salarım.", "I rise while all sleep and send the smell of bread through the village."],
           "bahçıvan": ["Toprağa tohum, tohuma su; en güzel domatesi ben yetiştiririm bu.", "Seed in soil, water on seed; I grow the best tomatoes indeed."],
-          "terzi": ["İğnem ince, ipliğim uzun; söküğün olursa bana gel, dostum.", "Thin needle, long thread; bring me your torn seams instead."],
-          "marangoz": ["Rendem fısıldar, talaş uçuşur; benim masamda köy oturur.", "My plane whispers, shavings fly; the whole village sits at tables I ply."],
+          "terzi": ["İğnem ince, ipliğim uzun; söküğün olursa bana gel, dostum.", "Thin needle, long thread; bring me anything torn and I'll mend it instead."],
+          "marangoz": ["Rendem fısıldar, talaş uçuşur; benim masamda köy oturur.", "My plane whispers and the shavings fly; half the chairs in this village were made by my hand."],
           "öğretmen": ["Tahtam yeşil, tebeşirim beyaz; harfleri sevdiren benim biraz.", "Green board, white chalk; I make children love to read and talk."],
-          "çiftçi": ["Sabah tarlada, öğlen tarlada; traktörüm benimle her yolda.", "Morning in the field, noon in the field; my tractor beside me, never to yield."],
-          "arıcı": ["Vızıl vızıl dostlarım var, onlar çiçek ben kavanoz toplar.", "My buzzing friends gather flowers, I gather jars."],
+          "çiftçi": ["Sabah tarlada, öğlen tarlada; traktörüm benimle her yolda.", "Out in the field at dawn and at noon, my tractor and I hum the same tune."],
+          "arıcı": ["Vızıl vızıl dostlarım var, onlar çiçek ben kavanoz toplar.", "My buzzing friends visit the flowers; I fill the jars."],
           "bekçi": ["Herkes uyur, ben uyanık; düdüğüm cepte, fenerim yanık.", "All asleep but me awake; whistle in pocket, lantern lit for your sake."],
           "ebe": ["Köyün bütün bebeklerini ilk ben kucakladım.", "I was the first to hold every baby in this village."],
           "çoban": ["Kavalım çalar, sürüm dinler; tepede yalnız ben ve kuzular.", "My flute plays and my flock listens; on the hill, just me and the lambs."],
           "aşçı": ["Kazanım kaynar, reçelim taşar; tarifimi soran kapımı aşındırır.", "My pot bubbles, my jam spills over; everyone wants my recipe."],
-          "muhtar": ["Mührüm bende, sözüm köyde; derdin varsa bana söyle.", "The seal is mine, my word is the village's; tell me your troubles."],
+          "muhtar": ["Mührüm bende, sözüm köyde; derdin varsa bana söyle.", "I keep the village seal and the village's word; bring me your troubles."],
           "peynirci": ["Sütü mayalar, sabırla beklerim; en tuzlu sırları ben bilirim.", "I set the milk and wait with patience; I know the saltiest secrets."],
           "değirmenci": ["Rüzgâr eser, taşım döner; buğday benden un olup gider.", "Wind blows, my stone turns; wheat leaves me as flour."],
           "demirci": ["Örsüm çınlar, kıvılcım saçar; at nalları benden çıkar.", "My anvil rings and sparks fly; every horseshoe starts with me."],
@@ -1902,7 +1963,7 @@
         }
         function tornFor(h) {
           const sup = lookFor(h).concat(placeFor(h)), best = [], rest = [];
-          [[h.name, h.name, (x) => x.name, (x) => x.name], [h.nickname.tr, h.nickname.en, (x) => x.nickname.tr, (x) => x.nickname.en]].forEach(([tr, en, gt, ge]) => {
+          [[h.name, h.nameEn, (x) => x.name, (x) => x.nameEn], [h.nickname.tr, h.nickname.en, (x) => x.nickname.tr, (x) => x.nickname.en]].forEach(([tr, en, gt, ge]) => {
             for (let n = 0; n < 4; n++) {
               const a = smudge(tr, gt), b = en === tr ? a : smudge(en, ge), pa = { t: a.t }, pb = { t: b.t };
               let ok = sup.filter((s) => matches([pa, s]).length === 1 && matches([pb, s]).length === 1);
@@ -1937,7 +1998,7 @@
           });
         }
         const sentence = (s) => { s = s.charAt(0).toLocaleUpperCase(lang() === "en" ? "en" : "tr") + s.slice(1); return /[.!?]$/.test(s) ? s : s + "."; };
-        const clueText = (l) => l.clauses.map((c) => sentence(c.f[lang() === "en" ? 1 : 0])).join(" ");
+        const clueText = (l) => l.clauses.map((c) => sentence(T(c.f[0], c.f[1]))).join(" ");
         // hand-drawn house front: wobbly pencil strokes, watercolour roof and door
         function sketchSVG(l) {
           const h = l.house, has = (k) => l.omit !== k, id = "sk" + l.n;
@@ -2043,7 +2104,7 @@
         }
         // shake: amplitude in world units, decays over d seconds; horiz = side to side only
         function camShake(a, d = 0.25, horiz = false) {
-          if (FX.calm) return;
+          if (FX.calm || FX.noShake) return;
           const cur = FX.shA * Math.max(0, 1 - FX.shT / FX.shD);
           if (a >= cur) { FX.shA = a; FX.shD = d; FX.shT = 0; FX.shH = horiz ? 1 : 0; }
         }
@@ -2744,7 +2805,7 @@
               $("lv-body").innerHTML = l.svg;
               $("lv-body").append(T("Biraz aceleyle çizdim, bir ayrıntıyı unutmuş olabilirim.", "I drew it in a hurry and may have left out one detail."));
             } else $("lv-body").textContent = clueText(l);
-            if (l.extra) { const s = document.createElement("span"); s.className = "x-paper__tip"; s.textContent = T("İpucu: ", "Hint: ") + sentence(l.extra.f[lang() === "en" ? 1 : 0]); $("lv-body").append(s); }
+            if (l.extra) { const s = document.createElement("span"); s.className = "x-paper__tip"; s.textContent = T("İpucu: ", "Hint: ") + sentence(T(l.extra.f[0], l.extra.f[1])); $("lv-body").append(s); }
             $("lv-type").textContent = "";
             (BADGE[l.kind] || []).forEach((n) => $("lv-type").append(badgeEl(n)));
             $("lv-type").append((l.hand ? "🤝 " : "") + T(K.lab[0], K.lab[1]) + (l.gold ? T(" · 🌟 Günün Mektubu ×3", " · 🌟 Letter of the Day ×3") : ""));
@@ -2753,7 +2814,7 @@
             $("lv-to").textContent = "—";
             $("lv-type").textContent = "";
             $("lv-body").textContent = S.pending.length
-              ? T(`Çantan boş. Postaneye git ve E ile mektupları al. Postanede ${S.pending.length} mektup bekliyor.`, `Your bag is empty. Go to the post office and press E to pick up letters. ${S.pending.length} letters wait there.`)
+              ? TK(`Çantan boş. Postaneye git ve E ile mektupları al. Postanede ${S.pending.length} mektup bekliyor.`, `Your bag is empty. Go to the post office and press E to pick up your letters. ${S.pending.length} letters are waiting.`, `Çantan boş. Postaneye git, Al'a dokunup mektupları al. Postanede ${S.pending.length} mektup bekliyor.`, `Your bag is empty. Go to the post office and tap Take to pick up your letters. ${S.pending.length} letters are waiting.`)
               : T("Hepsi teslim edildi!", "All delivered!");
             $("lv-sig").textContent = "";
           }
@@ -2917,7 +2978,7 @@
             if (mode === "hand") handOver(h, gain); else if (mode === "night") slipUnder(h, gain); else happyDelivery(h, gain);
             awardStamp(h, stars >= 3);
             giftCheck(h, stars);
-            tw(0, () => say(h.name, (mode === "night" ? T("(kapının ardından) ", "(from behind the door) ") : "") + h.story[lang()], top, og, 5, ownerVoice(h)), mode === "door" ? 1.0 : 1.2);
+            tw(0, () => say(nm(h), (mode === "night" ? T("(kapının ardından) ", "(from behind the door) ") : "") + T(h.story.tr, h.story.en), top, og, 5, ownerVoice(h)), mode === "door" ? 1.0 : 1.2);
             const xpT = `${vT} · ${10 + 5 * stars} XP`;
             if (l.rush) toast(`+${gain} 🪙  ⏱ ${T("Acele", "Rush")} ${"★".repeat(stars)}${"☆".repeat(3 - stars)}${tipped ? T(" (ipucu: yarı altın)", " (hint: half coins)") : ""}${xpT}`);
             else toast((tipped ? T("+5 🪙 (ipucu: yarı altın)", "+5 🪙 (hint: half coins)") : fast ? T(`+10 🪙  ⏱ +5 hız bonusu!`, `+10 🪙  ⏱ +5 speed bonus!`) : "+10 🪙") + xpT);
@@ -2933,7 +2994,7 @@
           } else {
             if (mode === "hand") grumpyHand(h); else grumpyDoor(h);
             S.mistakes++; S.hearts--; if (S.combo) S.combo.n = 0;
-            tw(0, () => say(h.name, T("Bu bana değil!", "This isn't for me!"), top, og, 2.5, ownerVoice(h)), mode === "hand" ? 0.4 : 0.6);
+            tw(0, () => say(nm(h), T("Bu bana değil!", "This isn't for me!"), top, og, 2.5, ownerVoice(h)), mode === "hand" ? 0.4 : 0.6);
             if (S.hearts <= 0) {
               const back = S.bag.splice(S.active, 1)[0]; back.rushT0 = 0; // a rush letter's clock restarts when it is picked up again
               S.pending.unshift(back); S.active = 0; S.hearts = 3;
@@ -2962,7 +3023,7 @@
           c.textAlign = "center"; c.textBaseline = "middle";
           if (!tier) { c.fillStyle = "#858585"; c.font = "700 52px Geist, sans-serif"; c.fillText("?", 60, 62); return; }
           c.font = '44px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; c.fillText(STAMP_EMO[h.id] || "✉️", 60, 52);
-          c.fillStyle = tier === 2 ? "#4a3200" : "#3a2f25"; c.font = "700 14px Geist, sans-serif"; c.fillText(h.name.split(" ")[0], 60, 92);
+          c.fillStyle = tier === 2 ? "#4a3200" : "#3a2f25"; c.font = "700 14px Geist, sans-serif"; c.fillText(h.given ? T(h.given.tr, h.given.en) : T(h.name.split(" ")[0], enFix(h.name).split(" ").pop()), 60, 92);
           if (tier === 2) { c.font = "700 13px Geist, sans-serif"; c.fillText("★", 96, 26); }
         }
         function awardStamp(h, gold) {
@@ -3000,7 +3061,7 @@
           if (!PROF) return;
           const st = PROF.stamps || {}, n = stampCount(), N = HOUSES.length;
           $("albumcount").textContent = `${n}/${N}`;
-          $("tab-notes-l").textContent = T("Defter", "Notebook");
+          $("tab-notes-l").textContent = T("Defter", "Journal");
           $("tab-album-l").textContent = T("Pul Albümü", "Stamp Album");
           if (!albumTab) return;
           xIcoText($("album-c"), T(`${n}/${N} pul · ilk teslimat pulu, ⏱ ★★★ acele altın pulu verir. 5 / 10 / ${N} pula 20 / 50 / 150 🪙.`, `${n}/${N} stamps · a first delivery earns the stamp, a ⏱ ★★★ rush the gold one. 5 / 10 / ${N} stamps pay 20 / 50 / 150 🪙.`));
@@ -3008,7 +3069,7 @@
           HOUSES.forEach((h) => {
             const t = st[h.id] || 0, cv = document.createElement("canvas");
             drawStamp(cv, h, t);
-            const lab = t ? `${h.name} · ${h.job[lang()]}${t === 2 ? T(" · altın", " · gold") : ""}` : T("Kilitli pul", "Locked stamp");
+            const lab = t ? `${nm(h)} · ${T(h.job.tr, h.job.en)}${t === 2 ? T(" · altın", " · gold") : ""}` : T("Kilitli pul", "Locked stamp");
             cv.setAttribute("role", "img"); cv.setAttribute("aria-label", lab); cv.title = lab;
             grid.append(cv);
           });
@@ -3044,11 +3105,11 @@
           return (fresh.length ? fresh : facts)[Math.floor(Math.random() * (fresh.length || facts.length))];
         }
         function renderNotes() {
-          $("notecount").textContent = notes.length;
-          $("notechip-l").textContent = T("Defter", "Notebook");
+          $("notecount").textContent = notes.length; $("notecount").classList.toggle("is-zero", !notes.length);
+          $("notechip-l").textContent = T("Defter", "Journal");
           renderAlbum();
           const ul = $("notelist"); ul.innerHTML = "";
-          notes.forEach((f) => { const li = document.createElement("li"); xIcoText(li, f[lang() === "en" ? 1 : 0]); ul.append(li); });
+          notes.forEach((f) => { const li = document.createElement("li"); xIcoText(li, T(f[0], f[1])); ul.append(li); });
           if (!notes.length) { const li = document.createElement("li"); li.textContent = T("Köylülerle konuş, dedikodular buraya yazılır.", "Talk to villagers; gossip is written here."); li.style.color = "var(--text-secondary)"; ul.append(li); }
           if (PROF && typeof friendLi === "function") friendLi(ul);
           if (PROF && DOST_READY) dostLi(ul);
@@ -3068,7 +3129,7 @@
           if (!notes.some((o) => o[0] === fact[0])) notes.push(fact);
           renderNotes();
           const vi = villagers.indexOf(v);
-          say(T("Köylü", "Villager"), fact[lang() === "en" ? 1 : 0], v.p.g.position, v.p.g, 5, voiceOf(V_WALK[Math.max(0, vi) % V_WALK.length], vi + 20));
+          say(T("Köylü", "Villager"), T(fact[0], fact[1]), v.p.g.position, v.p.g, 5, voiceOf(V_WALK[Math.max(0, vi) % V_WALK.length], vi + 20));
           // stop, face the postman and talk (seated villagers stay seated)
           v.talkT = 4;
           if (v.kk && v.pose !== "Sit" && v.pose !== "Up" && v.pose !== "Turn") v.kk.once("Talk");
@@ -3116,9 +3177,9 @@
         const RANKS = [
           { xp: 0, tr: "Çırak", en: "Apprentice" },
           { xp: 150, tr: "Postacı", en: "Postman" },
-          { xp: 450, tr: "Usta Postacı", en: "Senior Postman" },
+          { xp: 450, tr: "Usta Postacı", en: "Expert" },
           { xp: 1000, tr: "Baş Postacı", en: "Head Postman" },
-          { xp: 2000, tr: "Efsane Postacı", en: "Legendary Postman" },
+          { xp: 2000, tr: "Efsane Postacı", en: "Legend" },
         ];
         const rankOf = (xp) => { let r = 0; RANKS.forEach((k, i) => { if (xp >= k.xp) r = i; }); return r; };
         // categories: label, icon, the default colour (for the preview) and the items; price 0 is the free default
@@ -3604,7 +3665,7 @@
             scooter.g.rotation.set(0, player.heading, 0); scooter.ks.rotation.set(-1.45, 0, 0);
             if (player.kk) player.kk.ride(true);
             if (!SND.sfx("sfx_bell_ding")) { tone(660, 0, 0.08, "triangle", 0.1); tone(880, 0.08, 0.1, "triangle", 0.08); }
-            toast(T("Scootera bindin! 2,4 kat hızlısın: tekme at, süzül. E ile kapıya 4,5 m'den mektup at.", "On the scooter! 2.4× faster: kick, then glide. Press E to toss a letter from 4.5 m."), 3000);
+            toast(TK("Scootera bindin! 2,4 kat hızlısın: tekme at, süzül. E ile kapıya 4,5 m'den mektup at.", "On the scooter! 2.4× faster: kick, then glide. Press E to toss a letter from 4.5 m.", "Scootera bindin! 2,4 kat hızlısın: tekme at, süzül. At'a dokunup kapıya 4,5 m'den mektup at.", "On the scooter! 2.4× faster: kick, then glide. Tap Toss to throw a letter from 4.5 m."), 3000);
           }
         }
         function tossLetter(h) {
@@ -3989,8 +4050,8 @@
           const c = DOST[story.n - 1], i = lang() === "en" ? 1 : 0, last = story.n === DOST.length;
           $("lv-to").textContent = T("Yeni postacıya", "To the new postman");
           const body = $("lv-body"); body.textContent = "";
-          const b = document.createElement("b"); b.textContent = `${T("Bölüm", "Chapter")} ${story.n}/${DOST.length} · ${c.t[i]}`;
-          body.append(b, document.createElement("br"), c.b[i]);
+          const b = document.createElement("b"); b.textContent = `${T("Bölüm", "Chapter")} ${story.n}/${DOST.length} · ${T(c.t[0], c.t[1])}`;
+          body.append(b, document.createElement("br"), T(c.b[0], c.b[1]));
           $("lv-type").textContent = `📯 ${T("Bir Dost", "A Friend")}`;
           $("lv-sig").textContent = last ? T("— Hasan Dede (Bir Dost)", "— Hasan Dede (A Friend)") : T("— Bir Dost", "— A Friend");
           $("lv-nav").hidden = true; $("lv-tip").hidden = true; $("lv-rush").hidden = true;
@@ -4243,7 +4304,7 @@
         function renderStreak() {
           const el = $("streak"); if (!el) return;
           const [tr, en] = streakText();
-          el.setAttribute("data-tr", tr); el.setAttribute("data-en", en); el.textContent = lang() === "en" ? en : tr; el.hidden = false;
+          el.removeAttribute("data-tr"); el.removeAttribute("data-en"); xIcoText(el, lang() === "en" ? en : tr); el.hidden = false; el.dataset.st = "1";
         }
         function dailyStart() {
           const x = PX(), td = dayKey();
@@ -4383,14 +4444,14 @@
             if (ow && (!h || !ow.home || (al && al.hand))) { deliver(ow.h, "hand"); return; }
             if (h && S.bag.length) { if (!doorGate(h)) return; if (R) tossLetter(h); else deliver(h); }
             else if (nearPO() && !S.bag.length && S.pending.length) pickup(); // an empty bag at the post office: letters first, chat later
-            else if (v) { if (R) toast(T("Scooterdan in (B), sonra konuş.", "Get off the scooter (B) to talk.")); else hint(v); }
+            else if (v) { if (R) toast(TK("Scooterdan in (B), sonra konuş.", "Get off the scooter (B) to talk.", "Önce scooterdan in, sonra konuş.", "Get off the scooter first to talk.")); else hint(v); }
             else if (nearPO()) pickup();
             else if (h) toast(T("Çantanda mektup yok. Önce postaneye uğra.", "No letters in your bag. Visit the post office first."));
             else toast(T("Yakında kimse yok", "Nobody nearby"));
           },
           cycle() { if (S.bag.length > 1) { S.active = (S.active + 1) % S.bag.length; renderHUD(); } },
           refreshLang() {
-            renderHUD(); renderNotes(); poSign.refresh(); renderPerf();
+            renderHUD(); renderNotes(); poSign.refresh(); renderPerf(); if (!$("start").hidden) renderStreak();
             if (TUT.msg && !$("tut").hidden) $("tut").textContent = T(TUT.msg[0], TUT.msg[1]);
             if (!$("end").hidden) showEnd();
           },
@@ -4458,11 +4519,11 @@
             const other = shuffle(HOUSES.filter((q) => q !== h))[0], f = gossipAbout(other);
             const isNew = !notes.some((n) => n[0] === f[0]);
             if (isNew) { notes.push(f); renderNotes(); const nc = $("notechip"); nc.classList.remove("is-pop"); void nc.offsetWidth; nc.classList.add("is-pop"); }
-            say(h.name, T("Sana bir sır vereyim: ", "Let me tell you a secret: ") + f[lang() === "en" ? 1 : 0], top, o.g, 3.5, ownerVoice(h));
-            if (isNew) tw(0, () => toast(T("📒 Deftere yeni bir ipucu yazıldı.", "📒 A new clue went into your notebook.")), 1.2);
+            say(nm(h), T("Sana bir sır vereyim: ", "Let me tell you a secret: ") + T(f[0], f[1]), top, o.g, 3.5, ownerVoice(h));
+            if (isNew) tw(0, () => toast(T("📒 Deftere yeni bir ipucu yazıldı.", "📒 A new clue went into your journal.")), 1.2);
           } else {
             const g = GREET[Math.floor(Math.random() * GREET.length)];
-            say(h.name, T(g[0], g[1]), top, o.g, 1.6, ownerVoice(h));
+            say(nm(h), T(g[0], g[1]), top, o.g, 1.6, ownerVoice(h));
           }
           floatSprite(getFxTex().hearts[0], top.x, top.y - 0.4, top.z, 0.4, 0.4, 0.8, 1.1);
         }
@@ -4583,7 +4644,8 @@
         }
         function tutStart() {
           TUT.on = true;
-          tutSay("Postaneden ilk mektubunu al: kapının önünde E'ye (ya da Al'a) bas.", "Pick up your first letter at the post office: press E (or Take) at its door.", null, 12);
+          if (isTouchUI()) tutSay("Postaneden ilk mektubunu al: kapının önüne gel, Al'a dokun.", "Pick up your first letter at the post office: walk to its door and tap Take.", null, 12);
+          else tutSay("Postaneden ilk mektubunu al: kapının önünde E'ye bas.", "Pick up your first letter at the post office: press E at its door.", null, 12);
           arrowAtPO();
         }
         function tutOnPickup() {
@@ -4592,7 +4654,7 @@
           const n = S.done;
           if (n === 0) { tutSay("Zarfa dokun ve mektubu oku. Tarif edilen evi bul, kapısına teslim et!", "Tap the envelope to read the letter. Find the house it describes and deliver at its door!", "mailchip", 10); TUT.stuck = 20; }
           else if (n === 1) { tutSay("Takılırsan İpucu düğmesi aranacak yeri haritada gösterir.", "Stuck? The hint button marks the area on the map.", "tipchip", 10); pulseHint(true); TUT.stuck = 30; }
-          else if (n === 2) { tutSay("ACELE mektup! Halkadaki süre bitmeden teslim et; çabuk olursan ★★★. Scooter (B) çok hızlıdır.", "RUSH letter! Deliver before the ring runs out; be quick for ★★★. The scooter (B) is fast.", "mailchip", 10); TUT.stuck = 25; }
+          else if (n === 2) { tutSay("ACELE mektup! Halkadaki süre bitmeden teslim et; çabuk olursan ★★★. " + (isTouchUI() ? "Scooter çok hızlıdır." : "Scooter (B) çok hızlıdır."), "RUSH letter! Deliver before the ring runs out; be quick for ★★★. " + (isTouchUI() ? "The scooter is fast." : "The scooter (B) is fast."), "mailchip", 10); TUT.stuck = 25; }
         }
         function tutOnDeliver() {
           if (!TUT.on) return;
@@ -4624,7 +4686,7 @@
             p.set(player.pos.x - Math.sin(hd) * 1.8 - Math.cos(hd) * 1.1, 0, player.pos.z - Math.cos(hd) * 1.8 + Math.sin(hd) * 1.1); p.y = groundY(p.x, p.z);
             dog.g.scale.setScalar(0.001); tw(0.5, (k) => dog.g.scale.setScalar(Math.max(0.001, eo(k))), 0.3);
             tw(0, () => dogBark(0.4), 0.7); tw(0, () => dogBark(0.35), 1.1);
-            tw(0, () => tutSay("Yeni dostun: köyün köpeği! Mektubun kokusunu koklatırsan (G ya da köpek düğmesi) seni doğru kapıya götürür.", "Meet your new friend, the village dog! Let it sniff a letter (G or the dog button) and it leads you to the right door.", "dogchip", 9), 0.8);
+            tw(0, () => tutSay("Yeni dostun: köyün köpeği! Mektubun kokusunu koklatırsan (" + (isTouchUI() ? "köpek düğmesine dokun" : "G ya da köpek düğmesi") + ") seni doğru kapıya götürür.", "Meet your new friend, the village dog! Let it sniff a letter (" + (isTouchUI() ? "tap the dog button" : "G or the dog button") + ") and it leads you to the right door.", "dogchip", 9), 0.8);
           } else if (unl("shop") && !x.shopSeen) tutSay("Dükkân açıldı! Kazandığın altınlarla scooterını ve kıyafetini süsle.", "The shop is open! Spend your coins on your scooter and outfit.", "shopchip", 7);
         }
         $("again").addEventListener("click", () => setTimeout(roundIntro, 400));
@@ -4731,13 +4793,52 @@
             const u = tt - I.t2;
             turnY(player.group, angTo({ position: player.pos }, g.position.x, g.position.z), Math.min(1, dt * 8)); player.heading = feel.h = player.group.rotation.y;
             cine.w = Math.min(1, u / 0.5);
-            const name = T(`${I.h.name} (Muhtar)`, `${I.h.name} (Headman)`), head = new THREE.Vector3(g.position.x, g.position.y + 3, g.position.z);
+            const name = T(`${I.h.name} (Muhtar)`, I.h.nameEn), head = new THREE.Vector3(g.position.x, g.position.y + 3, g.position.z);
             if (u >= 0.4 && !I.l1) { I.l1 = 1; say(name, T("Hoş geldin, yeni postacı! Köyde adres yok ama herkes birbirini tanır.", "Welcome, new postman! There are no addresses here, but everyone knows everyone."), head, g, 1.0, ownerVoice(I.h)); if (o.kk) o.kk.once("Talk"); }
             if (u >= 2.9 && !I.l2) { I.l2 = 1; say(name, T("Al bakalım çantanı. İpuçlarını oku, doğru kapıyı bul!", "Here's your bag. Read the clues and find the right door!"), head, g, 1.2, ownerVoice(I.h)); }
             if (u >= 4.2 && !I.bag) { I.bag = 1; player.act("PickUp"); SND.sfx("sfx_paper_rustle_1"); SND.sfx("sfx_bell_ding", { delay: 0.3, vol: 0.4 }); }
             if (u >= 5.0 || tt > 12) endIntro(false);
           } else if (tt > 12.5) endIntro(false);
         });
+        // ---------- title screen camera (fix1106): a slow golden-morning orbit high over the village ----------
+        const TITLE = { on: true, hand: false, a: 0.35, R: 66, y: 30, lx: 0, ly: 2, lz: 0 };
+        anims.push((tt, dt) => {
+          if (!TITLE.on) return;
+          if (!TITLE.hand) TITLE.a += dt * 0.04;
+          cine.pos.set(Math.cos(TITLE.a) * TITLE.R, TITLE.y + (TITLE.hand ? 0 : Math.sin(tt * 0.35) * 1.2), Math.sin(TITLE.a) * TITLE.R);
+          cine.look.set(TITLE.lx, TITLE.ly, TITLE.lz);
+          cine.w = 1;
+        });
+        // leaving the title: a swoop into the intro's first shot (new game) or down to the postman (continue)
+        function titleHand(toIntro, cb) {
+          if (!TITLE.on) { if (cb) cb(); return; }
+          if (toIntro) {
+            TITLE.hand = true; cine.lock = true;
+            const a0 = TITLE.a, a1 = 0.9 + 2 * Math.PI * Math.round((a0 - 0.9) / (2 * Math.PI)), R0 = TITLE.R, y0 = TITLE.y, l0 = [TITLE.lx, TITLE.ly, TITLE.lz];
+            tw(1.1, (k) => { const e = eio(k); TITLE.a = lerp(a0, a1, e); TITLE.R = lerp(R0, 78, e); TITLE.y = lerp(y0, 46, e); TITLE.lx = lerp(l0[0], 0, e); TITLE.ly = lerp(l0[1], 0, e); TITLE.lz = lerp(l0[2], 4, e); }, 0, () => { TITLE.on = false; if (cb) cb(); });
+            return;
+          }
+          TITLE.on = false;
+          camFollow.set(player.pos.x + Math.sin(cam.yaw) * 11, player.pos.y + 7, player.pos.z + Math.cos(cam.yaw) * 11);
+          const w0 = cine.w; tw(1.6, (k) => (cine.w = Math.min(cine.w, lerp(w0, 0, eio(k)))), 0, () => (cine.w = 0));
+          if (cb) cb();
+        }
+        // hooks for the title menu
+        window.__apAlbum = (grid, cap) => {
+          if (!PROF) return;
+          const st = PROF.stamps || {}, n = stampCount(), N = HOUSES.length;
+          xIcoText(cap, T(`${n}/${N} pul. Her evin ilk teslimatı onun pulunu verir; ⏱ ★★★ acele teslimat altın pulunu.`, `${n}/${N} stamps. Your first delivery to each house earns its stamp; a ⏱ ★★★ rush delivery earns the gold one.`));
+          grid.innerHTML = "";
+          HOUSES.forEach((h) => {
+            const t = st[h.id] || 0, cv = document.createElement("canvas");
+            drawStamp(cv, h, t);
+            const lab = t ? `${nm(h)} · ${T(h.job.tr, h.job.en)}${t === 2 ? T(" · altın", " · gold") : ""}` : T("Kilitli pul", "Locked stamp");
+            cv.setAttribute("role", "img"); cv.setAttribute("aria-label", lab); cv.title = lab; grid.append(cv);
+          });
+        };
+        try { FX.noShake = localStorage.getItem("adressiz-shake") === "0"; } catch (e) {}
+        window.__apShake = (on) => { FX.noShake = !on; };
+        window.__apReady = true;
         const begin = () => {
           if (game.started) return;
           game.started = true;
@@ -4750,10 +4851,11 @@
             // first run: guided letters (the intro scene only the very first time)
             TUT.on = true; S.pending = tutLetters(S.pending); renderHUD();
             const go = () => { dailyStart(); tutStart(); };
-            if (!x.tut && !/[?&]nointro\b/.test(location.search)) setTimeout(() => runIntro(go), 0); // after the loop's state exists
-            else go();
+            if (!x.tut && !/[?&]nointro\b/.test(location.search)) setTimeout(() => titleHand(true, () => runIntro(go)), 0); // after the loop's state exists
+            else { titleHand(false); go(); }
             return;
           }
+          titleHand(false);
           dailyStart();
           toast(T("Köye hoş geldin! Önce postaneden mektupları al.", "Welcome to the village! First pick up letters at the post office."), 3200);
         };
@@ -4767,7 +4869,7 @@
           perf.low = !!on;
           sun.castShadow = !on; // three recompiles the lit materials without the shadow map
           renderer.setPixelRatio(on ? 1 : Math.min(window.devicePixelRatio || 1, 1.5));
-          renderer.setSize(innerWidth, innerHeight);
+          fitView(true);
           if (!on) perfHide(false);
           renderPerf();
           if (why === "auto") toast(T("Oyun akıcı olsun diye performans modu açıldı (ses ayarlarından kapatabilirsin).", "Performance mode is on to keep things smooth (you can turn it off in the sound settings)."), 3600);
@@ -4776,6 +4878,17 @@
           const b = $("snd-perf"); if (!b) return;
           b.setAttribute("aria-pressed", String(perf.low)); b.textContent = perf.low ? T("Açık", "On") : T("Kapalı", "Off");
         }
+        renderPerf(); // the language may have been picked (?lang=en) before this script ran
+        $("snd-menu").addEventListener("click", (e) => {
+          e.stopPropagation(); const b = e.currentTarget;
+          if (!b.classList.contains("is-armed")) {
+            b.classList.add("is-armed"); b.textContent = T("Bu tur bitsin mi? Tekrar dokun", "Leave this round? Tap again");
+            setTimeout(() => { b.classList.remove("is-armed"); b.textContent = T("‹ Ana Menü", "‹ Main Menu"); }, 3500);
+            return;
+          }
+          saveProf(); try { sessionStorage.setItem("ap-menu", "1"); } catch (err) {}
+          location.reload();
+        });
         $("snd-perf").addEventListener("click", (e) => {
           e.stopPropagation(); perf.auto = false; setPerf(!perf.low);
           try { localStorage.setItem(PERF_KEY, perf.low ? "1" : "0"); } catch (e2) {}
@@ -4999,9 +5112,10 @@
           // speed feel: on the scooter the view widens (FOV +9°) and pulls back ~20% and looks further ahead as speed builds
           const cl = 1 - Math.exp(-6 * rdt);
           FX.camS = lerp(FX.camS, riding && !cine.lock ? Math.min(1, Math.max(0, (player.speed - 3) / 16)) : 0, 1 - Math.exp(-2.5 * rdt));
-          const cs = FX.camS, aw = (Math.min(1, player.speed / 5) * (1.5 + 2.5 * cs)) / Math.max(player.speed, 1e-3), cd = cam.dist * (1 + 0.2 * cs);
+          const cs = FX.camS, aw = (Math.min(1, player.speed / 5) * (1.5 + 2.5 * cs)) / Math.max(player.speed, 1e-3), cd = cam.dist * (1 + 0.2 * cs) * (vh0 <= 500 ? 1.1 : 1);
           camAhead.lerp(fv.set(mv.x * aw, 0, mv.z * aw), cl);
-          camTarget.set(player.pos.x + camAhead.x, player.pos.y + 1.8, player.pos.z + camAhead.z);
+          // fix1106: on short landscape phones aim a little above the postman so he sits in the lower-centre third
+          camTarget.set(player.pos.x + camAhead.x, player.pos.y + (vh0 <= 500 ? 2.5 : 1.8), player.pos.z + camAhead.z);
           const cp = Math.cos(cam.pitch);
           const want = new THREE.Vector3(camTarget.x + Math.sin(cam.yaw) * cp * cd, camTarget.y + Math.sin(cam.pitch) * cd, camTarget.z + Math.cos(cam.yaw) * cp * cd);
           want.y = Math.max(want.y, groundY(want.x, want.z) + 0.8);
@@ -5022,13 +5136,14 @@
           sun.target.position.copy(player.pos);
           if (stepDt != null) return; // ?debug stepping: no draw, no new frame
           perfTick();
+          if ((FX.fitT = (FX.fitT || 0) + rdt) > 0.5) { FX.fitT = 0; fitView(); }
           drawMap();
           renderer.render(scene, camera);
           requestAnimationFrame(tick);
         }
         // ?debug: run n whole frames of fixed dt (for headless tests on slow software GL)
         if (window.__dbg) window.__dbg.step = (n, d = 1 / 30) => { stepDt = d; try { for (let i = 0; i < n; i++) tick(); } finally { stepDt = null; clock.getDelta(); } };
-        if (window.__dbg) Object.assign(window.__dbg, { FX, TUT, scooter, cam, chainAfter, friendGreet, frOf, notes });
+        if (window.__dbg) Object.assign(window.__dbg, { FX, TUT, scooter, cam, chainAfter, friendGreet, frOf, notes, generateLetters, clueText, gossipAbout, HOUSES, KIND, T, DOST, RIDDLES, GREET });
         camera.position.set(10, 8, 6);
         tick();
       })();

@@ -17,8 +17,8 @@
           var LOOP_END = { music_village: 124.444, music_evening: 128, music_title: 60.632, amb_village_loop: 32, amb_river_loop: 20, sfx_scooter_roll_loop: 2 };
           var PRE = ["ui_tap", "ui_open", "ui_close", "ui_confirm", "ui_back", "ui_toggle", "jingle_delivery_success", "jingle_delivery_success_alt", "jingle_wrong_house", "jingle_round_complete", "jingle_round_fail", "music_village"];
           var MAX_VOICES = 12, KEY = "adressiz.audio";
-          var set = { music: true, sfx: true };
-          try { var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if (sv) { set.music = sv.music !== false; set.sfx = sv.sfx !== false; } } catch (e) {}
+          var set = { music: true, sfx: true, mv: 0.8, sv: 1 };
+          try { var sv = JSON.parse(localStorage.getItem(KEY) || "null"); if (sv) { set.music = sv.music !== false; set.sfx = sv.sfx !== false; if (sv.mv >= 0 && sv.mv <= 1) set.mv = +sv.mv; if (sv.sv >= 0 && sv.sv <= 1) set.sv = +sv.sv; } } catch (e) {}
           var ctx = null, master, musicBus, duckG, sfxBus, ambBus;
           var bytes = {}, bufs = {}, pend = {}, voices = [], hid = document.hidden, ad = false, sdkMute = false;
           var cur = null, want = null, ambH = null, riverH = null, rollH = null, windH = null;
@@ -51,9 +51,9 @@
           function build() {
             master = gain(muted() ? 0 : 1, ctx.destination);
             duckG = gain(1, master);
-            musicBus = gain(set.music ? 1 : 0, duckG);
-            sfxBus = gain(set.sfx ? 1 : 0, master);
-            ambBus = gain(set.sfx ? 1 : 0, master);
+            musicBus = gain(set.music ? set.mv : 0, duckG);
+            sfxBus = gain(set.sfx ? set.sv : 0, master);
+            ambBus = gain(set.sfx ? set.sv : 0, master);
           }
           function unlock() {
             if (!ctx) {
@@ -198,9 +198,9 @@
           function save() { try { localStorage.setItem(KEY, JSON.stringify(set)); } catch (e) {} }
           function applySet() {
             if (!ctx) return;
-            ramp(musicBus.gain, set.music ? 1 : 0, 0.15);
-            ramp(sfxBus.gain, set.sfx ? 1 : 0, 0.05);
-            ramp(ambBus.gain, set.sfx ? 1 : 0, 0.15);
+            ramp(musicBus.gain, set.music ? set.mv : 0, 0.15);
+            ramp(sfxBus.gain, set.sfx ? set.sv : 0, 0.05);
+            ramp(ambBus.gain, set.sfx ? set.sv : 0, 0.15);
           }
           function openPanel(open) {
             if (open === !panel.hidden) return;
@@ -214,6 +214,13 @@
           document.addEventListener("pointerdown", function (e) { if (!panel.hidden && !panel.contains(e.target) && e.target !== btn) openPanel(false); });
           document.querySelectorAll(".x-lang button").forEach(function (b) { b.addEventListener("click", renderSet); });
           renderSet();
+          // volume levels from the title settings (0..1); moving a slider above 0 also turns that channel on
+          api.vol = function (k, v) {
+            v = Math.max(0, Math.min(1, +v || 0));
+            if (k === "m") { set.mv = v; set.music = v > 0; } else { set.sv = v; set.sfx = v > 0; }
+            save(); applySet(); renderSet();
+          };
+          api.getVol = function () { return { m: set.music ? set.mv : 0, s: set.sfx ? set.sv : 0 }; };
 
           // ---------- UI clicks (capture, so buttons that stop propagation still get their tap) ----------
           document.addEventListener("click", function (e) {
@@ -252,8 +259,8 @@
               windH.k = k; ramp(windH.g.gain, 0.16 * k * k, 0.2); ramp(windH.f.frequency, 400 + 900 * k, 0.2);
             },
           });
-          // the title theme plays on the start screen once the first tap unlocks audio
-          music("music_title");
+          // the title screen plays the gentlest track (music_evening: piano, soft brass, 90 BPM) once the first tap unlocks audio
+          music("music_evening");
         } catch (e) { /* audio unavailable: the game runs silent */ }
       })();
     
