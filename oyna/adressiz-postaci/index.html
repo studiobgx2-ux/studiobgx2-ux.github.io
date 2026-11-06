@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0f1a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Adressiz Postacı · Köy</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="game.css" />
+    <link rel="stylesheet" href="site-link.css" />
+    <link rel="stylesheet" href="fullscreen.css" />
+  </head>
+  <body>
+    <a class="bgx-back" id="bgxBack" href="/web-oyunlari/" aria-label="BGX2 Games web oyunlarına dön">← BGX2</a>
+    <div class="page" id="top">
+      <div class="x-game" id="game">
+        <div class="x-assets" aria-hidden="true">
+          <img id="art-icons" src="icons.png" alt="" />
+          <img id="art-badges" src="letter_badges.png" alt="" />
+          <img id="art-paper" src="paper_tile_256.png" alt="" />
+          <img id="art-frame" src="parchment_frame.png" alt="" />
+          <img id="art-sparkle" src="sparkle_loop.png" alt="" />
+          <img id="art-coin" src="coin_pop.png" alt="" />
+          <img id="art-heart" src="heart_pop.png" alt="" />
+          <img id="art-confetti" src="confetti.png" alt="" />
+          <img id="art-wrong" src="wrong_puff.png" alt="" />
+        </div>
+        <canvas class="x-map" id="minimap" width="300" height="300" aria-label="Köy haritası"></canvas>
+        <button class="x-maptoggle x-glass" id="maptoggle" type="button" aria-pressed="true" aria-controls="minimap" aria-label="Harita"><span class="x-ico x-ico--6" aria-hidden="true" data-e="🗺️"></span></button>
+        <p class="x-hint" data-tr="WASD / oklar: yürü · Shift: koş · E: etkileşim · Q: mektup seç · B: scooter · G: köpek · Sürükle: kamera" data-en="WASD / arrows: walk · Shift: run · E: interact · Q: pick letter · B: scooter · G: dog · Drag: camera">WASD / oklar: yürü · Shift: koş · E: etkileşim · Q: mektup seç · B: scooter · G: köpek · Sürükle: kamera</p>
+        <div class="x-hud" id="hud" hidden>
+          <div class="x-bar x-glass">
+            <span class="x-clock" id="dayclock" role="img" aria-label="Sabah" title="Sabah"><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="x-clock__bg" cx="18" cy="18" r="15" /><circle class="x-clock__fg" id="dayclock-fg" cx="18" cy="18" r="15" pathLength="100" /></svg><span id="dayclock-ico" aria-hidden="true">☀️</span></span>
+            <span><span class="x-ico x-ico--2" aria-hidden="true" data-e="🪙"></span> <b id="coins">0</b></span>
+            <span class="x-rank" id="rank" role="img" aria-label="Rütbe"><b id="rank-n">Çırak</b><i class="x-xpbar" aria-hidden="true"><i id="xp-fill"></i></i></span>
+            <span><span class="x-ico x-ico--0" aria-hidden="true" data-e="✉️"></span> <b id="done">0</b>/10</span>
+            <span class="x-hearts" id="hearts" aria-label="Can">♥♥♥</span>
+          </div>
+          <div class="x-row">
+            <button class="x-mailchip x-glass" id="mailchip" type="button" aria-expanded="false" aria-controls="lv"><span class="x-ico x-ico--0" id="mailico" aria-hidden="true" data-e="✉️"></span> <b id="mailcount">0</b><span class="x-bagb" id="bagbadges" aria-hidden="true"></span><span class="x-rushring" id="rushring" hidden><svg viewBox="0 0 36 36" aria-hidden="true"><circle class="x-rushring__bg" cx="18" cy="18" r="15" /><circle class="x-rushring__fg" id="rushring-fg" cx="18" cy="18" r="15" pathLength="100" /></svg><b id="rushsec">0</b></span></button>
+            <span class="x-mailchip x-glass x-combochip" id="combochip" role="status" hidden><b>🔥</b><b id="combo-n">x1</b><i class="x-combobar" aria-hidden="true"><i id="combo-fill"></i></i></span>
+            <button class="x-mailchip x-glass x-tipchip" id="tipchip" type="button" hidden>💡</button>
+            <button class="x-mailchip x-glass x-bikechip is-off" id="bikechip" type="button" aria-pressed="false"><span id="bikechip-l">🛴 Scooter</span><span class="x-key" aria-hidden="true">B</span></button>
+            <button class="x-mailchip x-glass x-dogchip" id="dogchip" type="button" aria-label="Köpek">🐶</button>
+            <button class="x-mailchip x-glass x-shopchip" id="shopchip" type="button" aria-expanded="false" aria-controls="shop"><span aria-hidden="true">🛍</span> <span id="shopchip-l">Dükkân</span></button>
+          </div>
+          <button class="x-mailchip x-glass" id="notechip" type="button" aria-expanded="false" aria-controls="notes"><span class="x-ico x-ico--5" aria-hidden="true" data-e="📒"></span> <span id="notechip-l">Defter</span> <b id="notecount">0</b></button>
+          <div class="x-card x-glass x-notes" id="notes" hidden>
+            <div class="x-tabs" role="tablist">
+              <button type="button" role="tab" id="tab-notes" aria-selected="true" aria-controls="notelist"><span id="tab-notes-l">Defter</span></button>
+              <button type="button" role="tab" id="tab-album" aria-selected="false" aria-controls="album"><span aria-hidden="true">📮</span> <span id="tab-album-l">Pul Albümü</span> <b id="albumcount">0/16</b></button>
+            </div>
+            <ul class="x-notelist" id="notelist" role="tabpanel"></ul>
+            <div class="x-album" id="album" role="tabpanel" hidden>
+              <p class="x-album__c" id="album-c"></p>
+              <div class="x-album__grid" id="albumgrid"></div>
+            </div>
+          </div>
+        </div>
+        <div class="x-lv" id="lv" aria-hidden="true">
+          <div class="x-env-back"></div>
+          <div class="x-paper" id="lv-paper" role="dialog" aria-label="Mektup">
+            <span class="x-stamp" aria-hidden="true"></span>
+            <div class="x-rush" id="lv-rush" hidden><span class="x-rush__seal" aria-hidden="true">A</span><span class="x-rush__lab">ACELE / RUSH</span><span class="x-rush__time" id="lv-rusht"></span></div>
+            <p class="x-paper__to"><b id="lv-tol">Kime:</b> <span id="lv-to"></span></p>
+            <p class="x-paper__body" id="lv-body"></p>
+            <div class="x-paper__foot">
+              <div class="x-paper__nav" id="lv-nav" hidden>
+                <button type="button" id="lv-prev" aria-label="Önceki mektup">‹</button>
+                <span id="lv-n">1/3</span>
+                <button type="button" id="lv-next" aria-label="Sonraki mektup">›</button>
+              </div>
+              <span class="x-paper__type" id="lv-type"></span>
+              <p class="x-paper__sig" id="lv-sig">— Bir Dost</p>
+              <button type="button" class="x-tip" id="lv-tip" hidden>💡 İpucu</button>
+            </div>
+          </div>
+          <div class="x-env-front"></div>
+          <div class="x-env-flap"></div>
+          <div class="x-seal x-seal--l" aria-hidden="true">P</div>
+          <div class="x-seal x-seal--r" aria-hidden="true">P</div>
+        </div>
+        <div class="x-rotate" aria-live="polite"><p>📱↻<br />Telefonu yatay çevir</p></div>
+        <p class="x-prompt" id="prompt" hidden></p>
+        <div class="x-starpop x-glass" id="starpop" role="status" hidden><div class="x-starpop__row" aria-hidden="true"><span class="x-k--0">★</span><span class="x-k--1">★</span><span class="x-k--2">★</span></div><p class="x-starpop__lab" id="starpop-l"></p></div>
+        <div class="x-shop" id="shop" hidden>
+          <div class="x-shop__card x-glass" role="dialog" aria-modal="true" aria-labelledby="shop-h">
+            <div class="x-shop__top">
+              <h2 id="shop-h">Dükkân</h2>
+              <span class="x-shop__rank" id="shop-rank"></span>
+              <span class="x-shop__coins"><span class="x-ico x-ico--2" aria-hidden="true" data-e="🪙"></span> <b id="shop-coins">0</b></span>
+              <button class="x-shop__close" id="shop-close" type="button">Kapat</button>
+            </div>
+            <div class="x-shop__tabs" id="shop-tabs" role="tablist" aria-label="Kategoriler"></div>
+            <div class="x-shop__main">
+              <div class="x-shop__prev">
+                <svg viewBox="0 0 160 150" role="img" id="shop-svg" aria-label="Önizleme">
+                  <ellipse cx="80" cy="140" rx="62" ry="6" fill="rgb(0 0 0 / 0.12)" />
+                  <line x1="117" y1="118" x2="109" y2="42" stroke-width="5" stroke-linecap="round" data-part="scooter" data-paint="stroke" />
+                  <line x1="97" y1="42" x2="121" y2="42" stroke="#f3ead8" stroke-width="4" stroke-linecap="round" />
+                  <rect x="30" y="114" width="98" height="8" rx="4" data-part="scooter" data-paint="fill" />
+                  <circle cx="40" cy="130" r="9" fill="#2b2b2b" /><circle cx="40" cy="130" r="4" fill="#f3ead8" />
+                  <circle cx="118" cy="130" r="9" fill="#2b2b2b" /><circle cx="118" cy="130" r="4" fill="#f3ead8" />
+                  <rect x="64" y="90" width="9" height="25" rx="4" fill="#2f3a5c" />
+                  <rect x="77" y="90" width="9" height="25" rx="4" fill="#2f3a5c" />
+                  <line x1="64" y1="64" x2="58" y2="90" stroke-width="8" stroke-linecap="round" data-part="shirt" data-paint="stroke" data-shade="0.9" />
+                  <rect x="60" y="56" width="30" height="38" rx="9" data-part="shirt" data-paint="fill" />
+                  <line x1="86" y1="64" x2="104" y2="44" stroke-width="8" stroke-linecap="round" data-part="shirt" data-paint="stroke" data-shade="0.9" />
+                  <line x1="86" y1="58" x2="62" y2="86" stroke-width="3" stroke-linecap="round" data-part="bag" data-paint="stroke" data-shade="0.8" />
+                  <rect x="52" y="80" width="16" height="18" rx="3" data-part="bag" data-paint="fill" />
+                  <rect x="52" y="80" width="16" height="7" rx="2" data-part="bag" data-paint="fill" data-shade="0.85" />
+                  <circle cx="75" cy="42" r="13" fill="#f2c9a0" />
+                  <path d="M61 39 Q61 24 75 24 Q89 24 89 39 Z" data-part="cap" data-paint="fill" />
+                  <rect x="61" y="36" width="28" height="4" fill="#f3c74b" />
+                  <path d="M80 40 Q90 38 95 42 L80 43 Z" data-part="cap" data-paint="fill" data-shade="0.7" />
+                </svg>
+                <p class="x-shop__vico" id="shop-vico" aria-hidden="true" hidden></p>
+                <p class="x-shop__sel" id="shop-sel"></p>
+                <button class="x-shop__buy" id="shop-buy" type="button" hidden></button>
+              </div>
+              <div class="x-shop__grid" id="shop-grid" role="tabpanel"></div>
+            </div>
+            <p class="x-shop__note" id="shop-note"></p>
+          </div>
+        </div>
+        <p class="x-bubble x-glass" id="bubble" hidden></p>
+        <p class="x-toast" id="toast" role="status"></p>
+        <div class="x-joy x-touch" id="joy"><div class="x-knob" id="knob"></div></div>
+        <button class="x-act" id="act" type="button">E</button>
+        <div class="x-start" id="start">
+          <div class="x-panel">
+            <div class="x-lang" role="group" aria-label="Dil / Language">
+              <button type="button" data-lang="tr" aria-pressed="true">TR</button>
+              <button type="button" data-lang="en" aria-pressed="false">EN</button>
+            </div>
+            <h1 data-tr="Adressiz Postacı" data-en="The Addressless Postman">Adressiz Postacı</h1>
+            <p data-tr="Köyde adres yok, ama herkes birbirini tanır. Postaneden mektupları al, ipuçlarını çöz ve doğru kapıya teslim et." data-en="The village has no addresses, but everyone knows everyone. Pick up letters at the post office, solve the clues and deliver to the right door.">Köyde adres yok, ama herkes birbirini tanır. Postaneden mektupları al, ipuçlarını çöz ve doğru kapıya teslim et.</p>
+            <p class="x-streak" id="streak" hidden></p>
+            <button class="x-go" id="go" type="button" data-tr="Başla" data-en="Start">Başla</button>
+          </div>
+        </div>
+        <div class="x-start" id="end" hidden>
+          <div class="x-panel">
+            <p class="x-stars" id="end-stars">★★★</p>
+            <h1 id="end-h">Bütün mektuplar teslim!</h1>
+            <p id="end-p"></p>
+            <p class="x-reveal" id="end-reveal"></p>
+            <button class="x-go" id="again" type="button">Tekrar Oyna</button>
+          </div>
+        </div>
+        <div class="x-start x-load" id="load" role="status">
+          <div class="x-panel">
+            <p data-tr="Köy uyanıyor..." data-en="The village is waking up...">Köy uyanıyor...</p>
+            <div class="x-prog" aria-hidden="true"><i id="load-bar"></i></div>
+            <p class="x-load-sub" data-tr="Postacı yükleniyor…" data-en="Loading the postman…">Postacı yükleniyor…</p>
+          </div>
+        </div>
+        <button class="x-sndbtn x-glass" id="sndbtn" type="button" aria-expanded="false" aria-controls="sndpanel" aria-label="Ses ayarları">🔊</button>
+        <div class="x-card x-glass x-sndpanel" id="sndpanel" hidden>
+          <h3 data-tr="Ses" data-en="Sound">Ses</h3>
+          <div class="x-sndrow"><span data-tr="Müzik" data-en="Music">Müzik</span><button class="x-sndtog" id="snd-music" type="button" aria-pressed="true">Açık</button></div>
+          <div class="x-sndrow"><span data-tr="Sesler" data-en="Sounds">Sesler</span><button class="x-sndtog" id="snd-sfx" type="button" aria-pressed="true">Açık</button></div>
+        </div>
+        <!-- audio files, named here so they ship with the page; the engine reads each src and decodes it with Web Audio -->
+        <div hidden aria-hidden="true">
+          <audio data-snd="amb_river_loop" src="amb_river_loop.mp3" preload="none"></audio>
+          <audio data-snd="amb_village_loop" src="amb_village_loop.mp3" preload="none"></audio>
+          <audio data-snd="jingle_delivery_success" src="jingle_delivery_success.mp3" preload="none"></audio>
+          <audio data-snd="jingle_delivery_success_alt" src="jingle_delivery_success_alt.mp3" preload="none"></audio>
+          <audio data-snd="jingle_round_complete" src="jingle_round_complete.mp3" preload="none"></audio>
+          <audio data-snd="jingle_round_fail" src="jingle_round_fail.mp3" preload="none"></audio>
+          <audio data-snd="jingle_wrong_house" src="jingle_wrong_house.mp3" preload="none"></audio>
+          <audio data-snd="music_evening" src="music_evening.mp3" preload="none"></audio>
+          <audio data-snd="music_title" src="music_title.mp3" preload="none"></audio>
+          <audio data-snd="music_village" src="music_village.mp3" preload="none"></audio>
+          <audio data-snd="sfx_bell_ding" src="sfx_bell_ding.mp3" preload="none"></audio>
+          <audio data-snd="sfx_bell_ring" src="sfx_bell_ring.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_blip_1" src="sfx_chatter_blip_1.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_blip_2" src="sfx_chatter_blip_2.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_blip_3" src="sfx_chatter_blip_3.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_blip_4" src="sfx_chatter_blip_4.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_blip_5" src="sfx_chatter_blip_5.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_blip_6" src="sfx_chatter_blip_6.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_line_1" src="sfx_chatter_line_1.mp3" preload="none"></audio>
+          <audio data-snd="sfx_chatter_line_2" src="sfx_chatter_line_2.mp3" preload="none"></audio>
+          <audio data-snd="sfx_coin" src="sfx_coin.mp3" preload="none"></audio>
+          <audio data-snd="sfx_coins_bag" src="sfx_coins_bag.mp3" preload="none"></audio>
+          <audio data-snd="sfx_dog_bark" src="sfx_dog_bark.mp3" preload="none"></audio>
+          <audio data-snd="sfx_door_knock" src="sfx_door_knock.mp3" preload="none"></audio>
+          <audio data-snd="sfx_hint_sparkle" src="sfx_hint_sparkle.mp3" preload="none"></audio>
+          <audio data-snd="sfx_letter_land" src="sfx_letter_land.mp3" preload="none"></audio>
+          <audio data-snd="sfx_letter_open" src="sfx_letter_open.mp3" preload="none"></audio>
+          <audio data-snd="sfx_paper_rustle_1" src="sfx_paper_rustle_1.mp3" preload="none"></audio>
+          <audio data-snd="sfx_paper_rustle_2" src="sfx_paper_rustle_2.mp3" preload="none"></audio>
+          <audio data-snd="sfx_scooter_kick" src="sfx_scooter_kick.mp3" preload="none"></audio>
+          <audio data-snd="sfx_scooter_roll_loop" src="sfx_scooter_roll_loop.mp3" preload="none"></audio>
+          <audio data-snd="sfx_sheep_baa" src="sfx_sheep_baa.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_dirt_1" src="sfx_step_dirt_1.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_dirt_2" src="sfx_step_dirt_2.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_dirt_3" src="sfx_step_dirt_3.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_dirt_4" src="sfx_step_dirt_4.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_grass_1" src="sfx_step_grass_1.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_grass_2" src="sfx_step_grass_2.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_grass_3" src="sfx_step_grass_3.mp3" preload="none"></audio>
+          <audio data-snd="sfx_step_grass_4" src="sfx_step_grass_4.mp3" preload="none"></audio>
+          <audio data-snd="sfx_toss_whoosh" src="sfx_toss_whoosh.mp3" preload="none"></audio>
+          <audio data-snd="ui_back" src="ui_back.mp3" preload="none"></audio>
+          <audio data-snd="ui_close" src="ui_close.mp3" preload="none"></audio>
+          <audio data-snd="ui_confirm" src="ui_confirm.mp3" preload="none"></audio>
+          <audio data-snd="ui_open" src="ui_open.mp3" preload="none"></audio>
+          <audio data-snd="ui_tap" src="ui_tap.mp3" preload="none"></audio>
+          <audio data-snd="ui_toggle" src="ui_toggle.mp3" preload="none"></audio>
+        </div>
+      </div>
+    </div>
+    <script src="game-boot.js"></script>
+    <script src="audio.js"></script>
+    <script src="three.min.js"></script>
+    <script src="GLTFLoader.js"></script>
+    <script src="SkeletonUtils.js"></script>
+    <script src="game.js"></script>
+    <script src="site-link.js"></script>
+    <script src="fullscreen-toggle.js"></script>
+  </body>
+</html>

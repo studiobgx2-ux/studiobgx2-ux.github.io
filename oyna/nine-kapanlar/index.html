@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#060505" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>NİNE: KAPANLAR</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="game.css" />
+    <link rel="stylesheet" href="site-link.css" />
+    <link rel="stylesheet" href="fullscreen.css" />
+  </head>
+  <body class="in-menu">
+    <a class="bgx-back" id="bgxBack" href="/web-oyunlari/" aria-label="BGX2 Games web oyunlarına dön">← BGX2</a>
+    <canvas id="game"></canvas>
+
+    <div class="x-hud"><span id="hudLevel">Bölüm 1/50</span><span id="hudZone">Bodrum</span><span id="hudDeaths">Ölüm sayısı: 0</span><button id="pickBtn" data-t>Bölüm Seç</button><button id="musBtn" aria-label="Müziği kapat" aria-pressed="false">🔊</button></div>
+    <div class="x-vignette" aria-hidden="true"></div>
+    <div class="x-grain" aria-hidden="true"></div>
+    <div class="x-flash" id="flash"></div>
+    <div class="x-toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="x-boss" id="bossBar" hidden aria-label="Kukla can barı" data-tl><b data-t>KUKLA</b><i></i><i></i><i></i><i></i></div>
+    <div class="x-hint" id="bossHint" role="status" aria-live="polite"></div>
+
+    <div class="x-tv" id="kukla" hidden>
+      <div class="x-tv__set">
+        <div class="x-tv__screen">
+          <svg viewBox="0 0 100 80" aria-hidden="true">
+            <rect width="100" height="80" fill="#121513" />
+            <!-- wooden ventriloquist marionette: strings, fez, wood-grain face, hinged jaw, painted mustache, striped shirt -->
+            <path d="M30 0 L33 30 M70 0 L67 30 M50 0 L50 7 M22 0 L24 70 M78 0 L76 70" stroke="#d8d2c4" stroke-width="0.5" opacity="0.75" />
+            <path d="M28 80 L30 70 Q50 63 70 70 L72 80 Z" fill="#f1ece2" />
+            <path d="M33 80 L34 68.5 M41 80 L41.5 66 M49 80 L49 65 M57 80 L57 66 M65 80 L64.5 67.5" stroke="#c1121f" stroke-width="3.2" />
+            <path d="M44 65 L50 70 L56 65" fill="none" stroke="#7a1c14" stroke-width="1.2" />
+            <rect x="46" y="58" width="8" height="8" fill="#6e4422" />
+            <path d="M31 30 Q31 17 50 16 Q69 17 69 30 L68 46 Q67 52 62 53 L38 53 Q33 52 32 46 Z" fill="#a8703d" />
+            <path d="M36 21 Q42 27 39 36 Q37 44 40 50 M45 18 Q48 26 46 34 M60 19 Q57 28 61 37 Q64 45 62 51 M54 40 Q53 46 55 51" stroke="#7d4c24" stroke-width="0.7" fill="none" opacity="0.8" />
+            <ellipse cx="65" cy="27" rx="2.2" ry="1.4" fill="none" stroke="#7d4c24" stroke-width="0.6" />
+            <path d="M36 52 L37 61 Q50 65 63 61 L64 52 Z" fill="#9a6435" />
+            <path d="M38 53 L38 61 M62 53 L62 61" stroke="#3a220e" stroke-width="1.2" />
+            <path d="M36 52 L64 52" stroke="#3a220e" stroke-width="0.8" />
+            <path d="M44 56 Q50 58 56 56" stroke="#5a3418" stroke-width="0.8" fill="none" />
+            <path d="M37 28 Q42 25.5 46 28 M54 28 Q58 25.5 63 28" stroke="#2a1608" stroke-width="1.4" fill="none" stroke-linecap="round" />
+            <ellipse cx="42" cy="33" rx="4" ry="3.2" fill="#f4ecd8" />
+            <ellipse cx="58" cy="33" rx="4" ry="3.2" fill="#f4ecd8" />
+            <circle cx="42.6" cy="33.3" r="1.8" fill="#3a5a8a" />
+            <circle cx="58.6" cy="33.3" r="1.8" fill="#3a5a8a" />
+            <circle cx="42.8" cy="33.4" r="0.8" fill="#0a0a0a" />
+            <circle cx="58.8" cy="33.4" r="0.8" fill="#0a0a0a" />
+            <path d="M47 35 Q50 42 53 35 Q51 43.5 49 43.5 Q47 42 47 35 Z" fill="#8a5428" />
+            <path d="M50 46 Q44 43.5 40 46 Q36 49 33.5 46 Q35 50.5 39.5 49 Q45 47.5 50 47.5 Q55 47.5 60.5 49 Q65 50.5 66.5 46 Q64 49 60 46 Q56 43.5 50 46 Z" fill="#0d0907" />
+            <path d="M33.5 46 Q31.5 43.5 33.5 42 M66.5 46 Q68.5 43.5 66.5 42" stroke="#0d0907" stroke-width="1.1" fill="none" stroke-linecap="round" />
+            <path d="M41 17 L43 6 L57 6 L59 17 Q50 19 41 17 Z" fill="#b5121b" />
+            <ellipse cx="50" cy="6" rx="7" ry="1.3" fill="#8f0f17" />
+            <path d="M50 6 Q56 6 58 12 L58 17" stroke="#0a0a0a" stroke-width="1" fill="none" />
+            <path d="M57 16 L58 21 L59 16 Z" fill="#0a0a0a" />
+          </svg>
+        </div>
+      </div>
+      <div class="x-tv__msg" role="status" aria-live="polite">
+        <p id="kuklaText"></p>
+        <small id="kuklaCode" data-t>Geçmek için dokun</small>
+      </div>
+    </div>
+
+    <div class="x-zone" id="zoneCard" hidden role="status" aria-live="polite">
+      <h2 id="zoneTitle">MEKAN 1: BODRUM</h2>
+      <small data-t>Geçmek için dokun</small>
+    </div>
+
+    <div class="x-story" id="story" hidden role="dialog" aria-live="polite" aria-label="Hikâye" data-tl>
+      <div class="x-story__card" id="storyCard">
+        <div class="x-story__art" id="storyArt" aria-hidden="true">
+          <div class="x-tv__set" id="storyTv"><div class="x-tv__screen" id="storyTvScreen"></div></div>
+          <svg id="storyCane" viewBox="0 0 100 120" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M58 112 L58 34 Q58 12 38 12 Q20 12 20 30" stroke="#8a5a2a" stroke-width="9" />
+            <path d="M58 112 L58 34 Q58 12 38 12 Q20 12 20 30" stroke="#b07a42" stroke-width="3" />
+            <rect x="51" y="106" width="14" height="10" rx="3" fill="#2b2420" />
+            <path d="M70 52 l8 -6 M74 62 l10 -2 M70 72 l8 6" stroke="#d23a3a" stroke-width="3" />
+          </svg>
+          <svg id="storyTeeth" viewBox="0 0 100 120">
+            <path d="M10 52 Q50 20 90 52 L86 66 Q50 44 14 66 Z" fill="#c9636a" />
+            <path d="M14 66 Q50 98 86 66 L90 80 Q50 112 10 80 Z" fill="#c9636a" />
+            <g fill="#f4efe6" stroke="#cfc6b8" stroke-width="1">
+              <rect x="22" y="52" width="10" height="13" rx="3" /><rect x="33" y="47" width="10" height="15" rx="3" /><rect x="45" y="45" width="10" height="16" rx="3" />
+              <rect x="57" y="47" width="10" height="15" rx="3" /><rect x="68" y="52" width="10" height="13" rx="3" />
+              <rect x="22" y="67" width="10" height="12" rx="3" /><rect x="33" y="70" width="10" height="13" rx="3" /><rect x="45" y="71" width="10" height="14" rx="3" />
+              <rect x="57" y="70" width="10" height="13" rx="3" /><rect x="68" y="67" width="10" height="12" rx="3" />
+            </g>
+            <path d="M80 30 l4 -10 M88 36 l10 -4 M20 30 l-4 -10" stroke="#d8c3a0" stroke-width="3" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <p class="x-story__who" id="storyWho"></p>
+          <p class="x-story__text" id="storyText"></p>
+        </div>
+      </div>
+      <small id="storyHint">Geçmek için dokun</small>
+    </div>
+
+    <div class="x-joyzone" id="joyZone" aria-hidden="true"><div class="x-joy" id="joy"><div class="x-joy__knob" id="joyKnob"></div></div></div>
+    <div class="x-pad x-pad--right"><button id="btnJump" aria-label="Zıpla" data-tl data-t>ZIPLA</button></div>
+
+    <div class="x-screen x-start" id="startScreen">
+      <div class="x-start__top">
+        <div class="x-lang x-start__lang" role="group" aria-label="Dil / Language"><button data-lang="tr">TR</button><button data-lang="en">EN</button></div>
+        <button class="x-start__mus" id="startMus" aria-label="Müziği kapat" aria-pressed="false">🔊</button>
+      </div>
+      <div class="x-start__panel">
+        <h1 class="x-start__sr" data-t>NİNE: KAPANLAR</h1>
+        <p class="x-start__en" aria-hidden="true">GRANNY TRAPS</p>
+        <button class="x-btn x-start__btn x-start__btn--cont" id="contBtn" hidden></button>
+        <button class="x-btn x-start__btn" id="startBtn" data-t>Başla</button>
+        <button class="x-btn x-start__btn x-start__btn--sm" id="pickBtn2" data-t>Bölüm Seç</button>
+        <p class="x-start__hint" data-t>Yeşil bayrağa ulaş. Hiçbir şeye güvenme.</p>
+      </div>
+    </div>
+    <div class="x-screen" id="pickScreen" hidden>
+      <div class="x-card">
+        <div class="x-lang" role="group" aria-label="Dil / Language"><button data-lang="tr">TR</button>|<button data-lang="en">EN</button></div>
+        <h1 data-t>Bölüm Seç</h1>
+        <p data-t>Bu oturumda ulaştığın bölümler</p>
+        <div class="x-grid" id="pickGrid"></div>
+        <button class="x-btn x-btn--ghost" id="pickClose" data-t>Kapat</button>
+      </div>
+    </div>
+    <div class="x-rotate" id="rotate" hidden role="alert">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+        <rect x="20" y="6" width="24" height="44" rx="4" /><line x1="29" y1="44" x2="35" y2="44" />
+        <path d="M52 30a20 20 0 0 1-16 24" /><path d="M36 48l0 6 6 0" />
+      </svg>
+      <p data-t>Telefonu yan çevir 📱↻</p>
+    </div>
+    <div class="x-screen" id="endScreen" hidden>
+      <div class="x-card">
+        <h1 data-t>Tebrikler!</h1>
+        <p data-t>Nine bayrağa ulaştı.</p>
+        <p class="x-big" id="endDeaths">0 ölüm</p>
+        <button class="x-btn" id="againBtn" data-t>Tekrar Oyna</button>
+      </div>
+    </div>
+    <script src="ads.js"></script>
+    <script src="game-lang.js"></script>
+    <script src="./three.min.js"></script>
+    <script src="game.js"></script>
+    <script src="site-link.js"></script>
+    <script src="fullscreen-toggle.js"></script>
+  </body>
+</html>

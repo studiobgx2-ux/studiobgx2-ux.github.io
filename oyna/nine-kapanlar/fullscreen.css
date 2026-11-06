@@ -1,0 +1,10 @@
+/* BGX2 site: game fills the whole screen on phones, no page margins, scroll or bounce */
+html, body { margin: 0 !important; padding: 0 !important; width: 100%; height: 100%; height: 100dvh; overflow: hidden; overscroll-behavior: none; background: #060505; }
+#game { position: fixed; inset: 0; width: 100vw !important; height: 100vh !important; height: 100dvh !important; max-width: none; display: block; }
+/* full screen button (fullscreen-toggle.js): only where element full screen exists, only on menu screens, beside ← BGX2 */
+.bgx-fs { position: fixed; z-index: 30; bottom: max(12px, env(safe-area-inset-bottom)); left: calc(50% + 6px); display: none;
+  padding: 7px 14px; border-radius: 999px; font: 600 13px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: .06em;
+  color: #e8f6ff; background: rgb(11 15 26 / .78); border: 1px solid rgb(61 224 255 / .45); cursor: pointer; }
+.bgx-fs:hover, .bgx-fs:focus-visible { border-color: #3de0ff; color: #3de0ff; outline: none; }
+body.bgx-fs-ok:has(#startScreen:not([hidden])) .bgx-fs, body.bgx-fs-ok:has(#pickScreen:not([hidden])) .bgx-fs, body.bgx-fs-ok:has(#endScreen:not([hidden])) .bgx-fs { display: block; }
+body.bgx-fs-ok .bgx-back { transform: translateX(calc(-100% - 6px)); }

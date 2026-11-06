@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0c0b09">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Sıfır Gün Cumhuriyeti</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="game.css">
+<link rel="stylesheet" href="site-link.css">
+<link rel="stylesheet" href="fullscreen.css"></head><body>
+<canvas id="c"></canvas>
+<div id="grain"></div><div id="vig"></div><div id="hurt"></div>
+<div id="hud">
+ <div id="quest"><span class="dia"></span><b id="qt">—</b></div>
+ <div id="mmwrap"><canvas id="mm" width="200" height="200"></canvas><i class="cp n">K</i><i class="cp s">G</i><i class="cp e">D</i><i class="cp w">B</i></div>
+ <div id="vit"><div class="vr"><span class="vn" id="hpn"></span><span class="vl">CAN</span></div><div class="gauge hp"><div class="fill" id="hpf"></div></div><div class="vr"><span class="vn" id="ypn"></span><span class="vl">YUVA</span></div><div class="gauge yv"><div class="fill" id="ypf"></div></div></div>
+ <div id="panel">
+  <div style="position:relative"><div id="lvl">Seviye 1</div>
+   <div id="slots">
+    <div class="slot" id="s1"><img src="skill_emp.png" alt=""><div class="cd" id="cd1"></div><span class="k">1</span></div>
+    <div class="slot lock" id="s2"><img src="skill_arkakapi.png" alt=""><div class="cd" id="cd2"></div><span class="k">2</span></div>
+    <div class="slot lock" id="s3"><img src="skill_kirlangic.png" alt=""><div class="cd" id="cd3"></div><span class="k">3</span></div>
+    <div class="slot lock"><img src="skill_nefes.png" alt=""><span class="k">4</span></div>
+   </div><div id="xpb"><div id="xpf"></div></div></div>
+ </div>
+</div>
+<div id="touch"><div id="joy"><div id="knob"></div></div><div class="tb" id="tAtk"><svg viewBox="0 0 24 24"><path d="M20 3.5 9.6 13.9l-1.5-1.5L6.6 14l1.6.9-3.6 3.6 1 1 3.6-3.6.9 1.6 1.6-1.5-1.5-1.5L20.5 4z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></div><div class="tb" id="tAct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.6"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/></svg><span class="tl">ETKİLEŞİM</span></div><div class="tb" id="tYama" style="display:none"><img src="skill_arkakapi.png" alt=""></div><div class="tb" id="tSerce" style="display:none"><img src="skill_kirlangic.png" alt=""></div><div class="tb" id="tEmp"><img src="skill_emp.png" alt=""></div><div class="tb" id="tPause">II</div></div>
+<div class="bar" id="barT"></div><div class="bar" id="barB"></div>
+<div id="toast"></div>
+<div id="vision"><span id="vtx"></span></div>
+<div id="dlg"><img id="dimg" alt=""><div style="flex:1"><div class="nm" id="dnm"></div><div class="tx" id="dtx"></div></div><div class="nx">▸</div></div>
+<div id="fade"></div><div id="white"></div>
+<div class="scr" id="menu"><div class="in">
+ <h1>SIFIR GÜN<br>CUMHURİYETİ</h1>
+ <div class="sub">Birinci Perde — Kül</div>
+ <button class="btn" id="bStart">Başla</button>
+ <div id="codew"><input id="code" maxlength="12" placeholder="Bölüm şifresi" autocomplete="off" autocapitalize="characters"><button class="btn" id="bCode">Git</button></div>
+ <button class="btn" id="bGfx">Grafik: Yüksek</button>
+ <button class="btn" id="bSnd">Ses: Açık</button>
+ <div class="small" id="ctl">Sol tık basılı tut: yürü ve saldır · WASD: yürü · 1: Aşırı Yük · E: konuş · Esc: duraklat</div>
+</div></div>
+<div class="scr" id="pause"><h1 style="font-size:clamp(24px,8vh,52px)">DURAKLATILDI</h1><div style="height:24px"></div>
+ <button class="btn" id="bRes" style="text-align:center">Devam</button><button class="btn" id="bMenu" style="text-align:center">Ana Menü</button></div>
+<div class="scr" id="card"><div class="k1" id="c1"></div><div class="k2" id="c2"></div><div class="k3" id="c3"></div><div class="tap">DEVAM ETMEK İÇİN DOKUN</div></div>
+<div id="rot"><div class="ph"></div>TELEFONU YAN ÇEVİR<div style="font-family:Cormorant Garamond;font-style:italic;letter-spacing:0;margin-top:10px;color:#8f805f">Kül'ün hikâyesi yatay ekranda anlatılır.</div></div>
+<a class="bgx-back" id="bgxBack" href="/web-oyunlari/" aria-label="BGX2 Games web oyunlarına dön">← BGX2</a>
+<script src="models-emb.js"></script>
+<script src="three-r160.js"></script>
+<script src="game.js"></script>
+<script src="site-link.js"></script>
+<script src="fullscreen-toggle.js"></script>
+</body></html>

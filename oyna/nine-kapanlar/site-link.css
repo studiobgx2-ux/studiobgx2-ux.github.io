@@ -1,0 +1,6 @@
+/* BGX2 site: small back link, shown only while a menu screen is open so it never covers the HUD or touch pads */
+.bgx-back { position: fixed; z-index: 30; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+  display: none; padding: 7px 14px; border-radius: 999px; font: 600 13px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: .06em; color: #e8f6ff; background: rgb(11 15 26 / .78); border: 1px solid rgb(61 224 255 / .45); text-decoration: none; }
+.bgx-back:hover, .bgx-back:focus-visible { border-color: #3de0ff; color: #3de0ff; outline: none; }
+body:has(#startScreen:not([hidden])) .bgx-back, body:has(#pickScreen:not([hidden])) .bgx-back, body:has(#endScreen:not([hidden])) .bgx-back { display: block; }
