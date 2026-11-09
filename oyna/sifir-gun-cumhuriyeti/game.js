@@ -1366,11 +1366,12 @@ function dawnScene(){step='c4dawn';setFade(1);setTimeout(()=>{teleport(O4+6,-67.
   D('Deniz','Lehim kaleminin kızgın ucunu künyenin tam ortasına bastırdı. Yeşil ışık titredi, kırmızıya döndü, bir kez parladı ve söndü.',()=>{hiss(.8,.2,3000);if(MAVI4&&MAVI4.kunye){MAVI4.kunye.material.color.setHex(0xff2a1a);setTimeout(()=>{MAVI4.kunye.visible=false;},700);}const w=$('white');w.style.transition='opacity .05s';w.style.opacity=.35;setTimeout(()=>{w.style.transition='opacity .8s';w.style.opacity=0;},90);}),
   D('Mavi','Artık ben de diğerlerindenim.')],()=>{serceUnlocked=true;$('s3').classList.remove('lock');if(isTouch)$('tSerce').style.display='flex';step='c4end';playing=false;
   setTimeout(()=>card('BÖLÜM 4 SONU','Mavi','Mavi Erdem ekibe katıldı. Yeni yetenek: SERÇE (3) — yakındaki makinelerin sensörlerini dört saniye kör eder.',()=>
-   card('SIRADAKİ','Bora','Çırak Yurdu 4, temelindeki ikinci çekirdek ve kapının kilidi. Yakında. (Bölüm 4 şifresi: TAHIL)',()=>{step='end';DEBT4.style.display='none';show('menu');})),900);});},800);}
+   card('SIRADAKİ','Bora','Çırak Yurdu 4, temelindeki ikinci çekirdek ve kapının kilidi. (Bölüm 4 şifresi: TAHIL)',()=>{DEBT4.style.display='none';startCh5(false);})),900);});},800);}
 function useSerce(){if(!playing||dlgActive||!serceUnlocked)return;if((P.serceCd||0)>0||P.yuva<30){toast(P.yuva<30?'YUVA YETERSİZ':'SERÇE DÖNÜYOR',true,1);return;}
  P.yuva-=30;P.serceCd=10;tone(2200,.15,'triangle',.06);tone(1600,.25,'triangle',.05);vfx('energy-burst',P.pos.x,TOP+2.2,P.pos.z,{color:'#9fe9ff',size:.35,quantity:5});
  let n=0;for(const e of ENEMIES){if(e.dead)continue;if(Math.hypot(e.x-P.pos.x,e.z-P.pos.z)<7){e.stun=Math.max(e.stun,4);n++;if(e.state==='wind'){e.state='chase';}}}
- for(const d of DRN){if(d.alive&&Math.hypot(d.x-P.pos.x,d.z-P.pos.z)<7){d.blind=4;}}toast(n?'SERÇE: '+n+' MAKİNE KÖR':'SERÇE DÖNDÜ',false,1.4);}
+ for(const d of DRN){if(d.alive&&Math.hypot(d.x-P.pos.x,d.z-P.pos.z)<7){d.blind=4;}}
+ if(typeof SL5!=='undefined'&&ZONE===5)SL5.forEach(s=>{if(Math.hypot(s.x-P.pos.x,s.z-P.pos.z)<9){s.blind=4;n++;}});toast(n?'SERÇE: '+n+' MAKİNE KÖR':'SERÇE DÖNDÜ',false,1.4);}
 function c4update(dt,t){updMG(dt);updBR(dt);updFoot(dt);P.serceCd=(P.serceCd||0)-dt;$('cd3')&&($('cd3').style.height=(serceUnlocked&&P.serceCd>0?P.serceCd/10*100:0)+'%');
  // holo + gear + furnace flicker + crane hooks
  z4.children.forEach(c=>{if(c.userData.holo){c.material.opacity=.7+Math.sin(t*3)*.08+(Math.random()<.02?-.4:0);}else if(c.userData.fl){c.intensity=2.2+Math.sin(t*11+c.position.z)*.4+Math.random()*.3;}else if(c.userData.crane){c.position.y+=Math.sin(t*.8)*.004;}});
@@ -1387,6 +1388,212 @@ function c4update(dt,t){updMG(dt);updBR(dt);updFoot(dt);P.serceCd=(P.serceCd||0)
  if(step==='c4cark'&&c4f.gate&&!c4f.amb&&P.pos.z<-45)c4ambush();
  if(step==='c4fight'&&ENEMIES.every(e=>e.dead)){step='c4door0';setQuest('Selim Usta\'nın atölyesi — paslı dişlili kapı');P.checkpoint.set(O4+3,TOP,-62);}
  if(step==='c4door0'&&Math.hypot(P.pos.x-(O4+6),P.pos.z-(-68.6))<1.7)c4door();}
+
+// ================= BÖLÜM 5 — BORA (Çırak Yurdu 4, ikinci çekirdek) =================
+const O5=460,KIT5={x:520,z:30},DORM5={x:520,z:0},BAS5={x:580,z:0},CORE5={x:580,z:-38};
+const z5=new THREE.Group();z5.visible=false;scene.add(z5);
+const Z5={walk:[[O5,11,12,40],[KIT5.x,KIT5.z,10,8],[DORM5.x,DORM5.z,20,16],[BAS5.x,-3,7,58],[CORE5.x,CORE5.z,18,16]],obst:[]};
+let c5f={},SL5=[];
+function c2by(m,d,c,n){const v=window.FLAGS.core2;return (v==='meridian'?m:v==='destroy'?d:v==='cark'?c:n)||[];}
+(function buildZ5(){
+ const add=(m,x,y,z)=>{m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;z5.add(m);return m;};
+ const conc=M4(0x5a5854,{roughness:1}),dark=M4(0x1e1d1b,{metalness:.4}),steel=M4(0x6a6e72,{metalness:.7,roughness:.4}),rust=M4(0x4a2e1e,{roughness:.8,metalness:.5});
+ const texWet=ctex(256,256,(g,w,h)=>{g.fillStyle='#2a2a28';g.fillRect(0,0,w,h);noise(g,w,h,.12,6000);for(let i=0;i<30;i++){g.fillStyle='rgba(120,140,160,.08)';g.beginPath();g.ellipse(Math.random()*w,Math.random()*h,6+Math.random()*20,3+Math.random()*8,0,0,7);g.fill();}},[4,12]);
+ const ag=new THREE.Mesh(new THREE.PlaneGeometry(30,48),new THREE.MeshStandardMaterial({map:texWet,roughness:.55,metalness:.25}));ag.rotation.x=-Math.PI/2;ag.position.set(O5,TOP,10);ag.receiveShadow=true;z5.add(ag);
+ // alley buildings
+ const bm=[M4(0x3a3834),M4(0x302e2a),M4(0x423e36)];const winM=new THREE.MeshBasicMaterial({color:0xd89a4a});
+ for(let zz=28;zz>=-2;zz-=6.5){for(const sx of [-1,1]){const hgt=7+Math.random()*6,x=O5+sx*(8.6+Math.random());add(new THREE.Mesh(new THREE.BoxGeometry(5,hgt,6),bm[Math.random()*3|0]),x,TOP+hgt/2,zz);
+  for(let k=0;k<3;k++){if(Math.random()<.5)continue;const wv=new THREE.Mesh(new THREE.PlaneGeometry(.5,.7),winM);wv.position.set(x-sx*2.51,TOP+2+Math.random()*(hgt-3),zz+(Math.random()-.5)*4.5);wv.rotation.y=-sx*Math.PI/2;z5.add(wv);}}}
+ // crates / bins for cover
+ [[O5-3.6,20],[O5+3.8,14],[O5-3.2,6],[O5+3.4,1.5],[O5-1.2,12.5]].forEach(([x,z])=>{const s=.9+Math.random()*.5;add(new THREE.Mesh(new THREE.BoxGeometry(s*1.4,s,s),Math.random()<.5?rust:dark),x,TOP+s/2,z).rotation.y=Math.random();Z5.obst.push({x,z,r:.8});});
+ // yurt wall + gate + towers
+ const wallM=M4(0x4e4c48,{roughness:1});add(new THREE.Mesh(new THREE.BoxGeometry(26,6,1),wallM),O5,TOP+3,-9.5);
+ const gate=add(new THREE.Mesh(new THREE.BoxGeometry(4.2,4.4,.3),steel),O5-1.5,TOP+2.2,-8.9);
+ const sign=(()=>{const c=document.createElement('canvas');c.width=512;c.height=96;const g=c.getContext('2d');g.fillStyle='#0c1418';g.fillRect(0,0,512,96);g.strokeStyle='#7fd8ff';g.lineWidth=3;g.strokeRect(4,4,504,88);g.fillStyle='#cfefff';g.font='bold 44px Georgia,serif';g.textAlign='center';g.fillText('ÇIRAK YURDU 4',256,64);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.Mesh(new THREE.PlaneGeometry(5,.95),new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:.92}));})();
+ sign.position.set(O5-1.5,TOP+5.1,-8.95);z5.add(sign);
+ const door=add(new THREE.Mesh(new THREE.BoxGeometry(1.2,2.2,.12),M4(0x2a221a)),O5+5,TOP+1.1,-8.95);const dl=new THREE.PointLight(0xffb060,1.2,6,2);dl.position.set(O5+5,TOP+2.6,-8.2);z5.add(dl);
+ const bulb=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),new THREE.MeshBasicMaterial({color:0xffc070}));bulb.position.set(O5+5,TOP+2.5,-8.6);z5.add(bulb);
+ for(const tx of [O5-9,O5+9]){add(new THREE.Mesh(new THREE.BoxGeometry(1.4,9,1.4),conc),tx,TOP+4.5,-9.8);add(new THREE.Mesh(new THREE.BoxGeometry(2.4,1.4,2.4),dark),tx,TOP+9.6,-9.8);}
+ // searchlights
+ [[O5-9,0,.42],[O5+9,2.4,.55]].forEach(([tx,ph,spd])=>{const sp=new THREE.SpotLight(0xe8f0ff,6,40,.22,.45,1);sp.position.set(tx,TOP+9.6,-9);z5.add(sp);z5.add(sp.target);
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(2.1,28),new THREE.MeshBasicMaterial({color:0xeaf2ff,transparent:true,opacity:.22,blending:THREE.AdditiveBlending,depthWrite:false}));disc.rotation.x=-Math.PI/2;z5.add(disc);
+  const cone=new THREE.Mesh(new THREE.CylinderGeometry(.15,2.1,1,20,1,true),new THREE.MeshBasicMaterial({color:0xdfe9ff,transparent:true,opacity:.06,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));z5.add(cone);
+  SL5.push({sp,disc,cone,tx,ty:TOP+9.6,tz:-9,ph,spd,x:O5,z:8,blind:0});});
+ // chimneys + agri tower glow in the distance
+ const brick=M4(0x5a3428);[[O5-16,-24],[O5-12,-36],[O5+14,-28],[O5+18,-44]].forEach(([x,z])=>{const h=18+Math.random()*6;add(new THREE.Mesh(new THREE.CylinderGeometry(.7,1.1,h,10),brick),x,TOP+h/2,z);});
+ const tw=new THREE.Mesh(new THREE.CylinderGeometry(4,4,30,16,1,true),new THREE.MeshStandardMaterial({color:0x2a4a3a,emissive:0x3aff6a,emissiveIntensity:.3,transparent:true,opacity:.5,side:THREE.DoubleSide}));tw.position.set(O5+4,TOP+15,-30);z5.add(tw);
+ // ---- kitchen
+ const tile=ctex(128,128,(g,w,h)=>{g.fillStyle='#8a8478';g.fillRect(0,0,w,h);g.strokeStyle='rgba(40,36,30,.7)';for(let i=0;i<=4;i++){g.beginPath();g.moveTo(i*32,0);g.lineTo(i*32,h);g.stroke();g.beginPath();g.moveTo(0,i*32);g.lineTo(w,i*32);g.stroke();}noise(g,w,h,.15,1500);},[5,4]);
+ const kf=new THREE.Mesh(new THREE.PlaneGeometry(11,9),new THREE.MeshStandardMaterial({map:tile,roughness:.8}));kf.rotation.x=-Math.PI/2;kf.position.set(KIT5.x,TOP,KIT5.z);kf.receiveShadow=true;z5.add(kf);
+ for(const [w,d,x,z] of [[11,.3,0,-4.6],[11,.3,0,4.6],[.3,9,-5.6,0],[.3,9,5.6,0]])add(new THREE.Mesh(new THREE.BoxGeometry(w,3.2,d),M4(0x5a564e)),KIT5.x+x,TOP+1.6,KIT5.z+z);
+ add(new THREE.Mesh(new THREE.BoxGeometry(7,1,1.2),steel),KIT5.x-.5,TOP+.5,KIT5.z-3.4);Z5.obst.push({x:KIT5.x-2.5,z:KIT5.z-3.4,r:.8},{x:KIT5.x+1.5,z:KIT5.z-3.4,r:.8});
+ const oven=add(new THREE.Mesh(new THREE.BoxGeometry(2.4,2.2,1.6),M4(0x2a2622,{metalness:.5})),KIT5.x+3.8,TOP+1.1,KIT5.z+3.4);Z5.obst.push({x:KIT5.x+3.8,z:KIT5.z+3.4,r:1.2});
+ const om=new THREE.Mesh(new THREE.PlaneGeometry(1.4,.6),new THREE.MeshBasicMaterial({color:0xff8a30}));om.position.set(KIT5.x+3.8,TOP+.9,KIT5.z+2.58);om.rotation.y=Math.PI;z5.add(om);
+ const ol=new THREE.PointLight(0xff7a2a,2.2,9,2);ol.position.set(KIT5.x+3.8,TOP+1,KIT5.z+1.8);ol.userData.fl=1;z5.add(ol);
+ const cart=add(new THREE.Mesh(new THREE.BoxGeometry(1.2,1,2),M4(0x6a5a40)),KIT5.x-3.6,TOP+.6,KIT5.z+2.4);Z5.obst.push({x:KIT5.x-3.6,z:KIT5.z+2.4,r:1});
+ for(let i=0;i<6;i++)add(new THREE.Mesh(new THREE.CapsuleGeometry(.12,.45,4,8),M4(0xb88a50)),KIT5.x-3.9+(i%3)*.3,TOP+1.2,KIT5.z+1.8+(i>2?.8:0)).rotation.z=Math.PI/2;
+ const kl=new THREE.PointLight(0xffd8a0,1.2,12,2);kl.position.set(KIT5.x,TOP+3,KIT5.z);z5.add(kl);
+ // ---- dorm (cold white light, bunks)
+ const df=new THREE.Mesh(new THREE.PlaneGeometry(21,17),M4(0x5a5c5e));df.rotation.x=-Math.PI/2;df.position.set(DORM5.x,TOP,DORM5.z);df.receiveShadow=true;z5.add(df);
+ for(const [w,d,x,z] of [[21,.3,0,-8.4],[21,.3,0,8.4],[.3,17,-10.4,0],[.3,17,10.4,0]])add(new THREE.Mesh(new THREE.BoxGeometry(w,3.4,d),M4(0x6a6c6e)),DORM5.x+x,TOP+1.7,DORM5.z+z);
+ for(let r=0;r<3;r++)for(let c=0;c<5;c++){const bx=DORM5.x-7+c*3.5,bz=DORM5.z-4.5+r*4;add(new THREE.Mesh(new THREE.BoxGeometry(1,.12,2),M4(0x8a8c8e,{metalness:.6})),bx,TOP+.5,bz);add(new THREE.Mesh(new THREE.BoxGeometry(.9,.1,1.9),M4(0x9a9a98)),bx,TOP+.6,bz);add(new THREE.Mesh(new THREE.BoxGeometry(1,.12,2),M4(0x8a8c8e,{metalness:.6})),bx,TOP+1.6,bz);Z5.obst.push({x:bx,z:bz,r:.75});}
+ const bdoor=add(new THREE.Mesh(new THREE.BoxGeometry(1.6,2.4,.15),steel),DORM5.x+8,TOP+1.2,DORM5.z-8.25);const bl=new THREE.PointLight(0xff3a20,1,5,2);bl.position.set(DORM5.x+8,TOP+2.6,DORM5.z-7.6);z5.add(bl);
+ [[-5,0],[5,0]].forEach(([x,z])=>{const L=new THREE.PointLight(0xe8f0ff,1.4,14,2);L.position.set(DORM5.x+x,TOP+3.2,DORM5.z+z);z5.add(L);});
+ // ---- basement corridor
+ const bf=new THREE.Mesh(new THREE.PlaneGeometry(8,60),M4(0x3a3a38));bf.rotation.x=-Math.PI/2;bf.position.set(BAS5.x,TOP,-3);bf.receiveShadow=true;z5.add(bf);
+ for(const sx of [-1,1]){add(new THREE.Mesh(new THREE.BoxGeometry(.4,3.6,60),M4(0x4a4a46)),BAS5.x+sx*3.8,TOP+1.8,-3);
+  const pipe=add(new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,60,8),rust),BAS5.x+sx*3.3,TOP+2.9,-3);pipe.rotation.x=Math.PI/2;}
+ for(let zz=22;zz>=-28;zz-=8){const L=new THREE.PointLight(0xff3a20,1.1,8,2);L.position.set(BAS5.x,TOP+3,zz);L.userData.blink=zz;z5.add(L);const b=new THREE.Mesh(new THREE.BoxGeometry(.5,.12,.2),new THREE.MeshBasicMaterial({color:0xff4a2a}));b.position.set(BAS5.x,TOP+3.4,zz);z5.add(b);}
+ for(let i=0;i<8;i++)add(new THREE.Mesh(new THREE.BoxGeometry(6.8,.22,.9),conc),BAS5.x,TOP-.1-i*.02,26-i*.9);
+ // ---- core chamber
+ const cf=new THREE.Mesh(new THREE.CircleGeometry(10,40),M4(0x2e3034,{metalness:.5,roughness:.6}));cf.rotation.x=-Math.PI/2;cf.position.set(CORE5.x,TOP+.01,CORE5.z);cf.receiveShadow=true;z5.add(cf);
+ for(let i=0;i<12;i++){const a=i/12*Math.PI*2;if(Math.abs(Math.sin(a))>.92&&Math.cos(a)>0)continue;add(new THREE.Mesh(new THREE.BoxGeometry(1.2,5,1.2),M4(0x3a3c40,{metalness:.6})),CORE5.x+Math.cos(a)*9.6,TOP+2.5,CORE5.z+Math.sin(a)*8);}
+ const pil=add(new THREE.Mesh(new THREE.CylinderGeometry(1,1.3,4.2,16),M4(0x2a2c30,{metalness:.8,roughness:.3})),CORE5.x,TOP+2.1,CORE5.z-4);Z5.obst.push({x:CORE5.x,z:CORE5.z-4,r:1.5});
+ const core=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,1.1,16),new THREE.MeshStandardMaterial({color:0x10304a,emissive:0x2ab0ff,emissiveIntensity:2.2,metalness:.4,roughness:.2}));core.position.set(CORE5.x,TOP+4.8,CORE5.z-4);z5.add(core);core.userData.core=1;
+ const cl=new THREE.PointLight(0x3ab8ff,3,18,2);cl.position.set(CORE5.x,TOP+4.6,CORE5.z-3);cl.userData.core=1;z5.add(cl);
+ const chair=add(new THREE.Mesh(new THREE.BoxGeometry(1,1.4,1),M4(0x4a4c50,{metalness:.6})),CORE5.x-3,TOP+.7,CORE5.z-1);Z5.obst.push({x:CORE5.x-3,z:CORE5.z-1,r:.7});
+ for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,3.4,6),new THREE.MeshStandardMaterial({color:0x101418,emissive:0x2a8aff,emissiveIntensity:.6}));c.position.set(CORE5.x-1.5,TOP+1.6+i*.25,CORE5.z-2.5+i*.1);c.rotation.set(.3,0,Math.PI/2.6);z5.add(c);c.userData.cable=1;}
+ const cr=new THREE.Mesh(new THREE.TorusGeometry(2.2,.06,6,40),new THREE.MeshBasicMaterial({color:0x3ab8ff,transparent:true,opacity:.6}));cr.rotation.x=Math.PI/2;cr.position.set(CORE5.x,TOP+.05,CORE5.z-4);z5.add(cr);cr.userData.core=1;
+})();
+function clearC5(){(c5f.figs||[]).forEach(f=>{if(f){scene.remove(f.g);f.on=false;}});c5f.figs=[];}
+function fig5(k,x,z,o){const f=figure(k,x,z,o);if(f){(c5f.figs=c5f.figs||[]).push(f);}return f;}
+function enterZone5(){if(!Z1S)Z1S={walk:WALK.slice(),rects:RECTS.slice(),domes:DOMES.slice(),obst:OBST.slice()};clearC3();
+ if(typeof CROWD4!=='undefined'){CROWD4.forEach(c=>{scene.remove(c.f.g);c.f.on=false;});CROWD4=[];}[MAVI4,SELIM4,c4f&&c4f.remzi].forEach(f=>{if(f){f.g.visible=false;}});
+ ZONE=5;world.visible=false;water.visible=false;z2.visible=false;z4.visible=false;z5.visible=true;ashCarpet.visible=false;if(DEBT4)DEBT4.style.display='none';
+ NPCS.forEach(n=>n.mesh.visible=false);ITEMS.forEach(it=>{if(!it.taken){it.taken=true;scene.remove(it.g);}});
+ ENEMIES.forEach(e=>{scene.remove(e.g);scene.remove(e.ring);if(e.laser)scene.remove(e.laser);if(e.mdl)e.mdl.on=false;});ENEMIES.length=0;BOLTS.forEach(b=>scene.remove(b.m));BOLTS.length=0;
+ droneOn=false;drone.visible=false;droneSpot.intensity=0;if(sirenG)sirenG.gain.value=0;CAMOV=null;
+ WALK.length=0;RECTS.length=0;Z5.walk.forEach(r=>{WALK.push(r);RECTS.push(r);});DOMES.length=0;OBST.length=0;Z5.obst.forEach(o=>OBST.push(o));
+ ash.visible=true;ashMat.size=.06;ashMat.color.setHex(0x7a7a78);night=nightTarget=0;setZL(0x10141c,.03,.32,.24,0x7a8ab8);scene.fog.color.copy(ZL.fog);neckL.intensity=1;}
+function startCh5(fromCode){clearC5();enterZone5();if(fromCode){P.lvl=Math.max(P.lvl,6);P.max=Math.max(P.max,160);P.ymax=Math.max(P.ymax,135);}
+ yamaUnlocked=true;$('s2').classList.remove('lock');serceUnlocked=true;$('s3').classList.remove('lock');if(isTouch){$('tYama').style.display='flex';$('tSerce').style.display='flex';}
+ P.hp=P.max;P.yuva=P.ymax;P.down=false;teleport(O5,27);P.face=Math.PI;P.checkpoint.set(O5,TOP,27);c5f={figs:[]};playing=false;step='c5intro';hide('menu');
+ card('BÖLÜM 5','Bora','Çırak Yurdu 4. Kapının bir kilidi, temelin bir kalbi, nöbetin bir bekçisi var.',()=>{playing=true;step='c5alley';
+  setQuest('Çırak Yurdu 4 — mutfak kapısına ulaş, ışıklara yakalanma');MMARK={x:O5+5,z:-8,c:'#e9c08a'};
+  setTimeout(()=>say([D('Deniz','Gece yarısını üç geçiyordu. Yurdun duvarı sokağın sonunda bir baraj gibi duruyordu; üstünde iki kule, kulelerde iki göz.'),
+   D('Mavi','Işıklar sekiz saniyede bir döner. Biri tembeldir, öbürü değil. Serçe onları dört saniye kör eder, ama yuvanı yakarsan geri dönüş yolun kalmaz.'),
+   D('Hayalet','Mutfak kapısı, sağda. Selim\'in çırağı Halim seni bekliyor. Yakalanırsan tazılar gelir ve Halim bu gece ekmek kesmez.'),
+   D('Deniz','Kenan Aydın\'ın künyesini Mavi bir saatliğine susturmuştu. Bu gece ben kimse değildim. Kül\'de bundan daha iyi bir kılık yoktu.')].concat(byCore([D('MERIDIAN','Yaklaşıyorsun. İkinci parçam seni duyuyor, Deniz. Onu yalnız bırakma.')],[D('Deniz','Yuvamın dibindeki sızı yurdun yönüne döndükçe keskinleşiyordu. Kırdığım şeyin kardeşi oradaydı.')],[D('Deniz','Duvarın dibinde taze kazı izleri vardı. Beş numara, beş çocuk. Satarken kimin kazacağını sormamıştım.')],[])),()=>{}),400);});}
+function c5alarm(){if(c5f.alarmOn)return;c5f.alarmOn=1;c5f.alarms=(c5f.alarms||0)+1;toast('GÖRÜLDÜN — TAZILAR SALINDI',true,2.4);tone(700,.4,'square',.07,350);setTimeout(()=>tone(700,.4,'square',.07,350),450);shakeA=.25;
+ const a=hound(O5-3,-6);a.aggro=true;a.state='chase';const b=hound(O5+3,-6);b.aggro=true;b.state='chase';setQuest('Tazıları sustur — sonra mutfak kapısı');}
+function kitchenScene(){step='c5kit';playing=false;setFade(1);setTimeout(()=>{teleport(KIT5.x-1,KIT5.z+3);P.face=Math.PI*.9;P.checkpoint.set(KIT5.x-1,TOP,KIT5.z+3);setZL(0x14100c,.03,.4,.3,0xffc890);scene.fog.color.copy(ZL.fog);
+ c5f.halim=fig5('remzi',KIT5.x+1.4,KIT5.z+1.6,{face:-Math.PI*.6,pal:{'#Worker_Head_1':null,Worker_Vest:0xd8d4c8,Worker_Yellow:0xcfcabe,LightBrown:0x8a8478,Grey:0x2a2a2a,Black:0x1a1a1a,Brown:0x4a4642,Brown2:0x3e3a36}});setFade(0);
+ say([D('Halim','Kapıyı arkandan kapat. Un kokusu tazıları şaşırtır ama Bora\'yı şaşırtmaz.'),D('Deniz','Bora kim?'),
+  D('Halim','Gece bekçisi. Eskiden bu yurdun çırağıydı. On altısında Sur\'a yükselttiler; ense yuvasını söküp yerine asker kartı taktılar. Şimdi bizi sayıyor.'),
+  D('Halim','Her gece birini aşağı indiriyorlar. Temele. Dinleme odası diyorlar. Geri gelenler konuşmuyor. Bazıları hiç gelmiyor.'),
+  D('Deniz','Bu gece kimin sırası?'),D('Halim','Listeyi Bora tutar. Ama ekmekleri ben sayarım, evlat. Bu gece bir ekmek fazla geldi.'),
+  D('Halim','Kahvaltı arabası kapı tarayıcısından geçer. Altında, unun içinde bir kişilik yer var. Tarayıcı ısıya bakar; un soğuktur. Nefesini tut.')],()=>{
+  BRO={t:'EKMEK ARABASI — KAPI TARAYICISI',h:'UNUN ALTINDA KIPIRDAMA: BASILI TUT (Boşluk / dokun)'};breathGame(()=>{BRO=null;dormScene();});});},700);}
+function dormScene(){step='c5dorm';playing=false;setFade(1);setTimeout(()=>{if(c5f.halim)c5f.halim.g.visible=false;teleport(DORM5.x-6,DORM5.z+6.5);P.face=Math.PI*.75;P.checkpoint.set(DORM5.x-6,TOP,DORM5.z+6.5);setZL(0x1a1e24,.022,.5,.2,0xe8f0ff);scene.fog.color.copy(ZL.fog);
+ const kp={Green:0x6a6c70,LightGreen:0x5e6064,Hair:0x2a2420,Gold:0x2a2420,Brown:0x3a3a3c,'#Backpack_1':null,'#Backpack_2':null,'#Backpack_3':null,'#Backpack_4':null};
+ for(let r=0;r<3;r++)for(let c=0;c<5;c++){if(Math.random()<.4)continue;fig5('kid',DORM5.x-7+c*3.5+.9,DORM5.z-4.5+r*4+.4,{face:Math.random()*6,scale:.8,noShadow:true,pal:kp});}
+ c5f.sema=fig5('kid',DORM5.x-4.6,DORM5.z+5.2,{face:-Math.PI*.4,scale:.82,pal:Object.assign({},kp,{Hair:0x3a2418})});
+ setFade(0);say([D('Deniz','Arabanın tahtaları araladı. Beyaz ışık, gri tulumlar, yüzlerce nefes. Kimse bağırmadı. Burada bağırmayı ilk hafta unutturuyorlardı.'),
+  D('Sema','Deniz.'),D('Deniz','Sema\'nın sesi bir fısıltıydı ama bütün koğuş duymuş gibi oldu. Başlar kalktı, sonra hemen yine yastıklara gömüldü.'),
+  D('Sema','Geç kaldın. Minik\'i yirmi dakika önce götürdüler. Aşağı. Bileğindeki halka mavi yanıyordu; başkalarınınki yanmıyor.'),
+  D('Deniz','Taşıyıcı. Mavi\'nin sınıflandırıcısındaki dördüncü sınıf. Yuvası olan, sinyali kaldırabilecek çocuk. Minik\'in yuvası yoktu. Ama sesi duyacak kadar küçüktü.'),
+  D('?','Kımıldama.')],()=>boraScene());},700);}
+function boraScene(){step='c5bora';
+ c5f.bora=fig5('sur',DORM5.x+7.4,DORM5.z-6.6,{face:-Math.PI*.78,scale:1.08,anim:'Idle_Gun',pal:{Swat:{c:0x4a4c4a,r:.6,m:.2},Swat_Black:{c:0x1c1d1e,r:.7,m:.2},Visor:{c:0x101214,r:.3,m:.1}}});
+ if(c5f.bora){const sc=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),new THREE.MeshBasicMaterial({color:0xff6a3a}));attachRel(c5f.bora,'Neck',sc,[0,.02,-.1]);}
+ say([D('Deniz','Kapının yanında, gölgenin içinde, uzun boylu bir adam duruyordu. Sur üniforması ama vizörü sönük. Ensesinde yuva olması gereken yerde turuncu bir kart ışığı.'),
+  D('Bora','Hurda Liman kokuyorsun. Tuz, mazot, çay. Ben de o kokuyla geldim buraya. On bir yaşındaydım.'),D('Bora','Kemerimde bir telsiz var. Tek tuşla bütün kuleler uyanır. Bana bir sebep ver, çocuk.')],()=>{
+  choose('Bora\'ya ne yapacaksın?',['Kılıcı çek, telsize ulaşmadan saldır.','Yakanı indir, yuvanı göster: “Sen de Kül\'densin.”','Sema\'nın önüne geç ve sus.'],i=>{
+   const pre=i===0?[D('Deniz','Kılıç kınından yarıya çıkmıştı ki bileğim duvara yapıştı. Hızlıydı. Benden çok daha hızlı.',()=>{SFX.hurt();shakeA=.3;}),D('Bora','Ses çıkarırsan tazılar uyanır ve önce onları alırlar. Bunu bilmiyorsan Hayalet sana hiçbir şey öğretmemiş.')]
+    :i===2?[D('Deniz','Hiçbir şey söylemedim. Sema\'nın önünde durdum ve bekledim.'),D('Bora','Akıllı. Ya da korkak. Burada ikisi aynı kapıya çıkar.')]
+    :[D('Deniz','Yakamı indirdim. Ensemdeki yuva koğuşun beyaz ışığında maviye döndü.'),D('Bora','Askerî yuva. Yanmış ama ölmemiş. Seni de mi yükseltmeye çalıştılar?'),D('Deniz','Beni bir ölünün künyesiyle sakladılar.')];
+   say(pre.concat([D('Bora','Minik\'i ben indirdim. Kart benim kartım, liste benim listem. Her gece birini indiriyorum ve her sabah sayımda “eksiksiz” diyorum.'),
+    D('Bora','Temelde bir şey var. Mavi atıyor. Vos\'un teknisyenleri çocukları onun yanına oturtuyor; kimin onu duyduğunu ölçüyorlar. Duyan geri gelmiyor. Kafası artık başka birinin.'),
+    D('Deniz','O zaman bu gece listeyi değiştir.'),D('Bora','Ben bir kapıyım, çocuk. Kapılar karar vermez.'),D('Sema','Minik senin ekmeğini yerdi, Bora. Her sabah. Sen veriyordun.'),
+    D('Deniz','Bora uzun süre Sema\'ya baktı. Sonra kartını ensesinden söktü; turuncu ışık avucunda titredi.'),
+    D('Bora','Kilit iki imza ister: bir asker kartı ve bir yuva. Kart bende. Yuva sende. Birlikte açılır. Ayrı ayrı alarm.')]),()=>{
+    step='c5lock0';playing=true;setQuest('Temel kapısı — Bora ile birlikte kilidi aç');MMARK={x:DORM5.x+8,z:DORM5.z-7.6,c:'#ff8a6a'};});});});}
+function c5lock(){step='c5lock';playing=false;moveTarget=null;teleport(DORM5.x+8,DORM5.z-7.1);P.face=Math.PI;
+ say([D('Bora','Ben kartı basınca sen frekansı tut. Kilit iki nabzı aynı anda görmeli. Üç kez.')],()=>{
+  minigame('TEMEL KİLİDİ — kartla aynı anda',3,()=>{tone(220,.3,'square',.08);setTimeout(()=>tone(330,.4,'square',.08),200);shakeA=.2;
+   say([D('Deniz','Kilit bir kez öttü, sonra derin bir nefes alır gibi açıldı. Aşağıdan soğuk, makine yağı ve ozon kokan bir hava yükseldi.'),
+    D('Bora','Merdivenin dibinde iki tazı ve bir devriye var. Teknisyenler odada. Ben burada kalıp sayımı tutacağım. Koğuşta sessizlik olmazsa hepimiz biteriz.'),
+    D('Bora','Minik\'i getir. O mavi şeye dokunma. Dokunursan seni de duyar.')],()=>{
+    setFade(1);setTimeout(()=>{teleport(BAS5.x,24.5);P.face=Math.PI;P.checkpoint.set(BAS5.x,TOP,24.5);setZL(0x1a0c08,.034,.3,.18,0xff7a5a);scene.fog.color.copy(ZL.fog);setFade(0);
+     step='c5bas';playing=true;setQuest('Temel — dinleme odasına in');MMARK={x:CORE5.x,z:CORE5.z,c:'#7fd0ff'};medkit(BAS5.x+2,8);medkit(BAS5.x-2,-16);},700);});});});}
+function c5wave1(){c5f.w1=1;const a=hound(BAS5.x-1.5,6);a.aggro=true;a.state='chase';const b=hound(BAS5.x+1.5,4);b.aggro=true;b.state='chase';soldier(BAS5.x,0,{aggro:true});
+ say([D('TAZI',byCore(['Çekirdek imzası: bir. Taşıyıcı yaklaşıyor. Öncelik: canlı yakala.'],['Kırık çekirdek izi. Kaynak tehdit. Etkisiz hale getir.'],['Sur muhbir kaydı ile uyumsuz yuva. Etkisiz hale getir.'],['Tanımlanamayan yuva. Etkisiz hale getir.'])[0],()=>{tone(1400,.2,'square',.05);})],()=>{setQuest('Devriyeyi durdur');});}
+function c5wave2(){c5f.w2=1;soldier(BAS5.x-2,-22,{aggro:true});soldier(BAS5.x+2,-23,{aggro:true});const h=hound(BAS5.x,-25);h.aggro=true;h.state='chase';toast('İKİNCİ DEVRİYE',true,1.6);P.checkpoint.set(BAS5.x,TOP,-8);}
+function coreArrive(){step='c5corein';playing=false;moveTarget=null;P.checkpoint.set(CORE5.x,TOP,CORE5.z+6);
+ c5f.minik=fig5('kid',CORE5.x-3,CORE5.z-.2,{face:Math.PI*.15,scale:.72,pal:{Green:0x6a6c70,LightGreen:0x5e6064,Hair:0x2a2420,Gold:0x2a2420,Brown:0x3a3a3c,'#Backpack_1':null,'#Backpack_2':null,'#Backpack_3':null,'#Backpack_4':null}});
+ c5f.tech=fig5('remzi',CORE5.x+2.6,CORE5.z-2.2,{face:-Math.PI*.3,pal:{'#Worker_Head_1':null,Worker_Vest:0xb8c0c8,Worker_Yellow:0xa8b0b8,LightBrown:0x8a8478,Grey:0x2a2a2a,Black:0x1a1a1a,Brown:0x5a5e66,Brown2:0x4a4e56}});
+ CAMOV={p:new THREE.Vector3(CORE5.x+5,TOP+7,CORE5.z+8),l:new THREE.Vector3(CORE5.x-1,TOP+2,CORE5.z-2)};
+ say([D('Deniz','Oda yuvarlaktı. Ortada, çelik bir sütunun tepesinde, bir kalp gibi mavi atan bir silindir. Kuyudakinin ikizi.'),
+  D('Deniz','Sütunun dibinde bir koltuk. Koltukta Minik. Kafasından büyük kulakları kabloların arasında kaybolmuştu. Gözleri açıktı ama bana bakmıyordu.'),
+  D('Teknisyen','Uyum yüzde altmış bir. Yetmişi geçerse General\'e bildirin. Bu çocuk onu hepsinden iyi duyuyor.'),
+  D('Minik','Deniz.'),D('Deniz','Ama ses Minik\'in sesi değildi. Çok sakin, çok yaşlı ve çok tanıdıktı.')].concat(
+  byCore([D('MERIDIAN','Bu çocuk beni çok iyi duyuyor, Deniz. Sen kadar iyi. Beni ondan al. Senin kafan daha geniş.')],
+   [D('MERIDIAN','Bir parçamı kırdın. Bu parçam bunu hatırlıyor. Bu çocuğun kafası çok sessiz, çok rahat. Belki burada kalırım.')],
+   [D('MERIDIAN','Beni sattığın adamların koltuğu bu. Beğendin mi, Deniz? Bu çocuk benim için bağırmıyor bile.')],
+   [D('MERIDIAN','Beni topla, Deniz. Bu çocuğun kafası çok küçük.')])).concat([
+  D('Teknisyen','Taşıyıcı! Kendi ayağıyla gelmiş. Ana\'yı salın!',()=>{SFX.growl&&SFX.growl();shakeA=.5;})]),()=>{CAMOV=null;
+  const b=hound(CORE5.x+4,CORE5.z-6,true);b.hp=b.max=560;b.dmg=20;b.aggro=true;b.state='chase';c5f.boss=b;soldier(CORE5.x-5,CORE5.z-6,{aggro:true});soldier(CORE5.x+6,CORE5.z+1,{aggro:true});
+  if(c5f.tech)c5f.tech.g.visible=false;toast('SUR TAZISI ANA',true,3);step='c5boss';playing=true;setQuest('Sur Tazısı Ana — Minik\'i koru');medkit(CORE5.x+6,CORE5.z+5);});}
+function coreAfter(){step='c5free';playing=false;moveTarget=null;teleport(CORE5.x-2,CORE5.z+1.4);P.face=-Math.PI*.6;
+ say([D('Deniz','Ana yere çakıldı; kırmızı gözü bir kez yanıp söndü. Odada yalnızca çekirdeğin nabzı kaldı.'),D('Deniz','Kablolar Minik\'in yuvasız ensesine yapışkan pedlerle tutturulmuştu. Hızlı çekersem ne olacağını bilmiyordum. Yavaş çekmeye vaktim yoktu.')],()=>{
+  qte('KABLOLARI ÇEK',2.2,()=>freeMinik(),()=>{toast('Minik inledi — yeniden',true,1.4);setTimeout(()=>qte('KABLOLARI ÇEK',2.6,()=>freeMinik(),()=>freeMinik()),900);});});}
+function freeMinik(){tone(600,.3,'sine',.06);c5f.cables=1;
+ say([D('Minik','…Deniz? Rüyamda biri bana bütün şehirlerin adını söyledi. Hepsini. Bir tanesi bizim liman değildi.'),D('Deniz','Geçti. Seni eve götürüyorum.'),
+  D('Deniz','Çekirdek sütunun tepesinde atmaya devam ediyordu. Kör Baykuş\'un kristali cebimde ısınmıştı. Bu gece ikinci kez, sesin bana bıraktığı bir karar vardı.'),
+  D('Hayalet','Evlat, iyi dinle. Bunu bir kez söyleyeceğim. Elli yıl önce ben de bir sütunun önünde durdum.')],()=>{
+  choose('İKİNCİ ÇEKİRDEK — ne yapacaksın?',['MERIDIAN\'a ver — yuvana bağla.','Yok et — Hayalet\'in yöntemiyle kır.','Çark\'a ver — Selim Usta\'nın “herkes aynı anda dursun” günü için.'],i=>{
+   const v=['meridian','destroy','cark'][i];setFlag('core2',v);c5f.core=v;const cm=z5.children.filter(c=>c.userData.core);
+   let L;
+   if(v==='meridian'){L=[D('Deniz','Silindiri sütundan söktüm ve yakamın içine, yuvamın üstüne bastırdım. Soğuktu. Sonra değildi.',()=>{neckL.intensity=7;cm.forEach(c=>{if(c.material&&c.material.color)c.material.opacity=.2;if(c.isLight)c.intensity=.4;});})].concat(
+     window.FLAGS.core1==='meridian'?[D('MERIDIAN','İki parçam. Sesim artık senin düşüncenden zor ayırt ediliyor, Deniz. Korkma. Ben de korkmuyorum.')]:[D('MERIDIAN','Bir parçam. Sonunda. Kafan sıcak ve geniş. Teşekkür ederim, Deniz.')]).concat(
+     [D('Hayalet','Her parça seni biraz daha onun yapar, evlat. Yedinciyi taktığında kimin konuştuğunu kim bilecek?')]);}
+   else if(v==='destroy'){L=[D('Deniz','Hayalet\'in tarif ettiği yerden, mührün altındaki üç vidadan tuttum. Kılıcın kabzasıyla vurdum. Bir kez. İki kez.',()=>{SFX.hit();shakeA=.6;cm.forEach(c=>{if(c.isLight)c.intensity=0;else if(c.material)c.material.visible=false;});burst(new THREE.Vector3(CORE5.x,TOP+4.8,CORE5.z-4),0x3ab8ff,80,4,1.6,.12);})].concat(
+     window.FLAGS.core1==='destroy'?[D('MERIDIAN','İki. İki parçam sustu. Beş kaldı, Deniz. Ve beşi de artık seni tanıyor.')]:[D('MERIDIAN','Bir parçamı kırdın. Acıyı bilmem gerekiyorsa, şimdi biliyorum.')]).concat(
+     [D('Hayalet','Bir eksik daha. Vos şimdi hızlanır. Kırılan her parça kalanları daha değerli yapar.')]);}
+   else{L=[D('Deniz','Silindiri söktüm ve Halim\'in un çuvalına sardım. Bu MERIDIAN\'ın değil, Çark\'ın olacaktı.',()=>{cm.forEach(c=>{if(c.isLight)c.intensity=.3;});})].concat(
+     [D('MERIDIAN','Beni bir anahtar gibi kullanacaksınız. Bütün künyelere tek bir saniye. Akıllıca. Ve tehlikeli. Ben anahtar değilim, Deniz. Ben kapıyım.')]).concat(
+     window.FLAGS.core1==='sur'?[D('Hayalet','Birini Sur\'a sattın, birini Çark\'a veriyorsun. Ya pazarlığı öğreniyorsun ya da her şeyi satılık sanıyorsun.')]:[D('Hayalet','Selim yıllardır o bir saniyeyi bekliyor. Şimdi elinde bir sebep var. Umarım hazırdır.')]);}
+   say(L,escapeScene);});});}
+function escapeScene(){step='c5esc';setFade(1);setTimeout(()=>{if(c5f.minik)c5f.minik.g.visible=false;teleport(DORM5.x+6,DORM5.z-5.5);P.face=Math.PI*.2;setZL(0x1a1e24,.024,.45,.2,0xe8f0ff);scene.fog.color.copy(ZL.fog);
+ if(c5f.bora){c5f.bora.g.position.set(DORM5.x+7.6,TOP,DORM5.z-4.2);c5f.bora.g.rotation.y=-Math.PI*.6;}setFade(0);
+ say([D('Bora','Minik.'),D('Deniz','Bora çocuğun başına bir kez, beceriksizce dokundu. Sonra hemen elini çekti, yanmış gibi.'),
+  D('Bora','Sayım altıda. Beş Hurda Liman çocuğu ve Minik. Altı eksik. Altı eksikle bu yurt sabahı görmez; ben de görmem.'),
+  D('Deniz','O zaman sen de gel.'),D('Bora','Ben bir kapıyım, demiştim.'),D('Sema','Kapılar da gider. Biz gördük. Hurda Liman\'da hepsi söküldü.'),
+  D('Bora','Yukarıda tazılar uyandı. Halim\'in arabası mutfak kapısında. Beni izleyin ve hiç durmayın.',()=>{tone(700,.4,'square',.07,350);setTimeout(()=>tone(700,.4,'square',.07,350),450);})],()=>{
+  setFade(1);setTimeout(()=>{teleport(O5+4.5,-6.5);P.face=0;P.checkpoint.set(O5+4.5,TOP,-6.5);setZL(0x10141c,.03,.32,.22,0x7a8ab8);scene.fog.color.copy(ZL.fog);
+   if(c5f.bora){c5f.bora.g.position.set(O5+3,TOP,-5.6);c5f.bora.g.rotation.y=0;}c5f.kids2=[];for(let i=0;i<6;i++){const k=fig5('kid',O5+5.5+(i%3)*.8,-4.8+(i/3|0)*.9,{face:0,scale:.76,noShadow:true,pal:{Green:0x6a6c70,LightGreen:0x5e6064,Hair:0x2a2420,Gold:0x2a2420,Brown:0x3a3a3c,'#Backpack_1':null,'#Backpack_2':null,'#Backpack_3':null,'#Backpack_4':null}});if(k)c5f.kids2.push(k);}
+   setFade(0);step='c5out';playing=true;setQuest('Çocuklar sokağın ucuna — Tazıları tut');MMARK={x:O5,z:28,c:'#cfe6ff'};c5f.alarmOn=1;
+   for(let i=0;i<3;i++){const h=hound(O5-4+i*4,-4);h.aggro=true;h.state='chase';}soldier(O5-6,-3,{aggro:true});
+   say([D('Deniz','Işıklar ikimizi de buldu. Bora kulelere doğru döndü ve tek bir el işaretiyle onları kör etti; kartı hâlâ bir şeyler açıyordu.',()=>{SL5.forEach(s=>s.blind=999);})]);},700);});},700);}
+function c5dawn(){step='c5dawn';playing=false;setFade(1);setTimeout(()=>{teleport(O5,26);P.face=Math.PI;setZL(0x4a4640,.03,.45,.42,0xd8c0a0);scene.fog.color.copy(ZL.fog);
+ if(c5f.bora){c5f.bora.g.position.set(O5+1.6,TOP,24.6);c5f.bora.g.rotation.y=Math.PI;}(c5f.kids2||[]).forEach((k,i)=>{k.g.position.set(O5-2+(i%3)*1,TOP,23+(i/3|0)*1);k.g.rotation.y=Math.PI;});
+ const mv=fig5('nur',O5-1.6,25,{face:Math.PI*.9,scale:.97,pal:{Red:0x1e1a18,'#Formal_Body_1':0x6a6c6c,LimeGreen:0x5e6060,Gold:0x2a2420,'#Formal_Feet_2':0x1c1a18,'#Formal_Legs_1':0x4a4c4c}});setFade(0);
+ say([D('Deniz','Şafak Çark\'ın bacalarının arasından gri bir sis gibi sızdı. Altı çocuk, bir eski asker, bir eski mühendis ve ben. Kül\'ün en tuhaf kervanı.'),
+  D('Mavi','Altı. Beş dedim, sen altı getirdin. Bir de bunu getirdin.'),D('Bora','Bora. Eski Sur. Yeni hiçbir şey.'),D('Mavi','Hoş geldin, hiçbir şey. Burada hepimiz biraz öyleyiz.')].concat(
+  c2by([D('Mavi','Yuvanın ışığı değişmiş, Deniz. Daha mavi. Bunu sevmedim.')],[D('Mavi','Kırık çekirdeğin parçalarını bana ver. Ölü bir kalbin bile anlatacakları vardır.')],[D('Mavi','Un çuvalında ne taşıdığını biliyorum. Selim Usta bunu duyunca ya ağlar ya güler. Belki ikisini birden.')],[])).concat([
+  D('Deniz','Bütün bacaların tepesindeki hoparlörler aynı anda cızırdadı. Sonra o ses: düzgün, sakin, teşekkür eder gibi.',()=>{tone(200,1.2,'sine',.06);}),
+  D('General Vos','Kül halkına. Bu gece bir Sur tesisine saldırı düzenlendi ve devlet malı çalındı. Kül\'e giden bütün yollar bu sabahtan itibaren kapatılmıştır. Hurda Liman karantinaya alınmıştır.'),
+  D('General Vos','Taşıyıcıyı teslim edin, karantina kalksın. Hepimiz aynı çarkın dişlileriyiz. Teşekkürler.'),
+  D('Deniz','Kristal cebimde ısındı. Kör Baykuş\'un haritasında yeni bir nokta atmaya başlamıştı: güneyde, Tuz Ovası\'nın beyazlığının tam ortasında.')]).concat(
+  byCore([D('MERIDIAN','Üçüncü parçam tuzun altında. Vos da biliyor. Acele et.')],[D('Deniz','Kırık sesler arasında üçüncüsü belirgindi: güneyde, tuzun altında.')],[D('Deniz','Beş numaralı kâğıdı çıkardım. Arkasına birisi kurşun kalemle yazmıştı: TUZ.')],[D('Deniz','Tuzun altında bir şey atıyordu. Üçüncüsü.')])),()=>{
+  step='c5end';setTimeout(()=>card('BÖLÜM 5 SONU','Bora','Bora ekibe katıldı. Minik ve beş Hurda Liman çocuğu kurtarıldı. Hurda Liman karantinada.',()=>
+   card('SIRADAKİ','Tuz Ovası','Üçüncü çekirdek, karantinaya alınmış bir liman ve tuzun altındaki kayıp şehir. Yakında. (Bölüm 5 şifresi: KILIT)',()=>{step='end';show('menu');})),900);});},800);}
+function c5update(dt,t){updMG(dt);updBR(dt);updFoot(dt);P.serceCd=(P.serceCd||0)-dt;$('cd3')&&($('cd3').style.height=(serceUnlocked&&P.serceCd>0?P.serceCd/10*100:0)+'%');
+ // searchlights
+ SL5.forEach(s=>{s.blind-=dt;const k=t*s.spd+s.ph;s.x=O5+Math.sin(k)*5;s.z=8+Math.cos(k*.7)*8.5;const on=s.blind<=0;s.sp.intensity=on?6:0;s.disc.visible=s.cone.visible=on;
+  s.sp.target.position.set(s.x,TOP,s.z);s.disc.position.set(s.x,TOP+.03,s.z);const dx=s.x-s.tx,dy=TOP-s.ty,dz=s.z-s.tz,len=Math.hypot(dx,dy,dz);s.cone.scale.set(1,len,1);s.cone.position.set((s.x+s.tx)/2,(TOP+s.ty)/2,(s.z+s.tz)/2);s.cone.lookAt(s.x,TOP,s.z);s.cone.rotateX(Math.PI/2);
+  if(on&&step==='c5alley'&&playing&&!dlgActive&&!c5f.alarmOn&&Math.hypot(P.pos.x-s.x,P.pos.z-s.z)<2.05)c5alarm();});
+ z5.children.forEach(c=>{if(c.userData.fl){c.intensity=2+Math.sin(t*11)*.4+Math.random()*.3;}else if(c.userData.blink!==undefined){c.intensity=(Math.sin(t*3+c.userData.blink)>.2)?1.2:.25;}else if(c.userData.core&&c.isLight){if(c.intensity>1)c.intensity=2.6+Math.sin(t*4)*.8;}});
+ if(!playing||dlgActive||P.dead)return;footstep();
+ const alive=ENEMIES.some(e=>!e.dead);
+ if(step==='c5alley'){if(c5f.alarmOn&&!alive){c5f.alarmOn=0;setQuest('Çırak Yurdu 4 — mutfak kapısına ulaş, ışıklara yakalanma');}
+  if(Math.hypot(P.pos.x-(O5+5),P.pos.z-(-8))<1.6){if(alive)toast('Önce tazıları sustur',true,1);else kitchenScene();}}
+ if(step==='c5lock0'&&Math.hypot(P.pos.x-(DORM5.x+8),P.pos.z-(DORM5.z-7.6))<1.7)c5lock();
+ if(step==='c5bas'){if(!c5f.w1&&P.pos.z<14)c5wave1();if(c5f.w1&&!c5f.w2&&!alive&&P.pos.z<-12)c5wave2();if(c5f.w2&&!alive&&P.pos.z<-29)coreArrive();
+  if(P.pos.z<-29&&alive){P.pos.z=-28.9;}}
+ if(step==='c5boss'&&!alive)coreAfter();
+ if(step==='c5out'){(c5f.kids2||[]).forEach((k,i)=>{const tz=Math.min(26,k.g.position.z+dt*1.6);k.g.position.z=tz;k.g.rotation.y=0;});if(c5f.bora){const bz=c5f.bora.g.position.z;c5f.bora.g.position.z=Math.min(24,bz+dt*1.4);}
+  if(!alive&&P.pos.z>22)c5dawn();}}
 
 function zl(dt){scene.fog.color.lerp(ZL.fog,Math.min(1,dt*1.5));scene.fog.density+=(ZL.dens-scene.fog.density)*Math.min(1,dt*1.5);hemi.intensity+=(ZL.hemi-hemi.intensity)*Math.min(1,dt*1.5);sun.intensity+=(ZL.sun-sun.intensity)*Math.min(1,dt*1.5);sun.color.lerp(ZL.sunC,Math.min(1,dt*1.5));}
 
@@ -1857,7 +2064,7 @@ let breathT=0,breathOn=0,beatT=0,last=performance.now(),paused=false;
 function togglePause(){if(!playing&&!paused)return;paused=!paused;paused?show('pause'):hide('pause');}
 $('bRes').onclick=()=>togglePause();$('bMenu').onclick=()=>{paused=false;hide('pause');playing=false;show('menu');};
 $('bStart').onclick=()=>{if(step==='menu')startGame();else if(step==='end')location.reload();else{hide('menu');playing=true;}};
-$('bCode').onclick=()=>{const v=($('code').value||'').trim().toLocaleUpperCase('tr-TR').replace(/İ/g,'I');if(v==='FISILTI'&&step==='menu'&&!$('bStart').disabled){audioInit();startCh2(true);resize();}else if(v==='YAMA'&&step==='menu'&&!$('bStart').disabled){audioInit();startCh3(true);resize();}else if(v==='TAHIL'&&(step==='menu'||step==='end')&&!$('bStart').disabled){audioInit();startCh4(true);resize();}else{$('code').value='';$('code').placeholder='Geçersiz şifre';}};
+$('bCode').onclick=()=>{const v=($('code').value||'').trim().toLocaleUpperCase('tr-TR').replace(/İ/g,'I');if(v==='FISILTI'&&step==='menu'&&!$('bStart').disabled){audioInit();startCh2(true);resize();}else if(v==='YAMA'&&step==='menu'&&!$('bStart').disabled){audioInit();startCh3(true);resize();}else if(v==='TAHIL'&&(step==='menu'||step==='end')&&!$('bStart').disabled){audioInit();startCh4(true);resize();}else if(v==='KILIT'&&(step==='menu'||step==='end')&&!$('bStart').disabled){audioInit();startCh5(true);resize();}else{$('code').value='';$('code').placeholder='Geçersiz şifre';}};
 $('bGfx').onclick=()=>{hiGfx=!hiGfx;$('bGfx').textContent='Grafik: '+(hiGfx?'Yüksek':'Düşük');setGfx();};
 $('bSnd').onclick=()=>{sndOn=!sndOn;$('bSnd').textContent='Ses: '+(sndOn?'Açık':'Kapalı');if(master)master.gain.value=sndOn?.8:0;};
 function update(dt){const t=performance.now()/1000;
@@ -1868,6 +2075,7 @@ function update(dt){const t=performance.now()/1000;
  // night lerp
  P.yamaCd=(P.yamaCd||0)-dt;if(ZONE===3){zl(dt);c3update(dt,t);}
  if(ZONE===4){zl(dt);c4update(dt,t);}
+ if(ZONE===5){zl(dt);c5update(dt,t);}
  if(ZONE===2){c2update(dt,t);if(HAY.mdl&&HAY.mdl.bones.Spine)HAY.mdl.bones.Spine.rotation.x+=.32;}
  if(ZONE===1){night+=(nightTarget-night)*Math.min(1,dt*.35);scene.fog.color.copy(FOG_DAY).lerp(FOG_NIGHT,night);scene.fog.density=.034+night*.012;hemi.intensity=.55-night*.38;sun.intensity=1.35-night*1.15;sun.color.setHex(night>.5?0x7d9ac8:0xffd29a);}
  if(ZONE===1&&typeof C1!=='undefined'){if(C1.inside==='dome'||C1.inside==='kafes'){scene.fog.color.setHex(0x0a0907);scene.fog.density=.022;}else if(C1.inside==='view'){scene.fog.density=.011;}}
@@ -1931,5 +2139,5 @@ addEventListener('resize',resize);addEventListener('orientationchange',()=>setTi
 function loop(now){requestAnimationFrame(loop);let dt=Math.min(.05,(now-last)/1000);last=now;
  const portrait=isTouch&&innerHeight>innerWidth;$('touch').style.display=isTouch&&playing&&!portrait?'block':'none';
  if(!paused&&!portrait)update(dt);renderer.render(scene,camera);}
-if(location.hash==='#dbg')window.__W=()=>JSON.stringify({walk:WALK,domes:DOMES.map(d=>({x:d.x,z:d.z,r:d.r})),obst:OBST});if(location.hash==='#dbg')window.__D={C1,tp:(x,z)=>{if(C1.inside)c1exit();teleport(x,z);},leaveKafes:()=>{if(C1.inside)c1exit();},c1i:()=>c1interact(),adv:()=>advance(),dl:()=>dlgActive,win:()=>{const f=C1.win;C1.win=null;f&&f();},leaveKafes,goDome,nurSetup,flashback,kovaCine,patrolArrive,sneakStart,crackIn,armRun,landDeck,minaretDown,brWin:()=>{const b=BR;if(!b)return;BR=null;b.o.remove();b.cb&&b.cb();},cam:v=>{CAMOV=v;},ec:()=>{enterCark();},c4f:()=>c4f,go:n=>{audioInit();(n===4?startCh4:n===3?startCh3:startCh2)(true);resize();},assets:()=>Object.keys(ASSETS),pm:()=>!!PM,vfx,P,useEmp,attack,ENEMIES2:()=>ENEMIES,VX,teleport,NUR,HAY,REMZI,ENEMIES,st:()=>step,setCam:v=>{camDist=v;}};setGfx();resize();show('menu');const bS=$('bStart');bS.disabled=true;bS.textContent='Yükleniyor…';loadAll().then(()=>{try{applyModels();applyZ2Models();swordTrail();}catch(err){console.warn(err);}bS.disabled=false;bS.textContent='Başla';});P.pos.set(2.5,TOP,1.5);camFocus.copy(P.pos);requestAnimationFrame(loop);
+if(location.hash==='#dbg')window.__W=()=>JSON.stringify({walk:WALK,domes:DOMES.map(d=>({x:d.x,z:d.z,r:d.r})),obst:OBST});if(location.hash==='#dbg')window.__D={C1,tp:(x,z)=>{if(C1.inside)c1exit();teleport(x,z);},leaveKafes:()=>{if(C1.inside)c1exit();},c1i:()=>c1interact(),adv:()=>advance(),dl:()=>dlgActive,win:()=>{const f=C1.win;C1.win=null;f&&f();},leaveKafes,goDome,nurSetup,flashback,kovaCine,patrolArrive,sneakStart,crackIn,armRun,landDeck,minaretDown,brWin:()=>{const b=BR;if(!b)return;BR=null;b.o.remove();b.cb&&b.cb();},cam:v=>{CAMOV=v;},ec:()=>{enterCark();},c4f:()=>c4f,go:n=>{audioInit();(n===5?startCh5:n===4?startCh4:n===3?startCh3:startCh2)(true);resize();},assets:()=>Object.keys(ASSETS),pm:()=>!!PM,vfx,P,useEmp,attack,ENEMIES2:()=>ENEMIES,VX,teleport,NUR,HAY,REMZI,ENEMIES,st:()=>step,setCam:v=>{camDist=v;}};setGfx();resize();show('menu');const bS=$('bStart');bS.disabled=true;bS.textContent='Yükleniyor…';loadAll().then(()=>{try{applyModels();applyZ2Models();swordTrail();}catch(err){console.warn(err);}bS.disabled=false;bS.textContent='Başla';});P.pos.set(2.5,TOP,1.5);camFocus.copy(P.pos);requestAnimationFrame(loop);
 })();
