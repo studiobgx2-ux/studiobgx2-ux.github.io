@@ -8,7 +8,9 @@ function bgxRemember() {
   try { localStorage.setItem('bgx2.registered', String(Date.now())); } catch (x) {}
   try { var h = location.hostname.replace(/^www\./, ''); document.cookie = 'bgx2reg=1; Max-Age=157680000; Path=/; SameSite=Lax' + (/bgx2games\.com\.tr$/.test(h) ? '; Domain=' + h : '') + (location.protocol === 'https:' ? '; Secure' : ''); } catch (x) {}
 }
+window.bgxRemember = bgxRemember;
 function bgxNext() { var nx = ''; try { nx = new URLSearchParams(location.search).get('next') || ''; } catch (x) {} return /^\/[^\/]/.test(nx) ? nx : ''; }
+window.bgxNext = bgxNext;
 /* "Already signed up" link on the sign-up page: remember and continue without filling the form again. */
 document.addEventListener('click', function (e) {
   var a = e.target && e.target.closest ? e.target.closest('[data-already]') : null; if (!a) return;
