@@ -12,7 +12,7 @@
     var fd = new FormData();
     fd.append('entry.1883529', u.email || ''); fd.append('entry.1075989910', (u.given_name || u.name || '').slice(0, 32));
     fd.append('entry.244674109', lang); fd.append('entry.1700006752', 'google'); fd.append('entry.1893874640', lang === 'tr' ? 'evet' : 'yes');
-    try { if (u.given_name && !localStorage.getItem('bgx2.profile')) localStorage.setItem('bgx2.profile', JSON.stringify({ nick: u.given_name.slice(0, 24), v: 1 })); } catch (e) {}
+    try { if (u.given_name) localStorage.setItem('bgx2.profile', JSON.stringify({ nick: u.given_name.slice(0, 24), v: 1 })); } catch (e) {}
     var go = function () { if (w.bgxRemember) w.bgxRemember(); location.href = (w.bgxNext && w.bgxNext()) || box.getAttribute('data-thanks'); };
     try { fetch(GF, { method: 'POST', mode: 'no-cors', body: fd }).then(go, go); } catch (e) { go(); } setTimeout(go, 3000);
   }
