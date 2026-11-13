@@ -3555,7 +3555,8 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
 
       function showIntro(i) {
         clearTimeout(zoneT); zoneEl.hidden = true;
-        if (i === 0 && !storySeen()) { markStory(); playStory(STORY_INTRO, false, () => showIntro(0)); return; }
+        if (i === 0) { state = "play"; return; } // level 1 starts instantly, no story/zone card/TV
+        if (i === 1 && !storySeen()) { markStory(); playStory(STORY_INTRO, false, () => showKukla(1)); return; }
         if (i % 5 !== 0) { showKukla(i); return; }
         const z = zoneOf(i); zoneLvl = i;
         document.getElementById("zoneTitle").textContent = T("MEKAN") + " " + (z + 1) + ": " + T(ZONES[z].name).toLocaleUpperCase(LANG);
