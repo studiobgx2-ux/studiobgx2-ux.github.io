@@ -862,7 +862,7 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
         realReached.add(levelIdx);
         const old = lsRead(), oldCp = old && old.cp && old.cp.lvl === lsLastIdx ? old.cp : null;
         const cp = cpActive && cpActive.lvl === levelIdx && levelIdx === lsLastIdx ? { lvl: cpActive.lvl, key: cpActive.key } : oldCp;
-        lsWrite({ reached: [...realReached].sort((a, b) => a - b), last: lsLastIdx, cp });
+        lsWrite({ reached: [...realReached].sort((a, b) => a - b), last: lsLastIdx, cp, deaths });
       }
 
       /* ===== CrazyGames SDK v3 (optional): progress save and gameplay events; a no-op when the SDK is absent ===== */
@@ -2343,7 +2343,7 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
             level.add(box(1.3, 0.2, MAT.beam, x, py, 1.7));
             const g = new THREE.Group(); g.position.set(x, py, 1.75);
             g.add(box(0.09, L + 0.1, MAT.spikeDark, 0, -(L + 0.1) / 2, 0)); g.add(circle(0.1, MAT.saw, 0, 0, 0.01));
-            const cres = (th, mat, z) => { const m = new THREE.Mesh(geoOf("k|" + th + "|" + R + "|" + D, () => { const s = new THREE.Shape(); s.absarc(0, R - D, R, 3.99, 5.43, false); s.absarc(0, R - D + th, R, 5.43, 3.99, true); return new THREE.ShapeGeometry(s); }), mat); m.position.set(0, -L, z); return m; };
+            const cres = (th, mat, z) => { const m = new THREE.Mesh(geoOf("k|" + th + "|" + R + "|" + D, () => { const s = new THREE.Shape(); s.absarc(0, R - D, R, 3.99, 5.43, false); s.absarc(0, R - D + th, R, 5.43, 3.99, true); return new THREE.ShapeGeometry(s); }), mat); m.position.set(0, -L, z); m.scale.setScalar(0.65); return m; };
             g.add(cres(0.25, MAT.spike, 0.02)); g.add(cres(0.35, MAT.tuft, 0.03));
             [[-0.4, -L - 0.1], [0.35, -L - 0.08]].forEach(([a, b]) => g.add(circle(0.07, MAT.rust, a, b, 0.04)));
             level.add(g);
@@ -3572,7 +3572,8 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
 
       function continueGame() { // saved level, from its checkpoint when the checkpoint belongs to it
         const sv = lsRead(), k = Math.min(TOTAL - 1, lsLast(sv)), cp = sv && sv.cp && sv.cp.lvl === k && typeof sv.cp.key === "string" ? sv.cp : null;
-        startGame(k, cp);
+        const d = sv && Number.isFinite(sv.deaths) ? Math.floor(sv.deaths) : 0;
+        startGame(k, cp); if (d > deaths) { deaths = d; document.getElementById("hudDeaths").textContent = T("Ölüm sayısı") + ": " + deaths; lsSave(); }
       }
       function startGame(k, cp) {
         const inp = document.getElementById("codeIn"), v = inp ? inp.value.trim().toUpperCase() : ""; // KOD input removed from the menu
@@ -3961,10 +3962,10 @@ const BOSS_CFG = { 9: { rage: true, easy: true, intro: "Bakıcı Kukla geldi! Ye
           if (s.sg && sg && sg !== s.sg) { const k = 1 - Math.hypot(p.x - bx, p.y - by) / 10; if (k > 0) SFX.whoosh(k); }
           if (sg) s.sg = sg;
           // five hit points spread along the blade's width (along the swing tangent), lifted to follow the crescent's curve
-          if (state === "play") for (const o of [-1, -0.5, 0, 0.5, 1]) {
-            const lift = 0.35 * o * o, hx = bx + o * cs - lift * sn, hy = by + o * sn + lift * cs;
+          if (state === "play") for (const o of [-0.65, -0.33, 0, 0.33, 0.65]) {
+            const lift = 0.54 * o * o, hx = bx + o * cs - lift * sn, hy = by + o * sn + lift * cs;
             const qx = Math.max(p.x - HW, Math.min(p.x + HW, hx)), qy = Math.max(p.y - HH, Math.min(p.y + HH, hy));
-            if (Math.hypot(qx - hx, qy - hy) < 0.45) { die("saw", Math.sign(p.x - hx) || 1); break; }
+            if (Math.hypot(qx - hx, qy - hy) < 0.3) { die("saw", Math.sign(p.x - hx) || 1); break; }
           }
         }
         if (sawGain) sawGain.gain.setTargetAtTime(Math.pow(Math.max(0, 1 - near / 7), 2) * 0.16, AC.currentTime, 0.08);

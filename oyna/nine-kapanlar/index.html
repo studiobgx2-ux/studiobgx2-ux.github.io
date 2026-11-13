@@ -116,7 +116,7 @@
 
     <div class="x-screen x-start" id="startScreen">
       <div class="x-start__top">
-        <div class="x-lang x-start__lang" role="group" aria-label="Dil / Language"><button data-lang="tr">TR</button><button data-lang="en">EN</button></div>
+        <button class="x-start__mus" id="setBtn" data-tl aria-label="Ayarlar">⚙</button>
         <button class="x-start__mus" id="startMus" aria-label="Müziği kapat" aria-pressed="false">🔊</button>
         <button class="x-start__mus" id="startFs" data-tl aria-label="Tam ekran">⛶</button>
       </div>
@@ -127,6 +127,16 @@
         <button class="x-btn x-start__btn" id="startBtn" data-t>Başla</button>
         <button class="x-btn x-start__btn x-start__btn--sm" id="pickBtn2" data-t>Bölüm Seç</button>
         <p class="x-start__hint" data-t>Yeşil bayrağa ulaş. Hiçbir şeye güvenme.</p>
+      </div>
+    </div>
+    <div class="x-screen" id="setScreen" hidden>
+      <div class="x-card">
+        <h1 data-t>Ayarlar</h1>
+        <p data-t>Dil</p>
+        <div class="x-lang" role="group" aria-label="Dil / Language"><button data-lang="tr">TR</button>|<button data-lang="en">EN</button></div>
+        <p data-t>Müzik</p>
+        <button class="x-btn x-btn--ghost" id="setMus">🔊</button>
+        <button class="x-btn" id="setClose" data-t>Kapat</button>
       </div>
     </div>
     <div class="x-screen" id="pickScreen" hidden>

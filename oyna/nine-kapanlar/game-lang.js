@@ -1,7 +1,8 @@
       /* ===== TR/EN: T(trText) returns the English line when LANG is "en", the Turkish otherwise ===== */
-      let LANG = (navigator.language || "tr").toLowerCase().startsWith("tr") ? "tr" : "en";
+      let LANG = "en"; // default English (user, 2026-11-13)
       // BGX2 site: ?lang=tr|en from the site wins over the browser language
       try { const q = new URLSearchParams(location.search).get("lang"); if (q === "tr" || q === "en") LANG = q; } catch (_) {}
+      try { const s = localStorage.getItem("nine_lang"); if (s === "tr" || s === "en") LANG = s; } catch (_) {} // the player's own choice wins
       const EN = {
         // screens, buttons, HUD
         "NİNE: KAPANLAR": "GRANNY TRAPS", "Oyun başlasın...": "Let the games begin...",
@@ -9,7 +10,7 @@
         "A/D veya oklar: yürü · W/Boşluk/Yukarı: zıpla": "A/D or arrows: walk · W/Space/Up: jump",
         "İpte: ◀ ▶ ile sallan, zıplayarak bırak": "On a rope: ◀ ▶ to swing, jump to let go",
         "KOD": "CODE", "Bölüm kodu": "Level code", "Başla": "Start", "DEVAM ET": "CONTINUE", "Bölüm Seç": "Level Select",
-        "Bu oturumda ulaştığın bölümler": "Levels you've reached this session", "Kapat": "Close",
+        "Bu oturumda ulaştığın bölümler": "Levels you've reached this session", "Kapat": "Close", "Ayarlar": "Settings", "Dil": "Language", "Müzik": "Music",
         "Telefonu yan çevir 📱↻": "Turn your phone sideways 📱↻", "Tebrikler!": "You did it!",
         "Nine bayrağa ulaştı.": "Granny made it to the flag.", "Tekrar Oyna": "Play Again", "ölüm": "deaths",
         "Bölüm": "Level", "Ölüm sayısı": "Deaths", "Müziği kapat": "Mute music", "Müziği aç": "Unmute music", "Tam ekran": "Fullscreen", "Tam ekran açılamadı": "Couldn't go fullscreen",
@@ -101,7 +102,7 @@
         document.getElementById("musBtn").setAttribute("aria-label", T(window.musicOn === false ? "Müziği aç" : "Müziği kapat"));
         if (window.relang) window.relang();
       }
-      document.querySelectorAll(".x-lang button").forEach((b) => b.addEventListener("click", () => { LANG = b.dataset.lang; applyLang(); }));
+      document.querySelectorAll(".x-lang button").forEach((b) => b.addEventListener("click", () => { LANG = b.dataset.lang; try { localStorage.setItem("nine_lang", LANG); } catch (_) {} applyLang(); }));
       applyLang();
       /* Test mode: every level 1–50 open in Bölüm Seç from the start. Set false to restore progression. */
       const TEST_ALL_OPEN = false;
@@ -205,6 +206,10 @@
         startMus.textContent = on ? "🔊" : "🔇"; startMus.setAttribute("aria-pressed", String(!on)); startMus.setAttribute("aria-label", T(on ? "Müziği kapat" : "Müziği aç"));
       };
       startMus.addEventListener("click", () => { document.getElementById("musBtn").click(); syncStartMus(); });
+      { const sc = document.getElementById("setScreen"), sm = document.getElementById("setMus"), sync = () => { sm.textContent = startMus.textContent; };
+        document.getElementById("setBtn").addEventListener("click", () => { sync(); sc.hidden = false; });
+        document.getElementById("setClose").addEventListener("click", () => { sc.hidden = true; });
+        sm.addEventListener("click", () => { startMus.click(); sync(); }); }
       document.querySelectorAll(".x-lang button").forEach((b) => b.addEventListener("click", syncStartMus));
       document.getElementById("pickClose").addEventListener("click", () => { if (!window.openPick) document.getElementById("pickScreen").hidden = true; });
       document.getElementById("pickGrid").addEventListener("click", (e) => {
