@@ -296,3 +296,8 @@
     
       html[lang="en"] .x-start { background-image: url("menu_bg_en.jpg"); }
       html[lang="en"] .x-start__en { display: none; }
+
+      /* 2026-11-14: bigger jump button on phones; boss texts compact and out of the way */
+      @media (hover: none), (pointer: coarse) { .x-pad--right button { width: clamp(96px, 30vmin, 132px) !important; height: clamp(96px, 30vmin, 132px) !important; font-size: clamp(16px, 5vmin, 22px) !important; opacity: 0.75; } }
+      body:has(.x-boss:not([hidden])) .x-hint { top: calc(max(6px, env(safe-area-inset-top)) + 40px) !important; font-size: 12px !important; line-height: 1.25 !important; padding: 4px 10px !important; max-width: min(46vw, 420px); white-space: normal; text-align: center; opacity: 0.85; }
+      body:has(.x-boss:not([hidden])) .x-toast { top: 16% !important; font-size: 14px !important; max-width: 50vw; }
